@@ -10,6 +10,9 @@ app.get('/', (req,res) => {
 })
 
 
+app.use('/admins', require('./src/admin/admins-routes'))
+
+
 // Server feedback
 app.listen(3000, () => {
     console.log(`Server has started at http://localhost:3000`)
