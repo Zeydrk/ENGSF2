@@ -43,9 +43,17 @@ export default function  Products(){
     }
     
   return (
+   <div className='products'>
+    <div className='viewProduct'>
+      {products && {
+        
+      }}      
+    </div>
+   
     <div className='createProduct'>
         <button  onClick={handleForm}>Add Product </button>
         {showForm && <FormComponent/>}
+    </div>
     </div>
   )
 }

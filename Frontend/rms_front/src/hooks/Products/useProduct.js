@@ -16,9 +16,19 @@ export function useProduct(){
         });
         setProducts(prev => [...prev ,response.data])
     }
+    async function deleteProduct(){
+        const response = await axios.post(`${BASE_URL}/products/delete`, {
+            id: response.id
+        });
+    }
+    async function updateProduct(){
+
+    }
 return {
     products,
     getAllProducts,
-    createProducts
+    createProducts,
+    deleteProduct,
+    updateProduct
 };
 }
