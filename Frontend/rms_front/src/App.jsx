@@ -5,6 +5,7 @@ import {createBrowserRouter, BrowserRouter as Router, Route, Routes, BrowserRout
 
 // Importing components
 import Login from './components/Login'
+import Product from './components/Products'
 
 
 
