@@ -8,6 +8,7 @@ export function useAdmin() {
     async function fetchAdmins(user) {
         const response = await axios.post(`${BASE_URL}/admins`, user)
         setAdmins(prev => [...prev, response.data])
+        return response.data
     }
 
 

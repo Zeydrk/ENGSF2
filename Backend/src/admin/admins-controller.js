@@ -15,8 +15,8 @@ const models = require("../../models")
 
 async function getAdmins(req, res) {
     const {username,password} = req.body
-    const response = await models['Admin'].findOne({where:{username,password}})
-    res.send(response)
+    const response = await models['Admin'].findOne({where:{username, password}})
+    res.send(response); // Unauthorized if no match found
 }
 
 // async function getOneAdmin(req, res) {

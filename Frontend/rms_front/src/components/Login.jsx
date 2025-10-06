@@ -24,8 +24,6 @@ export default function Login({ onLogin }) {
     // console.log(`Username: ${username}, Password: ${password}`);
     const user = { username, password };
     const response = await loginService.fetchAdmins(user);
-    console.log("Login API response:", response);
-
     if (response) {
       alert("Login successful!");
       onLogin(); // Notify parent component of successful login
