@@ -1,11 +1,12 @@
 // import react library/components
 import { useState } from 'react'
 import './App.css'
-import {createBrowserRouter, BrowserRouter as Router, Route, Routes, BrowserRouter } from 'react-router-dom'
+import {BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 
 // Importing components
 import Login from './components/Login'
-import Product from './components/Products'
+import Register from './components/Register'
+// import Product from './components/Products'
 
 
 
@@ -17,6 +18,7 @@ function App() {
       <Routes>
         {/* Public route */}
         <Route path="/" element={<Login onLogin={() => setIsLoggedIn(true)}/>} />
+        <Route path="/register" element={<Register />} />
       </Routes>
     </Router>
   )
