@@ -1,11 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useProduct } from "../hooks/Products/useProduct";
 
-<<<<<<< Updated upstream
-export default function  Products(){
-    const [showForm, setShowForm] = useState(false);
-    const productServices = useProducts();
-=======
 export default function ProductsWithTable() {
   const productApi = useProduct();
   const [loading, setLoading] = useState(false);
@@ -13,7 +8,6 @@ export default function ProductsWithTable() {
   const [form, setForm] = useState({ p_Name: "", p_Price: "" });
   const [editing, setEditing] = useState(null); // store product being edited
   const [error, setError] = useState(null);
->>>>>>> Stashed changes
 
   // load products on mount
   useEffect(() => {
@@ -110,37 +104,6 @@ export default function ProductsWithTable() {
   const products = productApi.products || [];
 
   return (
-<<<<<<< Updated upstream
-   <div className='products'>
-    <div className='viewProduct'>
-      {productServices.products.map(product => (
-        <div className='mt-6'>
-          <div>
-            <span className='mb-2'>ID:</span>
-            {product.id}
-          </div>
-          <div>
-            <span className='mb-2'>Product Name:</span>
-            {product.product_Name}
-          </div>
-          <div>
-            <span className='mb-2'>Product Price:</span>
-            {product.product_Price}
-          </div>
-        </div>
-      ))
-        
-      }      
-    </div>
-   
-    <div className='createProduct'>
-        <button  onClick={handleForm}>Add Product </button>
-        {showForm && <FormComponent/>}
-    </div>
-    </div>
-  )
-}
-=======
     <div data-theme="autumn" className="p-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-semibold">Products</h2>
@@ -153,7 +116,6 @@ export default function ProductsWithTable() {
           </button>
         </div>
       </div>
->>>>>>> Stashed changes
 
       {error && (
         <div className="alert alert-error mb-4">

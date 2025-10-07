@@ -36,7 +36,6 @@ export function useProduct(){
         const response = await axios.post(`${BASE_URL}/products/delete`, {
             id: product.id
         });
-        console.log(response);
     }
     async function updateProduct(product){      
         const response = await axios.post(`${BASE_URL}/products/update`,{
@@ -44,7 +43,6 @@ export function useProduct(){
             product_Name: product.product_Name,
             product_Price: product.product_Price
         })
-        console.log(response)
 
     }
 return {
