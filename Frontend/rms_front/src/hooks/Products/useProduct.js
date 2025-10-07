@@ -2,30 +2,54 @@ import axios from 'axios';
 import { useState } from 'react';
 
 export function useProduct(){
-    const [products, setProducts] = useProduct([]);
-    const BASE_URL = 'https://localhost:3000';
+    const [products, setProducts] = useState([]);
+    const BASE_URL = 'http://localhost:3000';
 
     async function getAllProducts(){
         const products = await axios.get(`${BASE_URL}/products`);
         setProducts(products.data)
     }
-    async function createProducts(){
-        const response = await axios.post(`${BASE_URL}/products/create`, {
-            product_Name:response.p_Name,
-            product_Price:response.p_Price
-        });
-        setProducts(prev => [...prev ,response.data])
+    async function createProducts(product){
+         try{
+     const response = await axios.post(`${BASE_URL}/products/create`, {
+        product_Name: product.product_Name,
+        product_Price: product.product_Price,
+      });
+      
+        setProducts(prev => [...prev, response.data]);
     }
-    async function deleteProduct(){
+    catch (error) {
+    // If there's an error, handle it here
+    if (error.response) {
+      // Server responded with a status outside 2xx
+      console.error('Server Error:', error.response.status, error.response.data);
+    } else if (error.request) {
+      // Request was made but no response received
+      console.error('No Response:', error.request);
+    } else {
+      // Something else happened
+      console.error('Error:', error.message);
+    }
+  }
+    }
+    async function deleteProduct(product){
         const response = await axios.post(`${BASE_URL}/products/delete`, {
-            id: response.id
+            id: product.id
         });
+        console.log(response);
     }
-    async function updateProduct(){
+    async function updateProduct(product){      
+        const response = await axios.post(`${BASE_URL}/products/update`,{
+            id: product.id,
+            product_Name: product.product_Name,
+            product_Price: product.product_Price
+        })
+        console.log(response)
 
     }
 return {
     products,
+    useProduct,
     getAllProducts,
     createProducts,
     deleteProduct,
