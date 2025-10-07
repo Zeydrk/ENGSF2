@@ -3,7 +3,7 @@ import {useProducts} from '../hooks/Products/useProduct';
 
 export default function  Products(){
     const [showForm, setShowForm] = useState(false);
-    const products = useProducts();
+    const productServices = useProducts();
 
     const handleForm = () => {
         setShowForm(true);
@@ -45,9 +45,24 @@ export default function  Products(){
   return (
    <div className='products'>
     <div className='viewProduct'>
-      {products && {
+      {productServices.products.map(product => (
+        <div className='mt-6'>
+          <div>
+            <span className='mb-2'>ID:</span>
+            {product.id}
+          </div>
+          <div>
+            <span className='mb-2'>Product Name:</span>
+            {product.product_Name}
+          </div>
+          <div>
+            <span className='mb-2'>Product Price:</span>
+            {product.product_Price}
+          </div>
+        </div>
+      ))
         
-      }}      
+      }      
     </div>
    
     <div className='createProduct'>
