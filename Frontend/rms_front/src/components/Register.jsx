@@ -1,13 +1,16 @@
+// Importing hooks
 import { useState } from "react";
 import { useAdmin } from "../hooks/useAdmin"; 
-import { useNavigate, Link, BrowserRouter as Router } from "react-router-dom";
-import Register from "./Register";
+import { Link, useNavigate} from "react-router-dom";
 
-export default function Login({ onLogin }) {
+// Main function
+export default function Register() {
+  // Hooks and states
   const loginService = useAdmin();
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   //   Setting handlers for input changes
   const handleUsernameChange = (e) => {
@@ -16,26 +19,31 @@ export default function Login({ onLogin }) {
   const handlePasswordChange = (e) => {
     setPassword(e.target.value);
   };
+  const handleConfirmPasswordChange = (e) => {
+    setConfirmPassword(e.target.value);
+  }
 
   // Setting function for alert
-
-
 
   // Setting handler for input submission
   async function handleSubmit(e) {
     e.preventDefault();
-    // console.log(`Username: ${username}, Password: ${password}`);
-    const user = { username, password };
-    const response = await loginService.fetchAdmins(user);
-    if (response) {
-      alert("Login successful!");
-      onLogin(); // Notify parent component of successful login
-      navigate("/");
-    } else {
-      alert("Login failed. Please check your credentials.");
+    // check if the passwords match, if it does, it will not accept it
+    if (password !== confirmPassword) {
+      alert("Passwords do not match. Please try again.");
+    }
+    else{
+        // Make sure to add the middleware after learning it this friday
+        const user = { username, password };
+        const response = await loginService.createAdmin(user);
+        if (response) {
+          alert("Registration successful! You can now log in.");
+          navigate("/");
+        } else {
+          alert("Registration failed. Please try again.");
+        }
     }
   }
-
   return (
     <div
       className="flex items-center justify-center min-h-screen bg-base-200"
@@ -45,7 +53,7 @@ export default function Login({ onLogin }) {
         <div className="card bg-base-100 shadow-xl">
           <div className="card-body">
             <h2 className="card-title text-2xl font-bold justify-center mb-4">
-              Login
+              Register
             </h2>
 
             <div className="form-control">
@@ -73,7 +81,23 @@ export default function Login({ onLogin }) {
                 name="password"
                 placeholder="Enter your password"
                 className="input input-bordered w-full"
+                // setup
                 onChange={handlePasswordChange}
+                required
+              />
+            </div>
+
+            <div className="form-control mt-4">
+              <label className="label" htmlFor="password">
+                <span className="label-text font-semibold">Confirm Password</span>
+              </label>
+              <input
+                type="password"
+                id="confirm-password"
+                name="confirm-password"
+                placeholder="Confirm your password"
+                className="input input-bordered w-full"
+                onChange={handleConfirmPasswordChange}
                 required
               />
             </div>
@@ -86,9 +110,12 @@ export default function Login({ onLogin }) {
 
             <div className="form-control mt-4 text-center">
               <p>
-                Don't have a account?{" "}
-                <Link to="/register" className="underline text-red-500" element={<Register />}>
-                  Register Here
+                Already have an account?{" "}
+                <Link
+                  to="/login"
+                  className="underline text-red-500"
+                >
+                  Click Here
                 </Link>
               </p>
             </div>
