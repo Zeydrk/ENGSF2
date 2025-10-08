@@ -1,22 +1,56 @@
 // import react library/components
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
-import {createBrowserRouter, BrowserRouter as Router, Route, Routes, BrowserRouter } from 'react-router-dom'
+import {BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 
 // Importing components
 import Login from './components/Login'
-import Product from './components/Products'
+import Register from './components/Register'
+import ProtectedRoute from './components/ProtectedRoute'
+import Home from './components/Home'
+// import Product from './components/Products'
 
 
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(() =>  {
+    return localStorage.getItem('isLoggedIn') === 'true';
+  });
+
+  // learn what is useEffecr later
+  // useEffect(() => {
+  //   const loggedIn = localStorage.getItem('isLoggedIn') == "true";
+  //   setIsLoggedIn(loggedIn);
+  // }, [])
+
+
+  // Handler for login state change
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+    localStorage.setItem('isLoggedIn', 'true');
+  }
+
+  // Handler for logout state change
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    localStorage.removeItem("isLoggedIn");
+  }
+
+
   return (
     
     <Router>
       <Routes>
         {/* Public route */}
-        <Route path="/" element={<Login onLogin={() => setIsLoggedIn(true)}/>} />
+        <Route path="/login" element={<Login onLogin={handleLogin}/>} />
+        <Route path="/register" element={<Register />} />
+        {/* Protected routes are here */}
+        <Route path="/" element=
+          {
+            <ProtectedRoute isAuthenticated={isLoggedIn}>
+              <Home />
+            </ProtectedRoute>
+          }/>
         <Route path='/product' element={<Product/>}/>
       </Routes>
     </Router>
