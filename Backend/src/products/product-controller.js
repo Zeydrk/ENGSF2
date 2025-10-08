@@ -11,8 +11,8 @@ async function getProducts(req, res) {
 
 async function addProduct(req, res) {
   try {
-    const { product_Name, product_Price } = req.body;
-    const newProduct = await models["Products"].create({ product_Name, product_Price });
+    const { product_Name, product_Price ,product_Stock, product_Expiry} = req.body;
+    const newProduct = await models["Products"].create({ product_Name, product_Price ,product_Stock, product_Expiry});
     res.status(201).json(newProduct);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -32,12 +32,14 @@ async function deleteProduct(req, res) {
 
 async function updateProduct(req, res) {
   try {
-    const { id, product_Name, product_Price } = req.body;
+    const { id, product_Name, product_Price, product_Stock, product_Expiry } = req.body;
     const product = await models["Products"].findByPk(id);
     if (!product) return res.status(404).json({ message: "Product not found" });
 
     product.product_Name = product_Name;
     product.product_Price = product_Price;
+    product.product_Stock = product_Stock;
+    product.product_Expiry = product_Expiry;
     await product.save();
 
     res.status(200).json({ message: "Product updated successfully", product });
