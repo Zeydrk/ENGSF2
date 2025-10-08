@@ -2,34 +2,35 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Products', {
+    await queryInterface.createTable('Packages', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      product_Name: {
+      seller_Id: {
+        type: Sequelize.INTEGER,
+        allowNull:false,
+        references: {
+        model: "Sellers", 
+        key: "id"
+      },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
+    },
+      package_Name: {
         type: Sequelize.STRING
       },
-      product_Price: {
-        type: Sequelize.DECIMAL(10,2)
-      },
-      product_Stock: {
-        type: Sequelize.INTEGER
-      },
-      product_Expiry: {
-        type: Sequelize.DATE
-      },
-      product_QrCodeValue:{ 
+      recipient_Name: {
         type: Sequelize.STRING
       },
-      product_QrCodePath: {
+      descrtion: {
         type: Sequelize.STRING
       },
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Products');
+    await queryInterface.dropTable('Packages');
   }
 };

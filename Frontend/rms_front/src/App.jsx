@@ -11,7 +11,8 @@ import Register from './components/Register'
 import ProtectedRoute from './components/ProtectedRoute'
 import Product from './components/Products'
 import Home from './components/Home'
-// import Product from './components/Products'
+import Product from './components/Products'
+import ProductPage from './components/ProductPage';
 
 
 
@@ -55,7 +56,8 @@ function App() {
               <Home />
             </ProtectedRoute>
           }/>
-        <Route path='/products' element={<Product/>}/>
+        <Route path='/product' element={<Product/>}/>
+        <Route path='/product/:id' element={<ProductPage/>}/>
       </Routes>
     </Router>
   )
