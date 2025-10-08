@@ -9,7 +9,8 @@ const productRoutes = require('./src/products/product-route')
 
 // Middleware
 app.use(express.json())
-app.use(cors());
+app.use(cors())
+app.use(express.text())
 
 // Enter routes here
 app.get('/', (req,res) => {
@@ -17,7 +18,6 @@ app.get('/', (req,res) => {
 })
 app.use('/admins',adminsRoutes);
 app.use('/products', productRoutes);
-
 
 // Server feedback
 app.listen(3000, () => {
