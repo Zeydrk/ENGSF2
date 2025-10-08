@@ -14,6 +14,9 @@ export function useProduct(){
      const response = await axios.post(`${BASE_URL}/products/create`, {
         product_Name: product.product_Name,
         product_Price: product.product_Price,
+        product_Stock: product.product_Stock,
+        product_Expiry: product.product_Expiry,
+        product_QR: product.product_QR
       });
       
         setProducts(prev => [...prev, response.data]);
@@ -38,10 +41,12 @@ export function useProduct(){
         });
     }
     async function updateProduct(product){      
-        const response = await axios.post(`${BASE_URL}/products/update`,{
+      await axios.post(`${BASE_URL}/products/update`,{
             id: product.id,
             product_Name: product.product_Name,
-            product_Price: product.product_Price
+            product_Price: product.product_Price,
+            product_Stock: product.product_Stock,
+            product_Expiry: product.product_Expiry,
         })
 
     }

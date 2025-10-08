@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { useProduct } from "../hooks/Products/useProduct";
+import { useProduct } from "../hooks/useProduct";
+import {QRCodeSVG} from 'qrcode.react';
 
 export default function ProductsWithTable() {
   const productApi = useProduct();
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ p_Name: "", p_Price: "" });
+  const [form, setForm] = useState({ p_Name: "", p_Price: "", p_Stock: "", p_Expiry: "" });
   const [editing, setEditing] = useState(null); // store product being edited
   const [error, setError] = useState(null);
 
@@ -27,26 +28,31 @@ export default function ProductsWithTable() {
   }
 
   function resetForm() {
-    setForm({ p_Name: "", p_Price: "" });
+    setForm({ p_Name: "", p_Price: "" , p_Stock: "", p_Expiry: ""});
   }
 
   async function handleCreate(e) {
     e.preventDefault();
     try {
       // basic validation
-      if (!form.p_Name?.trim() || form.p_Price === "") {
+      if (!form.p_Name?.trim() || form.p_Price === "" || form.p_Stock === "" || !form.p_Expiry || isNaN(new Date(form.p_Expiry).getTime())) {
         setError("Name and price are required");
         return;
       }
 
       const payload = {
         product_Name: form.p_Name.trim(),
-        product_Price: parseFloat(form.p_Price)
+        product_Price: parseFloat(form.p_Price),
+        product_Stock: parseFloat(form.p_Stock),
+        product_Expiry: new Date(form.p_Expiry).toISOString().split('T')[0]
       };
 
       if (isNaN(payload.product_Price)) {
         setError("Price must be a valid number");
         return;
+      }
+      if (isNaN(payload.product_Stock)){
+        setError("Stock must be a valid number")
       }
 
       await productApi.createProducts(payload);
@@ -73,7 +79,7 @@ export default function ProductsWithTable() {
 
   function openEdit(product) {
     setEditing(product);
-    setForm({ p_Name: product.product_Name || "", p_Price: String(product.product_Price ?? "") });
+    setForm({ p_Name: product.product_Name || "", p_Price: String(product.product_Price ?? "") || "", p_Stock: String(product.product_Stock ?? "") || "", p_Expiry:product.product_Expiry });
   }
 
   async function handleUpdate(e) {
@@ -83,7 +89,9 @@ export default function ProductsWithTable() {
       const payload = {
         id: editing.id,
         product_Name: form.p_Name.trim(),
-        product_Price: parseFloat(form.p_Price)
+        product_Price: parseFloat(form.p_Price),
+        product_Stock: parseFloat(form.p_Stock),
+        product_Expiry: form.p_Date
       };
 
       if (isNaN(payload.product_Price)) {
@@ -140,6 +148,18 @@ export default function ProductsWithTable() {
               </label>
               <input type="number" step="0.01" name="p_Price" value={form.p_Price} onChange={e => setForm(f => ({ ...f, p_Price: e.target.value }))} className="input input-bordered w-full" />
             </div>
+             <div>
+              <label className="label">
+                <span className="label-text">Product Stock</span>
+              </label>
+              <input type="number" step="0.01" name="p_Stock" value={form.p_Stock} onChange={e => setForm(f => ({ ...f, p_Stock: e.target.value }))} className="input input-bordered w-full" />
+            </div>
+            <div>
+              <label className="label">
+                <span className="label-text">Product Expiry</span>
+              </label>
+              <input type="date" name="p_Expiry" value={form.p_Expiry} onChange={e => setForm(f => ({ ...f, p_Expiry: e.target.value }))} className="input input-bordered w-full" />
+            </div>
             <div>
               <button type="submit" className="btn btn-success w-full">Create</button>
             </div>
@@ -164,6 +184,18 @@ export default function ProductsWithTable() {
               </label>
               <input type="number" step="0.01" name="p_Price" value={form.p_Price} onChange={e => setForm(f => ({ ...f, p_Price: e.target.value }))} className="input input-bordered w-full" />
             </div>
+            <div>
+              <label className="label">
+                <span className="label-text">Product Stock</span>
+              </label>
+              <input type="number" step="0.01" name="p_Stock" value={form.p_Stock} onChange={e => setForm(f => ({ ...f, p_Stock: e.target.value }))} className="input input-bordered w-full" />
+            </div>
+            <div>
+              <label className="label">
+                <span className="label-text">Product Expiry</span>
+              </label>
+              <input type="date" name="p_Expiry" value={form.p_Expiry} onChange={e => setForm(f => ({ ...f, p_Expiry: e.target.value }))} className="input input-bordered w-full" />
+            </div>
             <div className="flex gap-2">
               <button type="submit" className="btn btn-primary">Save</button>
               <button type="button" className="btn" onClick={() => { setEditing(null); resetForm(); }}>Cancel</button>
@@ -179,6 +211,8 @@ export default function ProductsWithTable() {
               <th>#</th>
               <th>Name</th>
               <th>Price</th>
+              <th>Stock</th>
+              <th>Expiry</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -197,6 +231,8 @@ export default function ProductsWithTable() {
                   <th>{idx + 1}</th>
                   <td>{p.product_Name}</td>
                   <td>{typeof p.product_Price === 'number' ? `₱${p.product_Price.toFixed(2)}` : `₱${parseFloat(p.product_Price || 0).toFixed(2)}`}</td>
+                  <td>{typeof p.product_Stock === 'number' ? `${p.product_Stock.toFixed(2)}` : `${parseFloat(p.product_Stock || 0).toFixed(2)}`}</td>
+                  <td>{new Date(p.product_Expiry).toISOString().split('T')[0]}</td>
                   <td className="flex gap-2">
                     <button className="btn btn-sm btn-ghost" onClick={() => openEdit(p)}>Edit</button>
                     <button className="btn btn-sm btn-error" onClick={() => handleDelete(p.id)}>Delete</button>

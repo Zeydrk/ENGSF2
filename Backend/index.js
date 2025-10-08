@@ -1,29 +1,22 @@
 // Importing
 const express = require('express')
 const app = express()
+const cors = require('cors')
 
-<<<<<<< Updated upstream
-=======
 // importing routes here
 const adminsRoutes = require('./src/admin/admins-routes')
 const productRoutes = require('./src/products/product-route')
 
 // Middleware
->>>>>>> Stashed changes
 app.use(express.json())
+app.use(cors());
 
 // Enter routes here
 app.get('/', (req,res) => {
     res.send("Test")
 })
-<<<<<<< Updated upstream
-
-
-app.use('/admins', require('./src/admin/admins-routes'))
-=======
 app.use('/admins',adminsRoutes);
 app.use('/products', productRoutes);
->>>>>>> Stashed changes
 
 
 // Server feedback

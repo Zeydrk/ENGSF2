@@ -13,7 +13,16 @@ module.exports = {
         type: Sequelize.STRING
       },
       product_Price: {
-        type: Sequelize.DECIMAL
+        type: Sequelize.DECIMAL(10,2)
+      },
+      product_Stock: {
+        type: Sequelize.INTEGER
+      },
+      product_Expiry: {
+        type: Sequelize.DATE
+      },
+      product_QR: {
+        type: Sequelize.INTEGER
       },
     });
   },
