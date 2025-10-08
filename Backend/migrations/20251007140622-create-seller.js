@@ -2,34 +2,25 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Products', {
+    await queryInterface.createTable('Sellers', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      product_Name: {
+      seller_FName: {
         type: Sequelize.STRING
       },
-      product_Price: {
-        type: Sequelize.DECIMAL(10,2)
-      },
-      product_Stock: {
-        type: Sequelize.INTEGER
-      },
-      product_Expiry: {
-        type: Sequelize.DATE
-      },
-      product_QrCodeValue:{ 
+      seller_MName: {
         type: Sequelize.STRING
       },
-      product_QrCodePath: {
+      seller_LName: {
         type: Sequelize.STRING
       },
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Products');
+    await queryInterface.dropTable('Sellers');
   }
 };

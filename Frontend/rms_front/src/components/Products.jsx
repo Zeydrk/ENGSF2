@@ -204,45 +204,92 @@ export default function ProductsWithTable() {
         </div>
       )}
 
-      <div className="overflow-x-auto bg-base-100 p-4 rounded-lg shadow">
-        <table className="table w-full">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Name</th>
-              <th>Price</th>
-              <th>Stock</th>
-              <th>Expiry</th>
-              <th>Actions</th>
+     <div className="overflow-x-auto bg-base-100 p-4 rounded-lg shadow">
+  <table className="table w-full">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Price</th>
+        <th>Stock</th>
+        <th>Expiry</th>
+        <th>QR Code</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {loading ? (
+        <tr>
+          <td colSpan="7">Loading...</td>
+        </tr>
+      ) : products.length === 0 ? (
+        <tr>
+          <td colSpan="7">No products found</td>
+        </tr>
+      ) : (
+        products.map((p, idx) => {
+          const qrValue =
+            p.qrCodeValue ||
+            `${window.location.origin}/product/${p.id || ""}`;
+
+          // download helper for QR
+          const downloadQR = () => {
+            const svgElement = document.getElementById(`qr-${p.id}`);
+            const svgData = new XMLSerializer().serializeToString(svgElement);
+            const blob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `${p.product_Name || "product"}_QR.svg`;
+            link.click();
+            URL.revokeObjectURL(url);
+          };
+
+          return (
+            <tr key={p.id ?? idx}>
+              <th>{idx + 1}</th>
+              <td>{p.product_Name}</td>
+              <td>₱{typeof p.product_Price === "number"? p.product_Price.toFixed(2): parseFloat(p.product_Price || 0).toFixed(2)}</td>
+              <td>{typeof p.product_Stock === "number"? p.product_Stock.toFixed(2): parseFloat(p.product_Stock || 0).toFixed(2)}</td>
+              <td>{new Date(p.product_Expiry).toISOString().split("T")[0]}</td>
+              <td>
+                <div className="flex flex-col items-center gap-1">
+                  <QRCodeSVG
+                    id={`qr-${p.id}`}
+                    value={qrValue}
+                    size={64}
+                  />
+                  <button
+                    className="btn btn-xs btn-outline btn-info"
+                    onClick={downloadQR}
+                  >
+                    Download
+                  </button>
+                </div>
+              </td>
+
+              <td className="flex gap-2">
+                <button
+                  className="btn btn-sm btn-ghost"
+                  onClick={() => openEdit(p)}
+                >
+                  Edit
+                </button>
+                <button
+                  className="btn btn-sm btn-error"
+                  onClick={() => handleDelete(p.id)}
+                >
+                  Delete
+                </button>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan="4">Loading...</td>
-              </tr>
-            ) : products.length === 0 ? (
-              <tr>
-                <td colSpan="4">No products found</td>
-              </tr>
-            ) : (
-              products.map((p, idx) => (
-                <tr key={p.id ?? idx}>
-                  <th>{idx + 1}</th>
-                  <td>{p.product_Name}</td>
-                  <td>{typeof p.product_Price === 'number' ? `₱${p.product_Price.toFixed(2)}` : `₱${parseFloat(p.product_Price || 0).toFixed(2)}`}</td>
-                  <td>{typeof p.product_Stock === 'number' ? `${p.product_Stock.toFixed(2)}` : `${parseFloat(p.product_Stock || 0).toFixed(2)}`}</td>
-                  <td>{new Date(p.product_Expiry).toISOString().split('T')[0]}</td>
-                  <td className="flex gap-2">
-                    <button className="btn btn-sm btn-ghost" onClick={() => openEdit(p)}>Edit</button>
-                    <button className="btn btn-sm btn-error" onClick={() => handleDelete(p.id)}>Delete</button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+          );
+        })
+      )}
+    </tbody>
+  </table>
+</div>
+
     </div>
   );
 }
