@@ -16,7 +16,6 @@ export function useProduct(){
         product_Price: product.product_Price,
         product_Stock: product.product_Stock,
         product_Expiry: product.product_Expiry,
-        product_QR: product.product_QR
       });
       
         setProducts(prev => [...prev, response.data]);

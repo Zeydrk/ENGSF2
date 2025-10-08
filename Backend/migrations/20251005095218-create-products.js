@@ -22,10 +22,10 @@ module.exports = {
         type: Sequelize.DATE
       },
       product_QrCodeValue:{ 
-        type: DataTypes.STRING
+        type: Sequelize.STRING
       },
       product_QrCodePath: {
-        type: DataTypes.STRING
+        type: Sequelize.STRING
       },
     });
   },

@@ -249,19 +249,9 @@ export default function ProductsWithTable() {
             <tr key={p.id ?? idx}>
               <th>{idx + 1}</th>
               <td>{p.product_Name}</td>
-              <td>
-                ₱
-                {typeof p.product_Price === "number"
-                  ? p.product_Price.toFixed(2)
-                  : parseFloat(p.product_Price || 0).toFixed(2)}
-              </td>
-              <td>
-                {typeof p.product_Stock === "number"
-                  ? p.product_Stock.toFixed(2)
-                  : parseFloat(p.product_Stock || 0).toFixed(2)}
-              </td>
+              <td>₱{typeof p.product_Price === "number"? p.product_Price.toFixed(2): parseFloat(p.product_Price || 0).toFixed(2)}</td>
+              <td>{typeof p.product_Stock === "number"? p.product_Stock.toFixed(2): parseFloat(p.product_Stock || 0).toFixed(2)}</td>
               <td>{new Date(p.product_Expiry).toISOString().split("T")[0]}</td>
-
               <td>
                 <div className="flex flex-col items-center gap-1">
                   <QRCodeSVG

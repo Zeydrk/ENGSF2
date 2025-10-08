@@ -8,7 +8,8 @@ import Login from './components/Login'
 import Register from './components/Register'
 import ProtectedRoute from './components/ProtectedRoute'
 import Home from './components/Home'
-// import Product from './components/Products'
+import Product from './components/Products'
+import ProductPage from './components/ProductPage';
 
 
 
@@ -52,6 +53,7 @@ function App() {
             </ProtectedRoute>
           }/>
         <Route path='/product' element={<Product/>}/>
+        <Route path='/product/:id' element={<ProductPage/>}/>
       </Routes>
     </Router>
   )
