@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useAdmin } from "../hooks/useAdmin"; 
-import { Link, BrowserRouter as Router } from "react-router-dom";
+import { useNavigate, Link, BrowserRouter as Router } from "react-router-dom";
 import Register from "./Register";
 
 export default function Login({ onLogin }) {
   const loginService = useAdmin();
+  const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
@@ -29,6 +30,7 @@ export default function Login({ onLogin }) {
     if (response) {
       alert("Login successful!");
       onLogin(); // Notify parent component of successful login
+      navigate("/");
     } else {
       alert("Login failed. Please check your credentials.");
     }
