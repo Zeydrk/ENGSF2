@@ -51,6 +51,7 @@ function App() {
               <Home />
             </ProtectedRoute>
           }/>
+        <Route path='/product' element={<Product/>}/>
       </Routes>
     </Router>
   )
