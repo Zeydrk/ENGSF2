@@ -17,6 +17,7 @@ function App() {
       <Routes>
         {/* Public route */}
         <Route path="/" element={<Login onLogin={() => setIsLoggedIn(true)}/>} />
+        <Route path='/product' element={<Product/>}/>
       </Routes>
     </Router>
   )

@@ -5,6 +5,7 @@ const cors = require('cors')
 
 // importing routes here
 const adminsRoutes = require('./src/admin/admins-routes')
+const productRoutes = require('./src/products/product-route')
 
 // Middleware
 app.use(express.json())
@@ -15,8 +16,8 @@ app.use(express.text())
 app.get('/', (req,res) => {
     res.send("Test")
 })
-app.use('/admins',adminsRoutes)
-
+app.use('/admins',adminsRoutes);
+app.use('/products', productRoutes);
 
 // Server feedback
 app.listen(3000, () => {

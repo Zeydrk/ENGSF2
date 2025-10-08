@@ -13,16 +13,17 @@ module.exports = {
         type: Sequelize.STRING
       },
       product_Price: {
-        type: Sequelize.DECIMAL
+        type: Sequelize.DECIMAL(10,2)
       },
-      createdAt: {
-        allowNull: false,
+      product_Stock: {
+        type: Sequelize.INTEGER
+      },
+      product_Expiry: {
         type: Sequelize.DATE
       },
-      updatedAt: {
-        allowNull: false,
-        type: Sequelize.DATE
-      }
+      product_QR: {
+        type: Sequelize.INTEGER
+      },
     });
   },
   async down(queryInterface, Sequelize) {
