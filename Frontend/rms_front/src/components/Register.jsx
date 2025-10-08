@@ -112,7 +112,7 @@ export default function Register() {
               <p>
                 Already have an account?{" "}
                 <Link
-                  to="/"
+                  to="/login"
                   className="underline text-red-500"
                 >
                   Click Here
