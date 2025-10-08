@@ -2,6 +2,8 @@
 const express = require('express')
 const app = express()
 const cors = require('cors')
+const path = require('path');
+
 
 // importing routes here
 const adminsRoutes = require('./src/admin/admins-routes')
@@ -10,6 +12,7 @@ const productRoutes = require('./src/products/product-route')
 // Middleware
 app.use(express.json())
 app.use(cors());
+app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
 
 // Enter routes here
 app.get('/', (req,res) => {
