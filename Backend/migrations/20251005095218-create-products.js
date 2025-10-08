@@ -21,8 +21,11 @@ module.exports = {
       product_Expiry: {
         type: Sequelize.DATE
       },
-      product_QR: {
-        type: Sequelize.INTEGER
+      product_QrCodeValue:{ 
+        type: DataTypes.STRING
+      },
+      product_QrCodePath: {
+        type: DataTypes.STRING
       },
     });
   },

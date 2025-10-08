@@ -18,7 +18,8 @@ module.exports = (sequelize, DataTypes) => {
     product_Price: DataTypes.DECIMAL,
     product_Stock: DataTypes.INTEGER,
     product_Expiry: DataTypes.DATE,
-    product_QR: DataTypes.STRING
+    product_QrCodeValue: DataTypes.STRING,
+    product_QrCodePath: DataTypes.STRING,
   }, {
     sequelize,
     modelName: 'Products',

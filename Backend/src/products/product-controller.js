@@ -1,4 +1,9 @@
 const models = require("../../models");
+const QRCode = require('qrcode');
+const fs = require('fs');
+const path = require('path');
+
+const UPLOAD_DIR = path.join(__dirname, '..', '..', 'public', 'uploads', 'qrcodes')
 
 async function getProducts(req, res) {
   try {
@@ -13,6 +18,28 @@ async function addProduct(req, res) {
   try {
     const { product_Name, product_Price ,product_Stock, product_Expiry} = req.body;
     const newProduct = await models["Products"].create({ product_Name, product_Price ,product_Stock, product_Expiry});
+      const baseUrl = process.env.APP_URL || 'https://yourdomain.com';
+    const qrValue = `${baseUrl}/products/${product.id}`;
+
+    // generate SVG string
+    const svgString = await QRCode.toString(qrValue, { type: 'svg', margin: 1 });
+
+    // ensure folder exists
+    fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+
+    // unique filename
+    const fileName = `qr_product_${product.id}_${Date.now()}.svg`;
+    const filePath = path.join(UPLOAD_DIR, fileName);
+
+    // save SVG file
+    fs.writeFileSync(filePath, svgString, 'utf8');
+
+    // public path that your Express will serve: '/uploads/qrcodes/qr_...svg'
+    const publicPath = `/uploads/qrcodes/${fileName}`;
+
+    // update product record with qr metadata
+    await product.update({ qrCodeValue: qrValue, qrCodePath: publicPath });
+
     res.status(201).json(newProduct);
   } catch (err) {
     res.status(500).json({ error: err.message });
