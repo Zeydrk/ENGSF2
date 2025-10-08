@@ -1,12 +1,15 @@
 // import react library/components
 import { useEffect, useState } from 'react'
 import './App.css'
+import Toasters from './components/Toasters'
 import {BrowserRouter as Router, Route, Routes } from 'react-router-dom'
+
 
 // Importing components
 import Login from './components/Login'
 import Register from './components/Register'
 import ProtectedRoute from './components/ProtectedRoute'
+import Product from './components/Products'
 import Home from './components/Home'
 // import Product from './components/Products'
 
@@ -40,6 +43,7 @@ function App() {
   return (
     
     <Router>
+      <Toasters/>
       <Routes>
         {/* Public route */}
         <Route path="/login" element={<Login onLogin={handleLogin}/>} />
@@ -51,7 +55,7 @@ function App() {
               <Home />
             </ProtectedRoute>
           }/>
-        <Route path='/product' element={<Product/>}/>
+        <Route path='/products' element={<Product/>}/>
       </Routes>
     </Router>
   )
