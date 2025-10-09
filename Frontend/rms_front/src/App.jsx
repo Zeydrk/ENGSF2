@@ -6,6 +6,7 @@ import {createBrowserRouter, BrowserRouter as Router, Route, Routes, BrowserRout
 // Importing components
 import Login from './components/Login'
 import Product from './components/Products'
+import Sellers from "./components/Sellers";
 
 
 
@@ -18,6 +19,7 @@ function App() {
         {/* Public route */}
         <Route path="/" element={<Login onLogin={() => setIsLoggedIn(true)}/>} />
         <Route path='/product' element={<Product/>}/>
+        <Route path='/seller' element={<Sellers/>}/>
       </Routes>
     </Router>
   )
