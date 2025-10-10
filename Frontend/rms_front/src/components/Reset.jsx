@@ -1,51 +1,55 @@
 // Importing hooks
 import { useState } from "react";
-import { useAdmin } from "../hooks/useAdmin"; 
-import { Link, useNavigate} from "react-router-dom";
+import { useAdmin } from "../hooks/useAdmin";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useLocation } from "react-router-dom";
 
-// Main function
-export default function Register() {
-  // Hooks and states
+export default function Reset() {
   const loginService = useAdmin();
+  const location = useLocation()
   const navigate = useNavigate();
-  const [username, setUsername] = useState("");
+const searchParams = new URLSearchParams(window.location.search)
+    // const token = searchParams.get("token")
+//   const [searchParams] = useSearchParams();
+  const token = searchParams.get('token')
+  console.log(token)
+  const [isLoading, setIsLoading] = useState(false);
+
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  //   Setting handlers for input changes
-  const handleUsernameChange = (e) => {
-    setUsername(e.target.value);
-  };
   const handlePasswordChange = (e) => {
     setPassword(e.target.value);
   };
   const handleConfirmPasswordChange = (e) => {
     setConfirmPassword(e.target.value);
-  }
+  };
 
-  // Setting function for alert
-
-  // Setting handler for input submission
   async function handleSubmit(e) {
     e.preventDefault();
-    // check if the passwords match, if it does, it will not accept it
+    setIsLoading(true)
     if (password !== confirmPassword) {
       toast.error("Passwords do not match. Please try again.", {
         className: "alert alert-error text-white",
       });
-    }
-    else{
-        // Make sure to add the middleware after learning it this friday
-        const user = { username, password };
-        const response = await loginService.createAdmin(user);
-        if (response) {
-          alert("Registration successful! You can now log in.");
-          navigate("/");
-        } else {
-          alert("Registration failed. Please try again.");
-        }
+    } else {
+      const response = await loginService.resetPassword(password, token);
+      if (response) {
+        toast.success("Your account has been reset!", {
+          className: "alert alert-success text-white",
+        });
+        setTimeout(() => {
+          setIsLoading(false);
+          navigate("/login");
+        }, 3000);
+      } else {
+        toast.error("An error occured!", {
+          className: "alert alert-error text-white",
+        });
+        setIsLoading(false);
+      }
     }
   }
   return (
@@ -53,27 +57,18 @@ export default function Register() {
       className="flex items-center justify-center min-h-screen bg-base-200"
       data-theme="autumn"
     >
+      {isLoading && (
+        <div className="fixed inset-0 flex flex-col items-center justify-center bg-black/70 z-50">
+          <span className="loading loading-spinner loading-xl text-white"></span>
+          <p className="text-white mt-4 text-lg">Logging in...</p>
+        </div>
+      )}
       <form onSubmit={handleSubmit} className="w-full max-w-md">
         <div className="card bg-base-100 shadow-xl">
           <div className="card-body">
             <h2 className="card-title text-2xl font-bold justify-center mb-4">
-              Register
+              Reset your password
             </h2>
-
-            <div className="form-control">
-              <label className="label" htmlFor="username">
-                <span className="label-text font-semibold">Username</span>
-              </label>
-              <input
-                type="text"
-                id="username"
-                name="username"
-                placeholder="Enter your username"
-                className="input input-bordered w-full"
-                onChange={handleUsernameChange}
-                required
-              />
-            </div>
 
             <div className="form-control mt-4">
               <label className="label" htmlFor="password">
@@ -93,7 +88,9 @@ export default function Register() {
 
             <div className="form-control mt-4">
               <label className="label" htmlFor="password">
-                <span className="label-text font-semibold">Confirm Password</span>
+                <span className="label-text font-semibold">
+                  Confirm Password
+                </span>
               </label>
               <input
                 type="password"
@@ -107,19 +104,20 @@ export default function Register() {
             </div>
 
             <div className="form-control mt-6">
-              <button type="submit" className="btn btn-primary w-full">
-                Login
+              <button
+                type="submit"
+                className="btn btn-primary w-full"
+                disabled={isLoading}
+              >
+                {isLoading ? "Resetting..." : "Reset Password"}
               </button>
             </div>
 
             <div className="form-control mt-4 text-center">
               <p>
-                Already have an account?{" "}
-                <Link
-                  to="/login"
-                  className="underline text-red-500"
-                >
-                  Click Here
+                Go back to{" "}
+                <Link to="/login" className="underline text-red-500">
+                  Login
                 </Link>
               </p>
             </div>

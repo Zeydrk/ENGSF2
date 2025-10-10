@@ -1,13 +1,18 @@
+// Importing necessary libraries and hooks
 import { useState } from "react";
-import { useAdmin } from "../hooks/useAdmin"; 
+import { useAdmin } from "../hooks/useAdmin";
 import { useNavigate, Link, BrowserRouter as Router } from "react-router-dom";
-import Register from "./Register";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+// import Register from "./Register";
+import Forgot from "./Forgot";
 
 export default function Login({ onLogin }) {
   const loginService = useAdmin();
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   //   Setting handlers for input changes
   const handleUsernameChange = (e) => {
@@ -19,20 +24,27 @@ export default function Login({ onLogin }) {
 
   // Setting function for alert
 
-
-
   // Setting handler for input submission
   async function handleSubmit(e) {
     e.preventDefault();
+    setIsLoading(true);
     // console.log(`Username: ${username}, Password: ${password}`);
     const user = { username, password };
     const response = await loginService.fetchAdmins(user);
     if (response) {
-      alert("Login successful!");
+      toast.success("Login Successful", {
+        className: "alert alert-success text-white",
+      });
       onLogin(); // Notify parent component of successful login
-      navigate("/");
+      setTimeout(() => {
+        setIsLoading(false);
+        navigate("/");
+      }, 3000);
     } else {
-      alert("Login failed. Please check your credentials.");
+      toast.error("Login failed. Please check your credentials.", {
+        className: "alert alert-error text-white",
+      });
+      setIsLoading(false);
     }
   }
 
@@ -41,6 +53,12 @@ export default function Login({ onLogin }) {
       className="flex items-center justify-center min-h-screen bg-base-200"
       data-theme="autumn"
     >
+      {isLoading && (
+        <div className="fixed inset-0 flex flex-col items-center justify-center bg-black/70 z-50">
+          <span className="loading loading-spinner loading-xl text-white"></span>
+          <p className="text-white mt-4 text-lg">Logging in...</p>
+        </div>
+      )}
       <form onSubmit={handleSubmit} className="w-full max-w-md">
         <div className="card bg-base-100 shadow-xl">
           <div className="card-body">
@@ -79,16 +97,24 @@ export default function Login({ onLogin }) {
             </div>
 
             <div className="form-control mt-6">
-              <button type="submit" className="btn btn-primary w-full">
-                Login
+              <button
+                type="submit"
+                className="btn btn-primary w-full"
+                disabled={isLoading}
+              >
+                {isLoading ? "Logging in..." : "Login"}
               </button>
             </div>
 
             <div className="form-control mt-4 text-center">
               <p>
-                Don't have a account?{" "}
-                <Link to="/register" className="underline text-red-500" element={<Register />}>
-                  Register Here
+                Forget Password?{" "}
+                <Link
+                  to="/forgot-password"
+                  className="underline text-red-500"
+                  element={<Forgot />}
+                >
+                  Click Here
                 </Link>
               </p>
             </div>
