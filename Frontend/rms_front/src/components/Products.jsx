@@ -112,7 +112,7 @@ export default function ProductsWithTable() {
   const products = productApi.products || [];
 
   return (
-    <div data-theme="autumn" className="p-6">
+    <div data-theme="autumn" className="p-6 min-h-screen bg-base-200">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-semibold">Products</h2>
         <div className="flex gap-2">
