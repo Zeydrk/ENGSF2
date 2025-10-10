@@ -11,6 +11,7 @@ import Home from './components/Home'
 
 import Navbar from './components/Navbar'  
 import Product from './components/Products'
+import Sellers from "./components/Sellers";
 import ProductPage from './components/ProductPage';
 
 const ProtectedLayout = ({ children, onLogout }) => (
@@ -75,6 +76,15 @@ function App() {
               </ProtectedLayout>
             }
           />
+          <Route
+            path="/seller"
+            element={
+              <ProtectedLayout onLogout={handleLogout}>
+                <Sellers />
+              </ProtectedLayout>
+            }
+          />
+       
       </Routes>
     </Router>
   )
