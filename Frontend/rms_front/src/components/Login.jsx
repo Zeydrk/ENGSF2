@@ -4,7 +4,8 @@ import { useAdmin } from "../hooks/useAdmin";
 import { useNavigate, Link, BrowserRouter as Router } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Register from "./Register";
+// import Register from "./Register";
+import Forgot from "./Forgot";
 
 export default function Login({ onLogin }) {
   const loginService = useAdmin();
@@ -107,13 +108,13 @@ export default function Login({ onLogin }) {
 
             <div className="form-control mt-4 text-center">
               <p>
-                Don't have a account?{" "}
+                Forget Password?{" "}
                 <Link
-                  to="/register"
+                  to="/forgot-password"
                   className="underline text-red-500"
-                  element={<Register />}
+                  element={<Forgot />}
                 >
-                  Register Here
+                  Click Here
                 </Link>
               </p>
             </div>

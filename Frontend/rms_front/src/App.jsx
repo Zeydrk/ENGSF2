@@ -12,6 +12,8 @@ import ProtectedRoute from './components/ProtectedRoute'
 import Product from './components/Products'
 import Home from './components/Home'
 import ProductPage from './components/ProductPage';
+import Forgot from './components/Forgot'
+import Reset from './components/Reset'
 
 
 
@@ -57,6 +59,8 @@ function App() {
           }/>
         <Route path='/product' element={<Product/>}/>
         <Route path='/product/:id' element={<ProductPage/>}/>
+        <Route path="/forgot-password/" element={<Forgot />} />
+        <Route path="/reset-password/" element={<Reset />} />
       </Routes>
     </Router>
   )
