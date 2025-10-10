@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useProduct } from "../hooks/useProduct";
 import {QRCodeSVG} from 'qrcode.react';
+import { Await } from "react-router-dom";
 
 export default function ProductsWithTable() {
   const productApi = useProduct();
@@ -9,7 +10,6 @@ export default function ProductsWithTable() {
   const [form, setForm] = useState({ p_Name: "", p_Price: "", p_Stock: "", p_Expiry: "" });
   const [editing, setEditing] = useState(null); // store product being edited
   const [error, setError] = useState(null);
-
   // load products on mount
   useEffect(() => {
     refresh();
@@ -26,7 +26,28 @@ export default function ProductsWithTable() {
       setLoading(false);
     }
   }
-
+  async function handleSearch(e){
+    e.preventDefault()
+    const input = e.target.value.toLowerCase();
+     if (input.trim() === "") {
+    refresh();
+  } else {
+    await productApi.searchProduct(input);
+  }
+}
+async function handleDropDown(option){
+if (option === 'priceDesc' || option === 'priceAsc'){
+  await productApi.priceSort(option == 'priceDesc' ? 'DESC' : 'ASC');
+}
+else if (option === 'stockDesc' || option === 'stockAsc'){
+  await productApi.stockSort(option == 'stockDesc' ? 'DESC' : 'ASC');
+}
+else if (option === 'expiryDesc' || option === 'expiryAsc'){
+  await productApi.expirySort(option == 'expiryDesc' ? 'DESC' : 'ASC');
+}else {
+  console.log("Nothing Selected")
+}
+}
   function resetForm() {
     setForm({ p_Name: "", p_Price: "" , p_Stock: "", p_Expiry: ""});
   }
@@ -124,6 +145,39 @@ export default function ProductsWithTable() {
           </button>
         </div>
       </div>
+      <div className="flex items-center">
+        <label className="input">
+  <svg className="h-[1em] opacity-50" viewBox="0 0 24 24">
+    <g
+      strokeLinejoin="round"
+      strokeLinecap="round"
+      strokeWidth="2.5"
+      fill="none"
+      stroke="currentColor"
+    >
+      <circle cx="11" cy="11" r="8"></circle>
+      <path d="m21 21-4.3-4.3"></path>
+    </g>
+  </svg>
+  <input type="search" name="input" onChange={handleSearch} className="grow" placeholder="Search Product" />
+</label>
+<div className="dropdown">
+  <div tabIndex={0} role="button" className="btn m-1">
+    Sort by
+  </div>
+  <ul
+    tabIndex={0}
+    className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"
+  >
+    <li onClick={() => handleDropDown("priceAsc")}><a>Price (↑)</a></li>
+    <li onClick={() => handleDropDown("priceDesc")}><a>Price (↓)</a></li>
+    <li onClick={() => handleDropDown("stockAsc")}><a>Stock (↑)</a></li>
+    <li onClick={() => handleDropDown("stockDesc")}><a>Stock (↓)</a></li>
+    <li onClick={() => handleDropDown("expiryAsc")}><a>Expiry (↑)</a></li>
+    <li onClick={() => handleDropDown("expiryDesc")}><a>Expiry (↓)</a></li>
+  </ul>
+</div>
+      </div>
 
       {error && (
         <div className="alert alert-error mb-4">
@@ -140,25 +194,25 @@ export default function ProductsWithTable() {
               <label className="label">
                 <span className="label-text">Product Name</span>
               </label>
-              <input type="text" name="p_Name" value={form.p_Name} onChange={e => setForm(f => ({ ...f, p_Name: e.target.value }))} className="input input-bordered w-full" />
+              <input type="text" name="p_Name" required value={form.p_Name} onChange={e => setForm(f => ({ ...f, p_Name: e.target.value }))} className="input input-bordered w-full" />
             </div>
             <div>
               <label className="label">
                 <span className="label-text">Product Price</span>
               </label>
-              <input type="number" step="0.01" name="p_Price" value={form.p_Price} onChange={e => setForm(f => ({ ...f, p_Price: e.target.value }))} className="input input-bordered w-full" />
+              <input type="number" step="0.01" name="p_Price" required value={form.p_Price} onChange={e => setForm(f => ({ ...f, p_Price: e.target.value }))} className="input input-bordered w-full" />
             </div>
              <div>
               <label className="label">
                 <span className="label-text">Product Stock</span>
               </label>
-              <input type="number" step="0.01" name="p_Stock" value={form.p_Stock} onChange={e => setForm(f => ({ ...f, p_Stock: e.target.value }))} className="input input-bordered w-full" />
+              <input type="number" step="0.01" name="p_Stock" required value={form.p_Stock} onChange={e => setForm(f => ({ ...f, p_Stock: e.target.value }))} className="input input-bordered w-full" />
             </div>
             <div>
               <label className="label">
                 <span className="label-text">Product Expiry</span>
               </label>
-              <input type="date" name="p_Expiry" value={form.p_Expiry} onChange={e => setForm(f => ({ ...f, p_Expiry: e.target.value }))} className="input input-bordered w-full" />
+              <input type="date" name="p_Expiry" required value={form.p_Expiry} onChange={e => setForm(f => ({ ...f, p_Expiry: e.target.value }))} className="input input-bordered w-full" />
             </div>
             <div>
               <button type="submit" className="btn btn-success w-full">Create</button>
@@ -176,25 +230,25 @@ export default function ProductsWithTable() {
               <label className="label">
                 <span className="label-text">Product Name</span>
               </label>
-              <input type="text" name="p_Name" value={form.p_Name} onChange={e => setForm(f => ({ ...f, p_Name: e.target.value }))} className="input input-bordered w-full" />
+              <input type="text" name="p_Name"  required value={form.p_Name} onChange={e => setForm(f => ({ ...f, p_Name: e.target.value }))} className="input input-bordered w-full" />
             </div>
             <div>
               <label className="label">
                 <span className="label-text">Product Price</span>
               </label>
-              <input type="number" step="0.01" name="p_Price" value={form.p_Price} onChange={e => setForm(f => ({ ...f, p_Price: e.target.value }))} className="input input-bordered w-full" />
+              <input type="number" step="0.01" name="p_Price" required value={form.p_Price} onChange={e => setForm(f => ({ ...f, p_Price: e.target.value }))} className="input input-bordered w-full" />
             </div>
             <div>
               <label className="label">
                 <span className="label-text">Product Stock</span>
               </label>
-              <input type="number" step="0.01" name="p_Stock" value={form.p_Stock} onChange={e => setForm(f => ({ ...f, p_Stock: e.target.value }))} className="input input-bordered w-full" />
+              <input type="number" step="0.01" name="p_Stock" required value={form.p_Stock} onChange={e => setForm(f => ({ ...f, p_Stock: e.target.value }))} className="input input-bordered w-full" />
             </div>
             <div>
               <label className="label">
                 <span className="label-text">Product Expiry</span>
               </label>
-              <input type="date" name="p_Expiry" value={form.p_Expiry} onChange={e => setForm(f => ({ ...f, p_Expiry: e.target.value }))} className="input input-bordered w-full" />
+              <input type="date" name="p_Expiry" required value={form.p_Expiry} onChange={e => setForm(f => ({ ...f, p_Expiry: e.target.value }))} className="input input-bordered w-full" />
             </div>
             <div className="flex gap-2">
               <button type="submit" className="btn btn-primary">Save</button>
@@ -250,7 +304,7 @@ export default function ProductsWithTable() {
               <th>{idx + 1}</th>
               <td>{p.product_Name}</td>
               <td>₱{typeof p.product_Price === "number"? p.product_Price.toFixed(2): parseFloat(p.product_Price || 0).toFixed(2)}</td>
-              <td>{typeof p.product_Stock === "number"? p.product_Stock.toFixed(2): parseFloat(p.product_Stock || 0).toFixed(2)}</td>
+              <td>{p.product_Stock} </td>
               <td>{new Date(p.product_Expiry).toISOString().split("T")[0]}</td>
               <td>
                 <div className="flex flex-col items-center gap-1">
