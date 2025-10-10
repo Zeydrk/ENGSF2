@@ -9,10 +9,11 @@ export function usePackage(){
         const packages = await axios.get(`${BASE_URL}/packages`);
         setPackage(packages.data)
     }
+    
     async function createPackage(packg){
          try{
      const response = await axios.post(`${BASE_URL}/packages/create`, {
-        seller_Id: packg.seller_Id,
+        seller_Name: packg.seller_Name, // Changed from seller_Id to seller_Name
         package_Name: packg.package_Name,
         recipient_Name: packg.recipient_Name,
         descrtion: packg.descrtion,
@@ -34,27 +35,28 @@ export function usePackage(){
     }
   }
     }
+    
     async function deletePackage(packg){
         const response = await axios.post(`${BASE_URL}/packages/delete`, {
             id: packg.id
         });
     }
+    
     async function updatePackage(packg){      
       await axios.post(`${BASE_URL}/packages/update`,{
             id: packg.id,
-            seller_Id: packg.seller_Id,
+            seller_Name: packg.seller_Name, // Changed from seller_Id to seller_Name
             package_Name: packg.package_Name,
             recipient_Name: packg.recipient_Name,
             descrtion: packg.descrtion,
         })
-
     }
-return {
-    packages,
-    usePackage,
-    getAllPackage,
-    createPackage,
-    deletePackage,
-    updatePackage
-};
+
+    return {
+        packages,
+        getAllPackage,
+        createPackage,
+        deletePackage,
+        updatePackage
+    };
 }
