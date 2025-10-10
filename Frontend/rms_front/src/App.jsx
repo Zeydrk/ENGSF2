@@ -8,10 +8,17 @@ import Login from './components/Login'
 import Register from './components/Register'
 import ProtectedRoute from './components/ProtectedRoute'
 import Home from './components/Home'
+
+import Navbar from './components/Navbar'  
 import Product from './components/Products'
 import ProductPage from './components/ProductPage';
 
-
+const ProtectedLayout = ({ children, onLogout }) => (
+  <>
+    <Navbar onLogout={onLogout} />
+    {children}
+  </>
+);
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() =>  {
@@ -52,8 +59,22 @@ function App() {
               <Home />
             </ProtectedRoute>
           }/>
-        <Route path='/product' element={<Product/>}/>
-        <Route path='/product/:id' element={<ProductPage/>}/>
+        <Route
+            path="/product"
+            element={
+              <ProtectedLayout onLogout={handleLogout}>
+                <Product />
+              </ProtectedLayout>
+            }
+          />
+        <Route
+            path="/product/:id"
+            element={
+              <ProtectedLayout onLogout={handleLogout}>
+                <ProductPage />
+              </ProtectedLayout>
+            }
+          />
       </Routes>
     </Router>
   )
