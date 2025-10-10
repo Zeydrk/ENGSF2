@@ -13,6 +13,8 @@ import Navbar from './components/Navbar'
 import Product from './components/Products'
 import Sellers from "./components/Sellers";
 import ProductPage from './components/ProductPage';
+import Package from './components/Package'
+import PackagePage from './components/PackagePage'
 
 const ProtectedLayout = ({ children, onLogout }) => (
   <>
@@ -60,6 +62,8 @@ function App() {
               <Home />
             </ProtectedRoute>
           }/>
+         <Route path='/package' element={<Package/>}/>
+        <Route path='/package/:id' element={<PackagePage/>}/>
         <Route
             path="/product"
             element={
