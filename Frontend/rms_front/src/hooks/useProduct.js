@@ -47,14 +47,43 @@ export function useProduct(){
             product_Stock: product.product_Stock,
             product_Expiry: product.product_Expiry,
         })
-
     }
+    async function searchProduct(input){
+       const search = await axios.get(`${BASE_URL}/products/search`, {
+        params: {query:input}
+       })
+       setProducts(search.data);
+    }
+    async function priceSort(order){
+      const sortedPrice = await axios.get(`${BASE_URL}/products/price`,{
+        params: {sort:order}
+      })
+      setProducts(sortedPrice.data)
+    }
+    async function stockSort(order){
+      const sortedStock = await axios.get(`${BASE_URL}/products/stock`, {
+        params: {sort:order}
+      });
+      setProducts(sortedStock.data);
+    }
+    async function expirySort(order) {
+      const sortedExpiry = await axios.get(`${BASE_URL}/products/expiry`, {
+        params: {sort:order}
+      });
+      setProducts(sortedExpiry.data)
+    }
+    
+
 return {
     products,
     useProduct,
     getAllProducts,
     createProducts,
     deleteProduct,
-    updateProduct
+    updateProduct,
+    searchProduct,
+    priceSort,
+    stockSort,
+    expirySort
 };
 }
