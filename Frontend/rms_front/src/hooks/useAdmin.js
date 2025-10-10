@@ -16,12 +16,27 @@ export function useAdmin() {
         
         return response.data
     }
+    async function forgotPassword(email) {
+        const response = await axios.post(`${BASE_URL}/admins/forgot-password`, email);
+        setAdmins(response.data)
+        return response.data
+
+    }
+
+    async function resetPassword(password,token) {
+        const response = await axios.post(`${BASE_URL}/admins/reset-password`, {password, token});
+        setAdmins(response.data)
+        return response.data
+
+    }
 
 
     return{
         admins,
         fetchAdmins,
-        createAdmin
+        createAdmin,
+        forgotPassword,
+        resetPassword
     }
 }
 
