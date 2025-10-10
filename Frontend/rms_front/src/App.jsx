@@ -10,6 +10,8 @@ import ProtectedRoute from './components/ProtectedRoute'
 import Home from './components/Home'
 import Product from './components/Products'
 import ProductPage from './components/ProductPage';
+import Package from './components/Package'
+import PackagePage from './components/PackagePage'
 
 
 
@@ -54,6 +56,8 @@ function App() {
           }/>
         <Route path='/product' element={<Product/>}/>
         <Route path='/product/:id' element={<ProductPage/>}/>
+                <Route path='/package' element={<Package/>}/>
+        <Route path='/package/:id' element={<PackagePage/>}/>
       </Routes>
     </Router>
   )
