@@ -8,12 +8,20 @@ import Login from './components/Login'
 import Register from './components/Register'
 import ProtectedRoute from './components/ProtectedRoute'
 import Home from './components/Home'
+
+import Navbar from './components/Navbar'  
 import Product from './components/Products'
+import Sellers from "./components/Sellers";
 import ProductPage from './components/ProductPage';
 import Package from './components/Package'
 import PackagePage from './components/PackagePage'
 
-
+const ProtectedLayout = ({ children, onLogout }) => (
+  <>
+    <Navbar onLogout={onLogout} />
+    {children}
+  </>
+);
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() =>  {
@@ -54,10 +62,33 @@ function App() {
               <Home />
             </ProtectedRoute>
           }/>
-        <Route path='/product' element={<Product/>}/>
-        <Route path='/product/:id' element={<ProductPage/>}/>
-                <Route path='/package' element={<Package/>}/>
+         <Route path='/package' element={<Package/>}/>
         <Route path='/package/:id' element={<PackagePage/>}/>
+        <Route
+            path="/product"
+            element={
+              <ProtectedLayout onLogout={handleLogout}>
+                <Product />
+              </ProtectedLayout>
+            }
+          />
+        <Route
+            path="/product/:id"
+            element={
+              <ProtectedLayout onLogout={handleLogout}>
+                <ProductPage />
+              </ProtectedLayout>
+            }
+          />
+          <Route
+            path="/seller"
+            element={
+              <ProtectedLayout onLogout={handleLogout}>
+                <Sellers />
+              </ProtectedLayout>
+            }
+          />
+       
       </Routes>
     </Router>
   )
