@@ -9,6 +9,7 @@ import Register from './components/Register'
 import ProtectedRoute from './components/ProtectedRoute'
 import Home from './components/Home'
 import Product from './components/Products'
+import Sellers from "./components/Sellers";
 import ProductPage from './components/ProductPage';
 
 
@@ -53,6 +54,7 @@ function App() {
             </ProtectedRoute>
           }/>
         <Route path='/product' element={<Product/>}/>
+        <Route path='/seller' element={<Sellers/>}/>
         <Route path='/product/:id' element={<ProductPage/>}/>
       </Routes>
     </Router>
