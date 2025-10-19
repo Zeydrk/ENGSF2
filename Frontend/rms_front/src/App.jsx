@@ -10,21 +10,29 @@ import Login from './components/Login'
 import Register from './components/Register'
 import ProtectedRoute from './components/ProtectedRoute'
 <<<<<<< HEAD
+<<<<<<< HEAD
 import Product from './components/Products'
 import Home from './components/Home'
 import ProductPage from './components/ProductPage';
 import Forgot from './components/Forgot'
 import Reset from './components/Reset'
 =======
+=======
+>>>>>>> 3541a7437bf7e6550ae9264cab7c018047376f6a
 import Home from './components/Home'
 
 import Navbar from './components/Navbar'  
 import Product from './components/Products'
 import Sellers from "./components/Sellers";
 import ProductPage from './components/ProductPage';
+import Forgot from './components/Forgot'
+import Reset from './components/Reset'
 import Package from './components/Package'
 import PackagePage from './components/PackagePage'
+<<<<<<< HEAD
 >>>>>>> main
+=======
+>>>>>>> 3541a7437bf7e6550ae9264cab7c018047376f6a
 
 const ProtectedLayout = ({ children, onLogout }) => (
   <>
@@ -74,11 +82,14 @@ function App() {
             </ProtectedRoute>
           }/>
 <<<<<<< HEAD
+<<<<<<< HEAD
         <Route path='/product' element={<Product/>}/>
         <Route path='/product/:id' element={<ProductPage/>}/>
         <Route path="/forgot-password/" element={<Forgot />} />
         <Route path="/reset-password/" element={<Reset />} />
 =======
+=======
+>>>>>>> 3541a7437bf7e6550ae9264cab7c018047376f6a
          <Route path='/package' element={<Package/>}/>
         <Route path='/package/:id' element={<PackagePage/>}/>
         <Route
@@ -106,7 +117,12 @@ function App() {
             }
           />
        
+<<<<<<< HEAD
 >>>>>>> main
+=======
+        <Route path="/forgot-password/" element={<Forgot />} />
+        <Route path="/reset-password/" element={<Reset />} />
+>>>>>>> 3541a7437bf7e6550ae9264cab7c018047376f6a
       </Routes>
     </Router>
   )
