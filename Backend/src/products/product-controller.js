@@ -2,6 +2,7 @@ const models = require("../../models");
 const QRCode = require('qrcode');
 const fs = require('fs');
 const path = require('path');
+const {Op} = require('sequelize');
 
 const UPLOAD_DIR = path.join(__dirname, '..', '..', 'public', 'uploads', 'qrcodes')
 
@@ -17,19 +18,15 @@ async function getProducts(req, res) {
 async function addProduct(req, res) {
   try {
     const { product_Name, product_Price, product_Stock, product_Expiry } = req.body;
-
     const newProduct = await models["Products"].create({
       product_Name,
       product_Price,
       product_Stock,
       product_Expiry
     });
-
   const baseUrl = process.env.APP_URL || 'http://localhost:5173';
   const qrValue = `${baseUrl}/products/${newProduct.id}`;
-
-
-    const svgString = await QRCode.toString(qrValue, { type: 'svg', margin: 1 });
+  const svgString = await QRCode.toString(qrValue, { type: 'svg', margin: 1 });
 
     fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
@@ -96,6 +93,56 @@ async function getProductById(req, res) {
     res.status(500).json({ error: err.message });
   }
 }
+async function searchProduct(req, res){
+  try {
+    const {query} = req.query;
+    const search = await models['Products'].findAll({where: {product_Name: {[Op.like]: `%${query}%` }} })
+    res.status(200).json(search);
+  }
+  catch(err){
+    console.error("Error fetching product name")
+    res.status(500).json({ error : err.message})
+  }
+}
+async function priceSort(req,res){
+  try{
+    const sort = req.query.sort === 'DESC' ? "DESC" : "ASC";
+    const sortedPrice = await models['Products'].findAll({
+      order: [['product_Price', sort]],
+    })
+    res.status(200).json(sortedPrice);
+  }
+  catch (err){
+    console.error("Error finding Price");
+    res.status(500).json({error: err.message});
+  }
+}
+async function stockSort(req,res){
+   try{
+    const sort = req.query.sort === 'DESC' ? "DESC" : "ASC";
+    const sortedStock = await models['Products'].findAll({
+      order: [['product_Stock', sort]],
+    })
+    res.status(200).json(sortedStock);
+  }
+  catch (err){
+    console.error("Error finding Stock");
+    res.status(500).json({error: err.message});
+  }
+}
+async function expirySort(req,res){
+  try{
+    const sort = req.query.sort === 'DESC' ? "DESC" : "ASC";
+    const sortedExpiry = await models['Products'].findAll({
+      order: [['product_Expiry', sort]],
+    })
+    res.status(200).json(sortedExpiry);
+  }
+  catch (err){
+    console.error("Error finding Expiry");
+    res.status(500).json({error: err.message});
+  }
+}
 
 module.exports = {
     getProducts,
@@ -103,4 +150,8 @@ module.exports = {
     deleteProduct,
     updateProduct,
     getProductById,
+    searchProduct,
+    priceSort,
+    stockSort,
+    expirySort
 }
