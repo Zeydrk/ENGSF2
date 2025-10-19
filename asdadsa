@@ -1,0 +1,212 @@
+[33mcommit 3e2f544237a24f288ca30ef021dcc2741538d9be[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mel_new_feature[m[33m, [m[1;31morigin/el_new_feature[m[33m)[m
+Author: Eleandro Brieta <Eleandro20233255>
+Date:   Sat Oct 11 02:08:54 2025 +0800
+
+    el_new_feature landing page
+
+[33mcommit f972c3d6fe3e84597959d5974916ee6e70b05bcb[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m
+Merge: 5da37a3 bea3019
+Author: Dezric <166732537+Zeydrk@users.noreply.github.com>
+Date:   Wed Oct 8 23:58:10 2025 +0800
+
+    Merge pull request #8 from Zeydrk/incomplete_p
+    
+    Merging claytoners function to main
+
+[33mcommit bea3019f044b278df4d0921cae44895098416100[m[33m ([m[1;31morigin/incomplete_p[m[33m)[m
+Author: 1Rai1 <soronioclayton42@gmail.com>
+Date:   Wed Oct 8 22:38:13 2025 +0800
+
+    QR Code
+
+[33mcommit f9a0c3bdfcfd5d170084f306ff6c86eb1d358a28[m
+Merge: d070ce0 5da37a3
+Author: 1Rai1 <soronioclayton42@gmail.com>
+Date:   Wed Oct 8 21:25:00 2025 +0800
+
+    Merge branch 'main' of https://github.com/Zeydrk/ENGSF2 into incomplete_p
+
+[33mcommit d070ce0dbdc680beff59233e98b4151125cfa046[m
+Merge: 5964b8b 69926c7
+Author: 1Rai1 <soronioclayton42@gmail.com>
+Date:   Wed Oct 8 21:15:24 2025 +0800
+
+    Merge branch 'seller' into incomplete_p
+
+[33mcommit 5da37a3f1faa0120fe0c0bbfb8f4c38777ff7c53[m
+Merge: 7b426fe 85499a7
+Author: Dezric <166732537+Zeydrk@users.noreply.github.com>
+Date:   Wed Oct 8 21:13:47 2025 +0800
+
+    Merge pull request #7 from Zeydrk/zed_login_feature
+    
+    Zed login feature
+
+[33mcommit 85499a70c90e954df9f7f3874adfd6cb9a6dff39[m
+Merge: ed44185 7b426fe
+Author: Zeydrk <zedricveran7@gmail.com>
+Date:   Wed Oct 8 21:13:25 2025 +0800
+
+    Merge branch 'main' into zed_login_feature
+
+[33mcommit 5964b8bd71f171ee2a81b0e9b3324a37f2467168[m
+Merge: 6e4e84c 96ddd18
+Author: 1Rai1 <soronioclayton42@gmail.com>
+Date:   Wed Oct 8 21:10:42 2025 +0800
+
+    Merge branch 'incomplete_p' of https://github.com/Zeydrk/ENGSF2 into incomplete_p
+
+[33mcommit 6e4e84c8f6f48d88ebf1216fbdcb1d43742a5f60[m
+Author: 1Rai1 <soronioclayton42@gmail.com>
+Date:   Wed Oct 8 21:07:44 2025 +0800
+
+    qr
+
+[33mcommit ed441857daa6ea2cf475a58b4271e3ae5f983030[m
+Author: Zeydrk <zedricveran7@gmail.com>
+Date:   Wed Oct 8 21:06:10 2025 +0800
+
+    Merging zed to main
+
+[33mcommit b2ff8f38717e0da72c8cbf5e18bb8d3a7d46efaa[m
+Author: 1Rai1 <soronioclayton42@gmail.com>
+Date:   Wed Oct 8 20:56:52 2025 +0800
+
+    qrcodes in process
+
+[33mcommit acf68dc65c64e0c634154fa4a81f87f988002136[m
+Author: Zeydrk <zedricveran7@gmail.com>
+Date:   Wed Oct 8 20:42:18 2025 +0800
+
+    Finished partial security, for login. Doing custom alert notification
+
+[33mcommit 7b426fe7b9a8d75a0e0d4ef5267b4f40083aeb18[m
+Merge: da9d2f0 96ddd18
+Author: Dezric <166732537+Zeydrk@users.noreply.github.com>
+Date:   Wed Oct 8 20:40:28 2025 +0800
+
+    Merge pull request #4 from Zeydrk/incomplete_p
+    
+    Merging main to incomplete p
+
+[33mcommit 96ddd18f6f3a30c81b7ac230126f7cedbf4321fd[m
+Merge: 8fa3fda da9d2f0
+Author: 1Rai1 <soronioclayton42@gmail.com>
+Date:   Wed Oct 8 20:40:04 2025 +0800
+
+    Merge branch 'main' into incomplete_p
+
+[33mcommit 8fa3fdacf65d4d1eaa4126a400265bea558de3b1[m
+Author: 1Rai1 <soronioclayton42@gmail.com>
+Date:   Wed Oct 8 20:32:35 2025 +0800
+
+    stash
+
+[33mcommit 69926c7e49c3a0bb52d77e4631a8d1ee9869a83e[m[33m ([m[1;31morigin/seller[m[33m)[m
+Author: 1Rai1 <soronioclayton42@gmail.com>
+Date:   Tue Oct 7 23:27:10 2025 +0800
+
+    Initial Seller
+
+[33mcommit 846dc3288f700ac3f34c69617add76a19b8a5023[m
+Author: 1Rai1 <soronioclayton42@gmail.com>
+Date:   Tue Oct 7 21:57:07 2025 +0800
+
+    Fixed merge things
+
+[33mcommit 40e19ab88b26d5c532bdc0785b184611b40037c8[m
+Author: 1Rai1 <soronioclayton42@gmail.com>
+Date:   Tue Oct 7 21:44:18 2025 +0800
+
+    Completed Product
+
+[33mcommit 62fd6fccaacb976fb9a906dbe7c229c88db21faf[m
+Author: Zeydrk <zedricveran7@gmail.com>
+Date:   Tue Oct 7 21:23:53 2025 +0800
+
+    Done with major functionalities in register, update when learned middlewares
+
+[33mcommit 99d91d7271c3157b6cc6590c2fd21b45d94688cc[m
+Author: 1Rai1 <soronioclayton42@gmail.com>
+Date:   Tue Oct 7 20:12:24 2025 +0800
+
+    frontend prog
+
+[33mcommit da9d2f0a38f40ee4ae3f5d8a3fa3ea51b6e305da[m
+Merge: c03fd3c e8458aa
+Author: Dezric <166732537+Zeydrk@users.noreply.github.com>
+Date:   Tue Oct 7 00:07:28 2025 +0800
+
+    Merge pull request #2 from Zeydrk/zed_login_feature
+    
+    Zed login feature
+
+[33mcommit e8458aa253d77a8e57561a9478df01f53a6f5e6b[m
+Merge: 13c39fc c03fd3c
+Author: Zeydrk <zedricveran7@gmail.com>
+Date:   Tue Oct 7 00:05:43 2025 +0800
+
+    updating login feature
+
+[33mcommit 13c39fc157df1fc3eb3bc7f19d562845d7bf8097[m
+Author: Zeydrk <zedricveran7@gmail.com>
+Date:   Tue Oct 7 00:01:31 2025 +0800
+
+    Fix security issue when logging in
+
+[33mcommit c03fd3c741651c02b0cdadf4eb1b349cff44688f[m
+Merge: 201aa50 0a96767
+Author: Dezric <166732537+Zeydrk@users.noreply.github.com>
+Date:   Mon Oct 6 23:38:02 2025 +0800
+
+    Merge pull request #1 from Zeydrk/incomplete_p
+    
+    Merging claytoners added backend functionality
+
+[33mcommit 0a967678abefc09d0d71f638752b2e41bb5730df[m
+Author: 1Rai1 <soronioclayton42@gmail.com>
+Date:   Mon Oct 6 23:32:34 2025 +0800
+
+    wala frontend
+
+[33mcommit 25fbba735cfb88a287ed197c5ba7507d0217cdda[m
+Author: Zeydrk <zedricveran7@gmail.com>
+Date:   Mon Oct 6 23:28:03 2025 +0800
+
+    finished login funcitonality, alert popup could be improved
+
+[33mcommit 027ee901e157fa8b0b0ac11901a1361dd36b484f[m
+Author: Zeydrk <zedricveran7@gmail.com>
+Date:   Mon Oct 6 23:26:51 2025 +0800
+
+    finished login functionality, alert box could be improved
+
+[33mcommit faf4144a5e2dffa447b9663412610cec60562184[m
+Author: 1Rai1 <soronioclayton42@gmail.com>
+Date:   Sun Oct 5 22:14:00 2025 +0800
+
+    extra kasi special ako
+
+[33mcommit 1c3baeb4d0ed948c29cf5dea6d6133fd3ef53de3[m
+Author: 1Rai1 <soronioclayton42@gmail.com>
+Date:   Sun Oct 5 21:29:24 2025 +0800
+
+    p
+
+[33mcommit 201aa5082811e02da578d9bc256456065b214607[m
+Author: Zeydrk <zedricveran7@gmail.com>
+Date:   Sun Oct 5 16:26:52 2025 +0800
+
+    currently doing login backend login/ setting up routes
+
+[33mcommit ce37906b04c0da92a457e997986428e9ec9786c4[m
+Author: Zeydrk <zedricveran7@gmail.com>
+Date:   Sat Oct 4 22:52:36 2025 +0800
+
+    added login frontend, used tailwind and daisyui with autumn theme
+
+[33mcommit b575ac84530bcb8221b694d1498ad244c2d887f5[m
+Author: Zeydrk <zedricveran7@gmail.com>
+Date:   Fri Oct 3 17:21:26 2025 +0800
+
+    first commit
