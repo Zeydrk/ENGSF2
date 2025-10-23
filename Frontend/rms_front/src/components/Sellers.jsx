@@ -4,17 +4,23 @@ import axios from "axios";
 export default function SellersWithTable() {
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ seller_FName: "", seller_MName: "", seller_LName: "" });
+  const [form, setForm] = useState({
+    seller_FName: "",
+    seller_MName: "",
+    seller_LName: "",
+    seller_Phone: "",
+    seller_Email: ""
+  });
   const [editing, setEditing] = useState(null);
   const [error, setError] = useState(null);
   const [sellers, setSellers] = useState([]);
-  const API_URL = "http://localhost:3000/seller";
+  const API_URL = "http://localhost:3000/sellers";
 
   useEffect(() => {
-    refresh();
+    loadSellers();
   }, []);
 
-  async function refresh() {
+  async function loadSellers() {
     try {
       setLoading(true);
       const res = await axios.get(API_URL);
@@ -28,7 +34,13 @@ export default function SellersWithTable() {
   }
 
   function resetForm() {
-    setForm({ seller_FName: "", seller_MName: "", seller_LName: "" });
+    setForm({
+      seller_FName: "",
+      seller_MName: "",
+      seller_LName: "",
+      seller_Phone: "",
+      seller_Email: ""
+    });
   }
 
   async function handleCreate(e) {
@@ -38,15 +50,19 @@ export default function SellersWithTable() {
         setError("First and last name are required");
         return;
       }
+
       const payload = {
         seller_FName: form.seller_FName.trim(),
         seller_MName: form.seller_MName.trim(),
         seller_LName: form.seller_LName.trim(),
+        seller_Phone: form.seller_Phone?.trim() || null,
+        seller_Email: form.seller_Email?.trim() || null,
       };
+
       await axios.post(`${API_URL}/create`, payload);
       resetForm();
       setShowForm(false);
-      refresh();
+      loadSellers();
     } catch (err) {
       console.error(err);
       setError(err?.message || "Create failed");
@@ -58,7 +74,7 @@ export default function SellersWithTable() {
     if (!ok) return;
     try {
       await axios.post(`${API_URL}/delete`, { id });
-      refresh();
+      loadSellers();
     } catch (err) {
       console.error(err);
       setError(err?.message || "Delete failed");
@@ -71,6 +87,8 @@ export default function SellersWithTable() {
       seller_FName: seller.seller_FName || "",
       seller_MName: seller.seller_MName || "",
       seller_LName: seller.seller_LName || "",
+      seller_Phone: seller.seller_Phone || "",
+      seller_Email: seller.seller_Email || ""
     });
     setShowForm(false);
   }
@@ -84,11 +102,13 @@ export default function SellersWithTable() {
         seller_FName: form.seller_FName.trim(),
         seller_MName: form.seller_MName.trim(),
         seller_LName: form.seller_LName.trim(),
+        seller_Phone: form.seller_Phone?.trim() || null,
+        seller_Email: form.seller_Email?.trim() || null,
       };
       await axios.post(`${API_URL}/update`, payload);
       setEditing(null);
       resetForm();
-      refresh();
+      loadSellers();
     } catch (err) {
       console.error(err);
       setError(err?.message || "Update failed");
@@ -99,22 +119,17 @@ export default function SellersWithTable() {
     <div data-theme="autumn" className="p-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-semibold">Sellers</h2>
-        <div className="flex gap-2">
-          <button
-            className="btn btn-sm btn-primary"
-            onClick={() => {
-              setShowForm(s => !s);
-              resetForm();
-              setEditing(null);
-              setError(null);
-            }}
-          >
-            {showForm ? "Close" : "Add Seller"}
-          </button>
-          <button className="btn btn-sm" onClick={refresh}>
-            Refresh
-          </button>
-        </div>
+        <button
+          className="btn btn-sm btn-primary"
+          onClick={() => {
+            setShowForm(s => !s);
+            resetForm();
+            setEditing(null);
+            setError(null);
+          }}
+        >
+          {showForm ? "Close" : "Add Seller"}
+        </button>
       </div>
 
       {error && (
@@ -125,6 +140,7 @@ export default function SellersWithTable() {
         </div>
       )}
 
+      {/* Create form */}
       {showForm && !editing && (
         <div className="card bg-base-200 p-4 mb-6">
           <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
@@ -168,6 +184,32 @@ export default function SellersWithTable() {
             </div>
 
             <div>
+              <label className="label">
+                <span className="label-text">Phone</span>
+              </label>
+              <input
+                type="tel"
+                name="seller_Phone"
+                value={form.seller_Phone}
+                onChange={e => setForm(f => ({ ...f, seller_Phone: e.target.value }))}
+                className="input input-bordered w-full"
+              />
+            </div>
+
+            <div>
+              <label className="label">
+                <span className="label-text">Email</span>
+              </label>
+              <input
+                type="email"
+                name="seller_Email"
+                value={form.seller_Email}
+                onChange={e => setForm(f => ({ ...f, seller_Email: e.target.value }))}
+                className="input input-bordered w-full"
+              />
+            </div>
+
+            <div>
               <button type="submit" className="btn btn-success w-full">
                 Create
               </button>
@@ -176,6 +218,7 @@ export default function SellersWithTable() {
         </div>
       )}
 
+      {/* Edit form */}
       {editing && (
         <div className="card bg-base-200 p-4 mb-6">
           <h3 className="font-medium mb-2">Edit Seller</h3>
@@ -219,6 +262,32 @@ export default function SellersWithTable() {
               />
             </div>
 
+            <div>
+              <label className="label">
+                <span className="label-text">Phone</span>
+              </label>
+              <input
+                type="tel"
+                name="seller_Phone"
+                value={form.seller_Phone}
+                onChange={e => setForm(f => ({ ...f, seller_Phone: e.target.value }))}
+                className="input input-bordered w-full"
+              />
+            </div>
+
+            <div>
+              <label className="label">
+                <span className="label-text">Email</span>
+              </label>
+              <input
+                type="email"
+                name="seller_Email"
+                value={form.seller_Email}
+                onChange={e => setForm(f => ({ ...f, seller_Email: e.target.value }))}
+                className="input input-bordered w-full"
+              />
+            </div>
+
             <div className="flex gap-2">
               <button type="submit" className="btn btn-primary">Save</button>
               <button type="button" className="btn" onClick={() => { setEditing(null); resetForm(); }}>
@@ -237,6 +306,8 @@ export default function SellersWithTable() {
               <th>First Name</th>
               <th>Middle Name</th>
               <th>Last Name</th>
+              <th>Phone Number</th>
+              <th>Email</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -244,11 +315,11 @@ export default function SellersWithTable() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan="5">Loading...</td>
+                <td colSpan="7">Loading...</td>
               </tr>
             ) : sellers.length === 0 ? (
               <tr>
-                <td colSpan="5">No sellers found</td>
+                <td colSpan="7">No sellers found</td>
               </tr>
             ) : (
               sellers.map((s, idx) => (
@@ -257,6 +328,8 @@ export default function SellersWithTable() {
                   <td>{s.seller_FName}</td>
                   <td>{s.seller_MName}</td>
                   <td>{s.seller_LName}</td>
+                  <td>{s.seller_Phone}</td>
+                  <td>{s.seller_Email}</td>
                   <td className="flex gap-2">
                     <button className="btn btn-sm btn-ghost" onClick={() => openEdit(s)}>Edit</button>
                     <button className="btn btn-sm btn-error" onClick={() => handleDelete(s.id)}>Delete</button>
