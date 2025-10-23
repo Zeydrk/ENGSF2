@@ -20,7 +20,9 @@ module.exports = (sequelize, DataTypes) => {
   Seller.init({
     seller_FName: DataTypes.STRING,
     seller_MName: DataTypes.STRING,
-    seller_LName: DataTypes.STRING
+    seller_LName: DataTypes.STRING,
+    seller_Phone: DataTypes.STRING,
+    seller_Email: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'Seller',
