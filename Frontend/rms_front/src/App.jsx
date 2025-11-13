@@ -10,7 +10,6 @@ import Login from './components/Login'
 import Register from './components/Register'
 import ProtectedRoute from './components/ProtectedRoute'
 import Home from './components/Home'
-
 import Navbar from './components/Navbar'  
 import Product from './components/Products'
 import Sellers from "./components/Sellers";
@@ -19,6 +18,7 @@ import Forgot from './components/Forgot'
 import Reset from './components/Reset'
 import Package from './components/Package'
 import PackagePage from './components/PackagePage'
+import Register2 from './components/Register2'
 
 const ProtectedLayout = ({ children, onLogout }) => (
   <>
@@ -60,6 +60,7 @@ function App() {
         {/* Public route */}
         <Route path="/login" element={<Login onLogin={handleLogin}/>} />
         <Route path="/register" element={<Register />} />
+        <Route path="/register2" element={<Register2 />} />
         {/* Protected routes are here */}
         <Route path="/" element=
           {
@@ -93,7 +94,6 @@ function App() {
               </ProtectedLayout>
             }
           />
-       
         <Route path="/forgot-password/" element={<Forgot />} />
         <Route path="/reset-password/" element={<Reset />} />
       </Routes>

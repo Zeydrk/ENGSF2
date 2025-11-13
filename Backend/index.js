@@ -10,6 +10,9 @@ const adminsRoutes = require('./src/admin/admins-routes')
 const productRoutes = require('./src/products/product-route')
 const packageRoutes = require('./src/packages/package-route')
 const sellerRoutes = require('./src/sellers/seller-route')
+// for testing
+const accountsRoutes = require('./src/accounts/accounts-routes')
+
 
 // Middleware
 app.use(express.json());
@@ -28,6 +31,10 @@ app.use('/admins',adminsRoutes);
 app.use('/products', productRoutes);
 app.use('/packages', packageRoutes);
 app.use('/sellers', sellerRoutes);
+
+app.use('/accounts', accountsRoutes);
+
+
 
 // Server feedback
 app.listen(3000, () => {
