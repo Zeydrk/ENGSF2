@@ -1,7 +1,9 @@
 // import react library/components
 import { useEffect, useState } from 'react'
 import './App.css'
+import Toasters from './components/Toasters'
 import {BrowserRouter as Router, Route, Routes } from 'react-router-dom'
+
 
 // Importing components
 import Login from './components/Login'
@@ -13,6 +15,8 @@ import Navbar from './components/Navbar'
 import Product from './components/Products'
 import Sellers from "./components/Sellers";
 import ProductPage from './components/ProductPage';
+import Forgot from './components/Forgot'
+import Reset from './components/Reset'
 import Package from './components/Package'
 import PackagePage from './components/PackagePage'
 
@@ -51,6 +55,7 @@ function App() {
   return (
     
     <Router>
+      <Toasters/>
       <Routes>
         {/* Public route */}
         <Route path="/login" element={<Login onLogin={handleLogin}/>} />
@@ -89,6 +94,8 @@ function App() {
             }
           />
        
+        <Route path="/forgot-password/" element={<Forgot />} />
+        <Route path="/reset-password/" element={<Reset />} />
       </Routes>
     </Router>
   )
