@@ -3,6 +3,8 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 const path = require('path');
+const passport = require('passport');
+const session = require('express-session');
 require('dotenv').config();
 
 
@@ -21,6 +23,17 @@ app.use(express.json());
 app.use(cors());
 app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
 app.use(express.text());
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false, 
+    saveUninitialized: true,
+    // cookie:{
+    //     maxAge: 24 * 60 * 60 * 1000  //supposed to be a day
+    // }
+}))
+app.use(passport.session());
+app.use(passport.initialize());
+
 
 // Enter routes here
 app.get('/', (req,res) => {

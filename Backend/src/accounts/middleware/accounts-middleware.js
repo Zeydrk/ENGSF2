@@ -22,15 +22,16 @@ passport.deserializeUser((id, done) =>{
   }
 })
 
-new LocalStrategy((seller_Email, seller_Password, done) => {
-  if (err) {
-    done(err, null);
-  };
-  if (seller !== null) {
-    done(null, seller);
-  }
+// test for exporting local strategy
+export default passport.use(
+  new LocalStrategy((seller_Email, seller_Password, done) => {
+    if (err) {
+      done(err, null);
+    };
+    if (seller !== null) {
+      done(null, seller);
+    }
+  
+  })
 
-});
-passport.use(localStrategy)
-
-module.exports = passport;
+)
