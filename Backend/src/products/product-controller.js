@@ -8,22 +8,125 @@ const UPLOAD_DIR = path.join(__dirname, '..', '..', 'public', 'uploads', 'qrcode
 
 async function getProducts(req, res) {
   try {
-    const products = await models["Products"].findAll();
-    res.status(200).json(products);
+    let {page,limit} = req.query;
+
+    page = parseInt(page) || 1;
+    limit = parseInt(limit) || 7;
+
+    const offset = (page - 1) * limit;
+    const {count, rows} = await models["Products"].findAndCountAll({
+      limit,
+      offset,
+      where:{isArchived: false},
+      order: [['product_Name', 'ASC']],
+    })
+    res.status(200).json({
+      totalItems: count,
+      totalPages: Math.ceil(count/limit),
+      currentPage: page,
+      products: rows,
+    })
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 }
+async function archivedProducts(req,res){
+  try {
+    let {page,limit} = req.query;
+
+    page = parseInt(page) || 1;
+    limit = parseInt(limit) || 7;
+
+    const offset = (page - 1) * limit;
+    const {count, rows} = await models["Products"].findAndCountAll({
+      limit,
+      offset,
+      where:{isArchived: true},
+      order: [['product_Name', 'ASC']],
+    })
+    res.status(200).json({
+      totalItems: count,
+      totalPages: Math.ceil(count/limit),
+      currentPage: page,
+      products: rows,
+    })
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+async function archiveAddBack(req,res){
+  try{
+    const {id} = req.body;
+
+    if(!id){
+      return res.status(400).json({message:"Product ID is required."})
+    }
+    const product = await models['Products'].findByPk(id);
+
+    if(!product){
+      return res.status(404).json({message:"Product not found"})
+    }
+    product.isArchived = false;
+    await product.save();
+    return res.status(200).json({message:"Product added successfully."});
+  }
+  catch(err){
+    console.error("Adding error:", err);
+    return res.status(500).json({message:"Internal server error."})
+}
+}
+async function archiveProduct(req, res) {
+  try {
+    const { id } = req.body;
+
+    if (!id) {
+      return res.status(400).json({ message: "Product ID is required." });
+    }
+    const product = await models['Products'].findByPk(id);
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found!" });
+    }
+    product.isArchived = true;
+    await product.save();
+
+    return res.status(200).json({ message: "Product archived successfully." });
+  } catch (err) {
+    console.error("Archive error:", err);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+}
+
 
 async function addProduct(req, res) {
   try {
-    const { product_Name, product_Price, product_Stock, product_Expiry } = req.body;
+    const { product_Name,product_Description, product_RetailPrice, product_BuyingPrice,product_Category, product_Stock, product_Expiry } = req.body;
+    
+    const existing = await models["Products"].findOne({
+      where: { product_Name: product_Name.trim() },
+    });
+
+    if (existing) {
+      return res.status(400).json({ message: "Product name already exists" });
+    }
     const newProduct = await models["Products"].create({
       product_Name,
-      product_Price,
+      product_Description,
+      product_RetailPrice,
+      product_BuyingPrice,
       product_Stock,
+      product_Category,
       product_Expiry
     });
+    const today = new Date();
+    const expiry = new Date(product_Expiry);
+    const diff = (expiry - today) / (1000 * 60 * 60 * 24);
+
+    if (expiry < today) {
+      return res.status(400).json({ message: "Cannot add expired product." });
+    } else if (diff <= 5) {
+      return res.status(400).json({ message: "Product expires too soon (within 5 days)." });
+    }
   const baseUrl = process.env.APP_URL || 'http://localhost:5173';
   const qrValue = `${baseUrl}/products/${newProduct.id}`;
   const svgString = await QRCode.toString(qrValue, { type: 'svg', margin: 1 });
@@ -51,24 +154,37 @@ async function addProduct(req, res) {
 
 
 async function deleteProduct(req, res) {
-  try {
-    const { id } = req.body;
-    const deleted = await models["Products"].destroy({ where: { id } });
-    if (deleted) res.status(200).json({ message: "Product deleted successfully" });
-    else res.status(404).json({ message: "Product not found" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+try {
+  const { id } = req.body;
+  const product = await models["Products"].findByPk(id);
+
+  if (!product) {
+    return res.status(404).json({ message: "Product not found" });
   }
+  if (product.product_Stock <= 0) {
+    await models["Products"].destroy({ where: { id } });
+    return res.status(200).json({ message: "Product deleted successfully" });
+  } else {
+    return res.status(400).json({ message: "Product still has stock." });
+  }
+} catch (err) {
+  console.error(err);
+  return res.status(500).json({ error: err.message });
+}
+
 }
 
 async function updateProduct(req, res) {
   try {
-    const { id, product_Name, product_Price, product_Stock, product_Expiry } = req.body;
+    const { id, product_Name, product_RetailPrice, product_BuyingPrice,product_Description,product_Category, product_Stock, product_Expiry } = req.body;
     const product = await models["Products"].findByPk(id);
     if (!product) return res.status(404).json({ message: "Product not found" });
 
     product.product_Name = product_Name;
-    product.product_Price = product_Price;
+    product.product_RetailPrice = product_RetailPrice;
+    product.product_BuyingPrice = product_BuyingPrice;
+    product.product_Description = product_Description;
+    product.product_Category = product_Category; 
     product.product_Stock = product_Stock;
     product.product_Expiry = product_Expiry;
     await product.save();
@@ -96,53 +212,77 @@ async function getProductById(req, res) {
 async function searchProduct(req, res){
   try {
     const {query} = req.query;
-    const search = await models['Products'].findAll({where: {product_Name: {[Op.like]: `%${query}%` }} })
-    res.status(200).json(search);
+    const search = await models['Products'].findAll({
+         where: {
+          product_Name: { [Op.like]: `%${query}%` },
+          isArchived: false
+} })
+    res.status(200).json(search.map(p => p.toJSON()));
   }
   catch(err){
     console.error("Error fetching product name")
     res.status(500).json({ error : err.message})
   }
+  
 }
-async function priceSort(req,res){
+async function searchArchiveProduct(req, res){
+  try {
+    const {query} = req.query;
+    const search = await models['Products'].findAll({
+      where: {
+          product_Name: { [Op.like]: `%${query}%` },
+          isArchived: true
+}
+, })
+    res.status(200).json(search);
+  }
+  catch(err){
+    console.error("Error fetching arhchived product name")
+    res.status(500).json({ error : err.message})
+  }
+  
+}
+async function categoryArchiveSort(req,res){
   try{
-    const sort = req.query.sort === 'DESC' ? "DESC" : "ASC";
-    const sortedPrice = await models['Products'].findAll({
-      order: [['product_Price', sort]],
+    const sort = req.query.sort;
+    const sortedCategory = await models['Products'].findAll({
+      where: {product_Category: {[Op.eq]: `${sort}`},
+              isArchived:true},
+      order: [['product_Name', 'ASC']],
     })
-    res.status(200).json(sortedPrice);
+    // if (!sortedCategory || sortedCategory.length === 0) {
+    //   return res.status(404).json({
+    //     message: `No products found for category: ${sort}`,
+    //   });
+    // }
+    res.status(200).json(sortedCategory);
   }
   catch (err){
-    console.error("Error finding Price");
+    console.error("Error finding Category");
     res.status(500).json({error: err.message});
   }
 }
-async function stockSort(req,res){
-   try{
-    const sort = req.query.sort === 'DESC' ? "DESC" : "ASC";
-    const sortedStock = await models['Products'].findAll({
-      order: [['product_Stock', sort]],
-    })
-    res.status(200).json(sortedStock);
-  }
-  catch (err){
-    console.error("Error finding Stock");
-    res.status(500).json({error: err.message});
-  }
-}
-async function expirySort(req,res){
+async function categorySort(req,res){
   try{
-    const sort = req.query.sort === 'DESC' ? "DESC" : "ASC";
-    const sortedExpiry = await models['Products'].findAll({
-      order: [['product_Expiry', sort]],
+    const sort = req.query.sort;
+    const sortedCategory = await models['Products'].findAll({
+      where: {product_Category: {[Op.eq]: `${sort}`},
+              isArchived:false},
+      order: [['product_Name', 'ASC']],
     })
-    res.status(200).json(sortedExpiry);
+    // if (!sortedCategory || sortedCategory.length === 0) {
+    //   return res.status(404).json({
+    //     message: `No products found for category: ${sort}`,
+    //   });
+    // }
+    res.status(200).json(sortedCategory);
   }
   catch (err){
-    console.error("Error finding Expiry");
+    console.error("Error finding Category");
     res.status(500).json({error: err.message});
   }
 }
+
 
 module.exports = {
     getProducts,
@@ -151,7 +291,10 @@ module.exports = {
     updateProduct,
     getProductById,
     searchProduct,
-    priceSort,
-    stockSort,
-    expirySort
+    categorySort,
+    archivedProducts,
+    archiveProduct,
+    archiveAddBack,
+    searchArchiveProduct,
+    categoryArchiveSort,
 }
