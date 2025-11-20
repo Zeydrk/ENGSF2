@@ -1,601 +1,349 @@
 import React, { useEffect, useState } from "react";
 import { useProduct } from "../hooks/useProduct";
-import { QRCodeSVG } from "qrcode.react";
+import {QRCodeSVG} from 'qrcode.react';
+import { Await } from "react-router-dom";
 
 export default function ProductsWithTable() {
   const productApi = useProduct();
-
-  // UI state
   const [loading, setLoading] = useState(false);
-  const [filteredResults, setFilteredResults] = useState(null);
-  const [showProductForm, setShowProductForm] = useState(false);
-  const [showCategoryForm, setShowCategoryForm] = useState(false);
-  const [form, setForm] = useState({
-    p_Name: "",
-    p_Desc: "",
-    p_Retail: "",
-    p_Buying: "",
-    p_Stock: "",
-    p_Cat: "",
-    p_Expiry: "",
-  });
-  const [editing, setEditing] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({ p_Name: "", p_Price: "", p_Stock: "", p_Expiry: "" });
+  const [editing, setEditing] = useState(null); // store product being edited
   const [error, setError] = useState(null);
-
-  // Pagination & mode
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [limit] = useState(7);
-  const [mode, setMode] = useState("product");
-
-  // Full lists from hook
-  const products = productApi.products || [];
-  const archived = productApi.archived || [];
-
-  // Reset pagination & filters on mode change
+  // load products on mount
   useEffect(() => {
-    setPage(1);
-    setError(null);
-    setFilteredResults(null);
-    refresh(1);
-  }, [mode]);
+    refresh();
+  }, []);
 
-  async function refresh(currentPage = page) {
-    setLoading(true);
-    setError(null);
+  async function refresh() {
     try {
-      const data =
-        mode === "product"
-          ? await productApi.getAllProducts(currentPage, limit)
-          : await productApi.archivedProducts(currentPage, limit);
-      setTotalPages(data?.totalPages || 1);
+      setLoading(true);
+      await productApi.getAllProducts(); 
     } catch (err) {
+      console.error(err);
       setError(err.message || "Failed to load");
     } finally {
       setLoading(false);
     }
   }
-
-  // --- Search handler ---
-  async function handleSearch(e) {
+  async function handleSearch(e){
+    e.preventDefault()
     const input = e.target.value.toLowerCase();
-
-    if (!input.trim()) {
-      setFilteredResults(null);
-      refresh();
-      return;
-    }
-
-    setLoading(true);
-    try {
-      if (mode === "product") {
-        await productApi.searchProduct(input); // searchProduct updates state internally
-      } else {
-        await productApi.searchArchivedProduct(input); // searchArchivedProduct updates state internally
-      }
-      setPage(1);
-      setTotalPages(1);
-      setFilteredResults(null); // no need to manually set results; hook state updates UI
-    } catch (err) {
-      setError((err && err.message) || "Search failed");
-    } finally {
-      setLoading(false);
-    }
+     if (input.trim() === "") {
+    refresh();
+  } else {
+    await productApi.searchProduct(input);
   }
-
-  // --- Category dropdown handler ---
-  async function handleDropDown(option) {
-    setLoading(true);
-    setFilteredResults(null);
-    try {
-      if (mode === "product") await productApi.categorySort(option);
-      else await productApi.categoryArchiveSort(option);
-      setPage(1);
-      setTotalPages(1);
-    } catch (err) {
-      setError("Dropdown failed: " + ((err && err.message) || ""));
-    } finally {
-      setLoading(false);
-    }
-  }
-
+}
+async function handleDropDown(option){
+if (option === 'priceDesc' || option === 'priceAsc'){
+  await productApi.priceSort(option == 'priceDesc' ? 'DESC' : 'ASC');
+}
+else if (option === 'stockDesc' || option === 'stockAsc'){
+  await productApi.stockSort(option == 'stockDesc' ? 'DESC' : 'ASC');
+}
+else if (option === 'expiryDesc' || option === 'expiryAsc'){
+  await productApi.expirySort(option == 'expiryDesc' ? 'DESC' : 'ASC');
+}else {
+  console.log("Nothing Selected")
+}
+}
   function resetForm() {
-    setForm({
-      p_Name: "",
-      p_Desc: "",
-      p_Retail: "",
-      p_Buying: "",
-      p_Stock: "",
-      p_Cat: "",
-      p_Expiry: "",
-    });
+    setForm({ p_Name: "", p_Price: "" , p_Stock: "", p_Expiry: ""});
   }
 
-  function validateExpiry(expiryDate) {
-    const today = new Date();
-    const expiry = new Date(expiryDate);
-    const diff = (expiry - today) / (1000 * 60 * 60 * 24);
-    if (expiry < today) {
-      alert("You cannot add an expired product!");
-      return false;
-    } else if (diff <= 5) {
-      alert("Product expiry is too soon (less than 5 days)!");
-      return false;
-    }
-    return true;
-  }
-
-  // --- CRUD handlers ---
   async function handleCreate(e) {
     e.preventDefault();
     try {
+      // basic validation
+      if (!form.p_Name?.trim() || form.p_Price === "" || form.p_Stock === "" || !form.p_Expiry || isNaN(new Date(form.p_Expiry).getTime())) {
+        setError("Name and price are required");
+        return;
+      }
+
       const payload = {
         product_Name: form.p_Name.trim(),
-        product_Description: form.p_Desc.trim(),
-        product_RetailPrice: parseFloat(form.p_Retail),
-        product_BuyingPrice: parseFloat(form.p_Buying),
+        product_Price: parseFloat(form.p_Price),
         product_Stock: parseFloat(form.p_Stock),
-        product_Category: form.p_Cat.trim(),
-        product_Expiry: new Date(form.p_Expiry).toISOString().split("T")[0],
+        product_Expiry: new Date(form.p_Expiry).toISOString().split('T')[0]
       };
 
-      if (!validateExpiry(payload.product_Expiry)) return;
+      if (isNaN(payload.product_Price)) {
+        setError("Price must be a valid number");
+        return;
+      }
+      if (isNaN(payload.product_Stock)){
+        setError("Stock must be a valid number")
+      }
 
-      await productApi.createProduct(payload);
+      await productApi.createProducts(payload);
       resetForm();
-      setShowProductForm(false);
+      setShowForm(false);
       refresh();
     } catch (err) {
+      console.error(err);
       setError(err.message || "Create failed");
     }
   }
 
-  async function handleDelete(id, stock) {
-    if (!window.confirm("Delete this product? This action cannot be undone.")) return;
-    if (stock > 0) {
-      alert("Cannot delete a product with stock");
-      return;
-    }
+  async function handleDelete(id) {
+    const ok = window.confirm("Delete this product? This action cannot be undone.");
+    if (!ok) return;
     try {
       await productApi.deleteProduct({ id });
       refresh();
     } catch (err) {
+      console.error(err);
       setError(err.message || "Delete failed");
-    }
-  }
-
-  async function handleArchive(id) {
-    if (!window.confirm("Archive this product?")) return;
-    try {
-      await productApi.archiveProduct({ id });
-      refresh();
-    } catch (err) {
-      setError(err.message || "Archive failed");
-    }
-  }
-
-  async function handleAddBack(id) {
-    try {
-      await productApi.archiveAddBack({ id });
-      refresh();
-    } catch (err) {
-      setError(err.message || "Add back failed");
     }
   }
 
   function openEdit(product) {
     setEditing(product);
-    setForm({
-      p_Name: product?.product_Name ?? "",
-      p_Desc: product?.product_Description ?? "",
-      p_Retail:
-        product?.product_RetailPrice !== undefined ? String(product.product_RetailPrice) : "",
-      p_Buying:
-        product?.product_BuyingPrice !== undefined ? String(product.product_BuyingPrice) : "",
-      p_Stock: product?.product_Stock !== undefined ? String(product.product_Stock) : "",
-      p_Cat: product?.product_Category ?? "",
-      p_Expiry: product?.product_Expiry
-        ? new Date(product.product_Expiry).toISOString().split("T")[0]
-        : "",
-    });
+    setForm({ p_Name: product.product_Name || "", p_Price: String(product.product_Price ?? "") || "", p_Stock: String(product.product_Stock ?? "") || "", p_Expiry:product.product_Expiry });
   }
 
   async function handleUpdate(e) {
     e.preventDefault();
-    if (!editing) return;
-    const payload = {
-      id: editing.id,
-      product_Name: form.p_Name.trim(),
-      product_Description: form.p_Desc.trim(),
-      product_RetailPrice: parseFloat(form.p_Retail),
-      product_BuyingPrice: parseFloat(form.p_Buying),
-      product_Stock: parseFloat(form.p_Stock),
-      product_Category: form.p_Cat.trim(),
-      product_Expiry: form.p_Expiry,
-    };
     try {
+      if (!editing) return;
+      const payload = {
+        id: editing.id,
+        product_Name: form.p_Name.trim(),
+        product_Price: parseFloat(form.p_Price),
+        product_Stock: parseFloat(form.p_Stock),
+        product_Expiry: form.p_Date
+      };
+
+      if (isNaN(payload.product_Price)) {
+        setError("Price must be a valid number");
+        return;
+      }
+
       await productApi.updateProduct(payload);
       setEditing(null);
       resetForm();
       refresh();
     } catch (err) {
+      console.error(err);
       setError(err.message || "Update failed");
     }
   }
 
-  // --- Table data ---
-  const tableData = filteredResults ?? (mode === "archive" ? archived : products);
-  const showPagination = filteredResults === null;
+  const products = productApi.products || [];
 
   return (
     <div data-theme="autumn" className="p-6 min-h-screen bg-base-200">
-      {/* Header & Mode Switch */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-semibold">
-          {mode === "product" ? "Products" : "Archived Products"}
-        </h2>
+        <h2 className="text-2xl font-semibold">Products</h2>
         <div className="flex gap-2">
-          <button className="btn btn-sm btn-primary" onClick={() => setShowProductForm((s) => !s)}>
-            {showProductForm ? "Close" : "Add Product"}
+          <button className="btn btn-sm btn-primary" onClick={() => { setShowForm(s => !s); resetForm(); setEditing(null); setError(null); }}>
+            {showForm ? "Close" : "Add Product"}
           </button>
-          <button
-            className="btn btn-sm btn-primary"
-            onClick={() => {
-              setMode((prev) => (prev === "product" ? "archive" : "product"));
-              setEditing(null);
-              setShowProductForm(false);
-              setShowCategoryForm(false);
-              setPage(1);
-              setFilteredResults(null);
-            }}
-          >
-            {mode === "product" ? "Show Archives" : "Show Products"}
-          </button>
-          <button className="btn btn-sm" onClick={() => refresh()}>
+          <button className="btn btn-sm" onClick={refresh}>
             Refresh
           </button>
         </div>
       </div>
-
-      {/* Search & Sort */}
-      <div className="flex items-center gap-3 mb-4">
-        <input
-          type="search"
-          placeholder={mode === "product" ? "Search Product" : "Search Archived"}
-          onChange={handleSearch}
-          className="input grow"
-        />
-        <div className="dropdown">
-          <div tabIndex={0} role="button" className="btn m-1">
-            Sort by
-          </div>
-          <ul
-            tabIndex={0}
-            className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"
-          >
-            {[
-              "Beverages",
-              "Snacks",
-              "Dairy",
-              "Meat & Poultry",
-              "Seafood",
-              "Fruits & Vegetables",
-              "Grains & Cereals",
-              "Frozen Food",
-              "Condiments & Sauces",
-              "Cleaning Supplies",
-              "Personal Care",
-              "Household Essentials",
-              "Others",
-            ].map((cat) => (
-              <li key={cat} onClick={() => handleDropDown(cat)}>
-                <a>{cat}</a>
-              </li>
-            ))}
-          </ul>
-        </div>
+      <div className="flex items-center">
+        <label className="input">
+  <svg className="h-[1em] opacity-50" viewBox="0 0 24 24">
+    <g
+      strokeLinejoin="round"
+      strokeLinecap="round"
+      strokeWidth="2.5"
+      fill="none"
+      stroke="currentColor"
+    >
+      <circle cx="11" cy="11" r="8"></circle>
+      <path d="m21 21-4.3-4.3"></path>
+    </g>
+  </svg>
+  <input type="search" name="input" onChange={handleSearch} className="grow" placeholder="Search Product" />
+</label>
+<div className="dropdown">
+  <div tabIndex={0} role="button" className="btn m-1">
+    Sort by
+  </div>
+  <ul
+    tabIndex={0}
+    className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"
+  >
+    <li onClick={() => handleDropDown("priceAsc")}><a>Price (↑)</a></li>
+    <li onClick={() => handleDropDown("priceDesc")}><a>Price (↓)</a></li>
+    <li onClick={() => handleDropDown("stockAsc")}><a>Stock (↑)</a></li>
+    <li onClick={() => handleDropDown("stockDesc")}><a>Stock (↓)</a></li>
+    <li onClick={() => handleDropDown("expiryAsc")}><a>Expiry (↑)</a></li>
+    <li onClick={() => handleDropDown("expiryDesc")}><a>Expiry (↓)</a></li>
+  </ul>
+</div>
       </div>
 
       {error && (
         <div className="alert alert-error mb-4">
-          <span>{error}</span>
+          <div>
+            <span>{error}</span>
+          </div>
         </div>
       )}
 
-      {/* Product Form */}
-      {showProductForm && !editing && (
+      {showForm && !editing && (
         <div className="card bg-base-200 p-4 mb-6">
           <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-            {/* Inputs simplified */}
-            <input
-              type="text"
-              placeholder="Name"
-              value={form.p_Name}
-              onChange={(e) => setForm((f) => ({ ...f, p_Name: e.target.value }))}
-              className="input input-bordered w-full"
-              required
-            />
-            <input
-              type="text"
-              placeholder="Description"
-              value={form.p_Desc}
-              onChange={(e) => setForm((f) => ({ ...f, p_Desc: e.target.value }))}
-              className="input input-bordered w-full"
-              required
-            />
-            <input
-              type="number"
-              placeholder="Retail Price"
-              value={form.p_Retail}
-              onChange={(e) => setForm((f) => ({ ...f, p_Retail: e.target.value }))}
-              className="input input-bordered w-full"
-              required
-            />
-            <input
-              type="number"
-              placeholder="Buying Price"
-              value={form.p_Buying}
-              onChange={(e) => setForm((f) => ({ ...f, p_Buying: e.target.value }))}
-              className="input input-bordered w-full"
-              required
-            />
-            <input
-              type="number"
-              placeholder="Stock"
-              value={form.p_Stock}
-              onChange={(e) => setForm((f) => ({ ...f, p_Stock: e.target.value }))}
-              className="input input-bordered w-full"
-              required
-            />
-            <input
-              type="date"
-              value={form.p_Expiry}
-              onChange={(e) => setForm((f) => ({ ...f, p_Expiry: e.target.value }))}
-              className="input input-bordered w-full"
-              required
-            />
-            <select
-              value={form.p_Cat}
-              onChange={(e) => setForm((f) => ({ ...f, p_Cat: e.target.value }))}
-              className="select select-bordered w-full"
-              required
-            >
-              <option value="">-- Select Category --</option>
-              {[
-                "Beverages",
-                "Snacks",
-                "Dairy",
-                "Meat & Poultry",
-                "Seafood",
-                "Fruits & Vegetables",
-                "Grains & Cereals",
-                "Frozen Food",
-                "Condiments & Sauces",
-                "Cleaning Supplies",
-                "Personal Care",
-                "Household Essentials",
-                "Others",
-              ].map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
-            <button type="submit" className="btn btn-success w-full">
-              Create
-            </button>
-          </form>
-        </div>
-      )}
-
-      {/* Edit Form */}
-      {editing && (
-        <div className="card bg-base-200 p-4 mb-6">
-          <form onSubmit={handleUpdate} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-            <input
-              type="text"
-              value={form.p_Name}
-              onChange={(e) => setForm((f) => ({ ...f, p_Name: e.target.value }))}
-              className="input input-bordered w-full"
-              required
-            />
-            <input
-              type="text"
-              value={form.p_Desc}
-              onChange={(e) => setForm((f) => ({ ...f, p_Desc: e.target.value }))}
-              className="input input-bordered w-full"
-              required
-            />
-            <input
-              type="number"
-              value={form.p_Retail}
-              onChange={(e) => setForm((f) => ({ ...f, p_Retail: e.target.value }))}
-              className="input input-bordered w-full"
-              required
-            />
-            <input
-              type="number"
-              value={form.p_Buying}
-              onChange={(e) => setForm((f) => ({ ...f, p_Buying: e.target.value }))}
-              className="input input-bordered w-full"
-              required
-            />
-            <input
-              type="number"
-              value={form.p_Stock}
-              onChange={(e) => setForm((f) => ({ ...f, p_Stock: e.target.value }))}
-              className="input input-bordered w-full"
-              required
-            />
-            <input
-              type="date"
-              value={form.p_Expiry}
-              onChange={(e) => setForm((f) => ({ ...f, p_Expiry: e.target.value }))}
-              className="input input-bordered w-full"
-              required
-            />
-            <select
-              value={form.p_Cat}
-              onChange={(e) => setForm((f) => ({ ...f, p_Cat: e.target.value }))}
-              className="select select-bordered w-full"
-              required
-            >
-              <option value="">-- Select Category --</option>
-              {[
-                "Beverages",
-                "Snacks",
-                "Dairy",
-                "Meat & Poultry",
-                "Seafood",
-                "Fruits & Vegetables",
-                "Grains & Cereals",
-                "Frozen Food",
-                "Condiments & Sauces",
-                "Cleaning Supplies",
-                "Personal Care",
-                "Household Essentials",
-                "Others",
-              ].map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
-            <div className="flex gap-2">
-              <button type="submit" className="btn btn-primary">
-                Save
-              </button>
-              <button
-                type="button"
-                className="btn"
-                onClick={() => {
-                  setEditing(null);
-                  resetForm();
-                }}
-              >
-                Cancel
-              </button>
+            <div>
+              <label className="label">
+                <span className="label-text">Product Name</span>
+              </label>
+              <input type="text" name="p_Name" required value={form.p_Name} onChange={e => setForm(f => ({ ...f, p_Name: e.target.value }))} className="input input-bordered w-full" />
+            </div>
+            <div>
+              <label className="label">
+                <span className="label-text">Product Price</span>
+              </label>
+              <input type="number" step="0.01" name="p_Price" required value={form.p_Price} onChange={e => setForm(f => ({ ...f, p_Price: e.target.value }))} className="input input-bordered w-full" />
+            </div>
+             <div>
+              <label className="label">
+                <span className="label-text">Product Stock</span>
+              </label>
+              <input type="number" step="0.01" name="p_Stock" required value={form.p_Stock} onChange={e => setForm(f => ({ ...f, p_Stock: e.target.value }))} className="input input-bordered w-full" />
+            </div>
+            <div>
+              <label className="label">
+                <span className="label-text">Product Expiry</span>
+              </label>
+              <input type="date" name="p_Expiry" required value={form.p_Expiry} onChange={e => setForm(f => ({ ...f, p_Expiry: e.target.value }))} className="input input-bordered w-full" />
+            </div>
+            <div>
+              <button type="submit" className="btn btn-success w-full">Create</button>
             </div>
           </form>
         </div>
       )}
 
-      {/* Products Table */}
-      <div className="overflow-x-auto bg-base-100 p-4 rounded-lg shadow">
-        <table className="table w-full">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Name</th>
-              <th>Description</th>
-              <th>Retail Price</th>
-              <th>Buying Price</th>
-              <th>Category</th>
-              <th>Stock</th>
-              <th>Expiry</th>
-              <th>QR Code</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan="10" className="text-center text-gray-500 py-4">
-                  Loading...
-                </td>
-              </tr>
-            ) : tableData.length > 0 ? (
-              tableData.map((item, idx) => (
-                <tr key={item.id ?? idx}>
-                  <th>{idx + 1}</th>
-                  <td>{item.product_Name}</td>
-                  <td>{item.product_Description}</td>
-                  <td>₱{parseFloat(item.product_RetailPrice || 0).toFixed(2)}</td>
-                  <td>₱{parseFloat(item.product_BuyingPrice || 0).toFixed(2)}</td>
-                  <td>{item.product_Category}</td>
-                  <td>{item.product_Stock}</td>
-                  <td>{new Date(item.product_Expiry).toISOString().split("T")[0]}</td>
-                  <td>
-                    <QRCodeSVG
-                      id={`qr-${item.id}`}
-                      value={item.qrCodeValue || `${window.location.origin}/product/${item.id || ""}`}
-                      size={64}
-                    />
-                  </td>
-                  <td className="flex gap-2">
-                    {mode === "product" ? (
-                      <>
-                        <button className="btn btn-sm btn-ghost" onClick={() => openEdit(item)}>
-                          Edit
-                        </button>
-                        <button
-                          className="btn btn-sm btn-error"
-                          onClick={() => handleDelete(item.id, item.product_Stock)}
-                        >
-                          Delete
-                        </button>
-                        <button className="btn btn-sm btn-warning" onClick={() => handleArchive(item.id)}>
-                          Archive
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button className="btn btn-sm btn-ghost" onClick={() => openEdit(item)}>
-                          Edit
-                        </button>
-                        <button
-                          className="btn btn-sm btn-error"
-                          onClick={() => handleDelete(item.id, item.product_Stock)}
-                        >
-                          Delete
-                        </button>
-                        <button className="btn btn-sm btn-success" onClick={() => handleAddBack(item.id)}>
-                          Add Back
-                        </button>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="10" className="text-center text-gray-500 py-4">
-                  No {mode === "product" ? "products" : "archived products"} found
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+      {/* Edit modal / inline editor */}
+      {editing && (
+        <div className="card bg-base-200 p-4 mb-6">
+          <h3 className="font-medium mb-2">Edit Product</h3>
+          <form onSubmit={handleUpdate} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            <div>
+              <label className="label">
+                <span className="label-text">Product Name</span>
+              </label>
+              <input type="text" name="p_Name"  required value={form.p_Name} onChange={e => setForm(f => ({ ...f, p_Name: e.target.value }))} className="input input-bordered w-full" />
+            </div>
+            <div>
+              <label className="label">
+                <span className="label-text">Product Price</span>
+              </label>
+              <input type="number" step="0.01" name="p_Price" required value={form.p_Price} onChange={e => setForm(f => ({ ...f, p_Price: e.target.value }))} className="input input-bordered w-full" />
+            </div>
+            <div>
+              <label className="label">
+                <span className="label-text">Product Stock</span>
+              </label>
+              <input type="number" step="0.01" name="p_Stock" required value={form.p_Stock} onChange={e => setForm(f => ({ ...f, p_Stock: e.target.value }))} className="input input-bordered w-full" />
+            </div>
+            <div>
+              <label className="label">
+                <span className="label-text">Product Expiry</span>
+              </label>
+              <input type="date" name="p_Expiry" required value={form.p_Expiry} onChange={e => setForm(f => ({ ...f, p_Expiry: e.target.value }))} className="input input-bordered w-full" />
+            </div>
+            <div className="flex gap-2">
+              <button type="submit" className="btn btn-primary">Save</button>
+              <button type="button" className="btn" onClick={() => { setEditing(null); resetForm(); }}>Cancel</button>
+            </div>
+          </form>
+        </div>
+      )}
 
-        {/* Pagination */}
-        {showPagination && (
-          <div className="flex justify-center items-center gap-4 mt-4">
-            <button
-              className="btn btn-sm"
-              onClick={() => {
-                setPage((p) => Math.max(1, p - 1));
-                refresh(Math.max(1, page - 1));
-              }}
-              disabled={page === 1}
-            >
-              Prev
-            </button>
-            <span>
-              Page <strong>{page}</strong> of {totalPages}
-            </span>
-            <button
-              className="btn btn-sm"
-              onClick={() => {
-                setPage((p) => Math.min(totalPages, p + 1));
-                refresh(Math.min(totalPages, page + 1));
-              }}
-              disabled={page === totalPages}
-            >
-              Next
-            </button>
-          </div>
-        )}
-      </div>
+     <div className="overflow-x-auto bg-base-100 p-4 rounded-lg shadow">
+  <table className="table w-full">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Price</th>
+        <th>Stock</th>
+        <th>Expiry</th>
+        <th>QR Code</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {loading ? (
+        <tr>
+          <td colSpan="7">Loading...</td>
+        </tr>
+      ) : products.length === 0 ? (
+        <tr>
+          <td colSpan="7">No products found</td>
+        </tr>
+      ) : (
+        products.map((p, idx) => {
+          const qrValue =
+            p.qrCodeValue ||
+            `${window.location.origin}/product/${p.id || ""}`;
+
+          // download helper for QR
+          const downloadQR = () => {
+            const svgElement = document.getElementById(`qr-${p.id}`);
+            const svgData = new XMLSerializer().serializeToString(svgElement);
+            const blob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `${p.product_Name || "product"}_QR.svg`;
+            link.click();
+            URL.revokeObjectURL(url);
+          };
+
+          return (
+            <tr key={p.id ?? idx}>
+              <th>{idx + 1}</th>
+              <td>{p.product_Name}</td>
+              <td>₱{typeof p.product_Price === "number"? p.product_Price.toFixed(2): parseFloat(p.product_Price || 0).toFixed(2)}</td>
+              <td>{p.product_Stock} </td>
+              <td>{new Date(p.product_Expiry).toISOString().split("T")[0]}</td>
+              <td>
+                <div className="flex flex-col items-center gap-1">
+                  <QRCodeSVG
+                    id={`qr-${p.id}`}
+                    value={qrValue}
+                    size={64}
+                  />
+                  <button
+                    className="btn btn-xs btn-outline btn-info"
+                    onClick={downloadQR}
+                  >
+                    Download
+                  </button>
+                </div>
+              </td>
+
+              <td className="flex gap-2">
+                <button
+                  className="btn btn-sm btn-ghost"
+                  onClick={() => openEdit(p)}
+                >
+                  Edit
+                </button>
+                <button
+                  className="btn btn-sm btn-error"
+                  onClick={() => handleDelete(p.id)}
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          );
+        })
+      )}
+    </tbody>
+  </table>
+</div>
+
     </div>
   );
 }
