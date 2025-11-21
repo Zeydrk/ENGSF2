@@ -388,96 +388,146 @@ export default function ProductsWithTable() {
       )}
 
       {/* Edit Form */}
-      {editing && (
-        <div className="card bg-base-200 p-4 mb-6">
-          <form onSubmit={handleUpdate} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-            <input
-              type="text"
-              value={form.p_Name}
-              onChange={(e) => setForm((f) => ({ ...f, p_Name: e.target.value }))}
-              className="input input-bordered w-full"
-              required
-            />
-            <input
-              type="text"
-              value={form.p_Desc}
-              onChange={(e) => setForm((f) => ({ ...f, p_Desc: e.target.value }))}
-              className="input input-bordered w-full"
-              required
-            />
-            <input
-              type="number"
-              value={form.p_Retail}
-              onChange={(e) => setForm((f) => ({ ...f, p_Retail: e.target.value }))}
-              className="input input-bordered w-full"
-              required
-            />
-            <input
-              type="number"
-              value={form.p_Buying}
-              onChange={(e) => setForm((f) => ({ ...f, p_Buying: e.target.value }))}
-              className="input input-bordered w-full"
-              required
-            />
-            <input
-              type="number"
-              value={form.p_Stock}
-              onChange={(e) => setForm((f) => ({ ...f, p_Stock: e.target.value }))}
-              className="input input-bordered w-full"
-              required
-            />
-            <input
-              type="date"
-              value={form.p_Expiry}
-              onChange={(e) => setForm((f) => ({ ...f, p_Expiry: e.target.value }))}
-              className="input input-bordered w-full"
-              required
-            />
-            <select
-              value={form.p_Cat}
-              onChange={(e) => setForm((f) => ({ ...f, p_Cat: e.target.value }))}
-              className="select select-bordered w-full"
-              required
-            >
-              <option value="">-- Select Category --</option>
-              {[
-                "Beverages",
-                "Snacks",
-                "Dairy",
-                "Meat & Poultry",
-                "Seafood",
-                "Fruits & Vegetables",
-                "Grains & Cereals",
-                "Frozen Food",
-                "Condiments & Sauces",
-                "Cleaning Supplies",
-                "Personal Care",
-                "Household Essentials",
-                "Others",
-              ].map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
-            <div className="flex gap-2">
-              <button type="submit" className="btn btn-primary">
-                Save
-              </button>
-              <button
-                type="button"
-                className="btn"
-                onClick={() => {
-                  setEditing(null);
-                  resetForm();
-                }}
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+     {editing && (
+  <div className="card bg-base-200 p-4 mb-6">
+    <form onSubmit={handleUpdate} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+
+      {/* Product Name */}
+      <div>
+        <label className="label">
+          <span className="label-text">Product Name</span>
+        </label>
+        <input  
+          type="text"
+          value={form.p_Name}
+          onChange={(e) => setForm((f) => ({ ...f, p_Name: e.target.value }))}
+          className="input input-bordered w-full"
+          required
+        />
+      </div>
+
+      {/* Description */}
+      <div>
+        <label className="label">
+          <span className="label-text">Description</span>
+        </label>
+        <input
+          type="text"
+          value={form.p_Desc}
+          onChange={(e) => setForm((f) => ({ ...f, p_Desc: e.target.value }))}
+          className="input input-bordered w-full"
+          required
+        />
+      </div>
+
+      {/* Retail Price */}
+      <div>
+        <label className="label">
+          <span className="label-text">Retail Price</span>
+        </label>
+        <input
+          type="number"
+          value={form.p_Retail}
+          onChange={(e) => setForm((f) => ({ ...f, p_Retail: e.target.value }))}
+          className="input input-bordered w-full"
+          required
+        />
+      </div>
+
+      {/* Buying Price */}
+      <div>
+        <label className="label">
+          <span className="label-text">Buying Price</span>
+        </label>
+        <input
+          type="number"
+          value={form.p_Buying}
+          onChange={(e) => setForm((f) => ({ ...f, p_Buying: e.target.value }))}
+          className="input input-bordered w-full"
+          required
+        />
+      </div>
+
+      {/* Stock */}
+      <div>
+        <label className="label">
+          <span className="label-text">Stock</span>
+        </label>
+        <input
+          type="number"
+          value={form.p_Stock}
+          onChange={(e) => setForm((f) => ({ ...f, p_Stock: e.target.value }))}
+          className="input input-bordered w-full"
+          required
+        />
+      </div>
+
+      {/* Expiry Date */}
+      <div>
+        <label className="label">
+          <span className="label-text">Expiry Date</span>
+        </label>
+        <input
+          type="date"
+          value={form.p_Expiry}
+          onChange={(e) => setForm((f) => ({ ...f, p_Expiry: e.target.value }))}
+          className="input input-bordered w-full"
+          required
+        />
+      </div>
+
+      {/* Category */}
+      <div>
+        <label className="label">
+          <span className="label-text">Category</span>
+        </label>
+        <select
+          value={form.p_Cat}
+          onChange={(e) => setForm((f) => ({ ...f, p_Cat: e.target.value }))}
+          className="select select-bordered w-full"
+          required
+        >
+          <option value="">-- Select Category --</option>
+          {[
+            "Beverages",
+            "Snacks",
+            "Dairy",
+            "Meat & Poultry",
+            "Seafood",
+            "Fruits & Vegetables",
+            "Grains & Cereals",
+            "Frozen Food",
+            "Condiments & Sauces",
+            "Cleaning Supplies",
+            "Personal Care",
+            "Household Essentials",
+            "Others",
+          ].map((cat) => (
+            <option key={cat} value={cat}>
+              {cat}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Buttons */}
+      <div className="flex gap-2 mt-6">
+        <button type="submit" className="btn btn-primary">Save</button>
+        <button
+          type="button"
+          className="btn"
+          onClick={() => {
+            setEditing(null);
+            resetForm();
+          }}
+        >
+          Cancel
+        </button>
+      </div>
+
+    </form>
+  </div>
+)}
 
       {/* Products Table */}
       <div className="overflow-x-auto bg-base-100 p-4 rounded-lg shadow">
