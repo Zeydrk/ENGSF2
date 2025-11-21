@@ -10,6 +10,7 @@ require('dotenv').config();
 // importing routes here
 const adminsRoutes = require('./src/admin/admins-routes')
 const productRoutes = require('./src/products/product-route')
+const packageRoutes = require('./src/packages/package-route')
 const sellerRoutes = require('./src/sellers/seller-route')
 
 // Middleware
@@ -29,6 +30,7 @@ app.use('/admins', require('./src/admin/admins-routes'))
 
 app.use('/admins',adminsRoutes);
 app.use('/products', productRoutes);
+app.use('/packages', packageRoutes);
 app.use('/sellers', sellerRoutes);
 
 
