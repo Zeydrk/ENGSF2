@@ -5,7 +5,9 @@ const cors = require('cors')
 const path = require('path');
 const passport = require('passport');
 const session = require('express-session');
+
 require('dotenv').config();
+require('./src/accounts/middleware/accounts-middleware')
 
 
 
@@ -31,8 +33,8 @@ app.use(session({
     //     maxAge: 24 * 60 * 60 * 1000  //supposed to be a day
     // }
 }))
-app.use(passport.session());
 app.use(passport.initialize());
+app.use(passport.session());
 
 
 // Enter routes here
