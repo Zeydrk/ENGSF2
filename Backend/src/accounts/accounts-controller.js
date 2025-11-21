@@ -29,8 +29,31 @@ async function createAccount2(req,res){
 }
 
 async function login(req,res){
-    
+    if (req.body == email && password){
+        res.send("here is the admin")
+    }
+    else{
+        res.send("here is the seller")
+    }
+    const { seller_Email, seller_Password } = req.body;
+    const { email, password} = req.body
+    // const admin = await models['Admin'].findOne({ where: { email, password } });
+    // const seller = await models['Seller'].findOne({ where: { seller_Email, seller_Password } });
+    // if (seller){
+    //     res.status(200).send({
+    //         code: 200,
+    //         message: "Welcome Seller " + seller.seller_FName
+    //     });
+    // }
+    // if (admin){
+    //     res.status(200).json({
+    //         code: 200,
+    //         message: "Welcome Admin"
+    //     });
+    //     res.send(admin);
+    // }
 }
+
 
 
 
@@ -42,5 +65,6 @@ async function getAccount(req,res){
 // Exporting
 module.exports = {
     createAccount,
-    createAccount2
+    createAccount2,
+    login,
 }

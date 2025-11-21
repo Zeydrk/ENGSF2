@@ -1,21 +1,20 @@
 // all required packages
 const passport = require('passport')
 const session = require('express-session')
-const localStrategy = require('passport-local')
-const model = require('../../models')
+const LocalStrategy = require('passport-local')
 
 // all midlleware functions 
 // test if it will word
 
 // Serializing za user
-passport.serializeUser((seller, done) =>{
-  done(null,seller.id)
+passport.serializeUser((user, done) =>{
+  done(null,user.email)
 })
 
 // deserializing za user
-passport.deserializeUser((id, done) =>{
-  if (id){
-    done(null, seller)
+passport.deserializeUser((email, done) =>{
+  if (email){
+    done(null, user)
   }
   else{
     done(err, null)
@@ -23,15 +22,16 @@ passport.deserializeUser((id, done) =>{
 })
 
 // test for exporting local strategy
-export default passport.use(
-  new LocalStrategy((seller_Email, seller_Password, done) => {
+passport.use(
+  new LocalStrategy((email, password, done) => {
     if (err) {
       done(err, null);
     };
-    if (seller !== null) {
-      done(null, seller);
+    if (user !== null) {
+      done(null, user);
     }
   
   })
 
 )
+module.exports = passport
