@@ -15,11 +15,15 @@ module.exports = (sequelize, DataTypes) => {
   }
   Products.init({
     product_Name: DataTypes.STRING,
-    product_Price: DataTypes.DECIMAL,
+    product_Description: DataTypes.TEXT,
+    product_RetailPrice: DataTypes.DECIMAL,
+    product_BuyingPrice: DataTypes.DECIMAL,
     product_Stock: DataTypes.INTEGER,
     product_Expiry: DataTypes.DATE,
+    product_Category: DataTypes.STRING,
     product_QrCodeValue: DataTypes.STRING,
     product_QrCodePath: DataTypes.STRING,
+    isArchived: DataTypes.BOOLEAN
   }, {
     sequelize,
     modelName: 'Products',

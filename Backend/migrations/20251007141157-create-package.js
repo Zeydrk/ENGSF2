@@ -16,7 +16,7 @@ module.exports = {
         model: "Sellers", 
         key: "id"
       },
-        onDelete: 'CASCADE',
+        onDelete: 'RESTRICT',
         onUpdate: 'CASCADE'
     },
       package_Name: {
