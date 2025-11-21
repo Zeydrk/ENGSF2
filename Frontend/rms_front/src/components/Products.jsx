@@ -229,7 +229,6 @@ export default function ProductsWithTable() {
 
   return (
     <div data-theme="autumn" className="p-6 min-h-screen bg-base-200">
-      {/* Header & Mode Switch */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-semibold">
           {mode === "product" ? "Products" : "Archived Products"}
