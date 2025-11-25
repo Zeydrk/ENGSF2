@@ -9,7 +9,6 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
   }
-
   Package.init({
     seller_Id: {
       type: DataTypes.INTEGER,
@@ -19,14 +18,43 @@ module.exports = (sequelize, DataTypes) => {
         key: "id"
       }
     },
-    description: DataTypes.STRING,
-    customer_Name: DataTypes.STRING,
-    package_Size: DataTypes.STRING,
-    price: DataTypes.DECIMAL(10,2),
-    handling_Fee: DataTypes.DECIMAL(10,2),
-    payment_Status: DataTypes.STRING,       // paid / unpaid
-    payment_Method: DataTypes.STRING,       // cash / gcash
-    package_Status: DataTypes.STRING        // pending / claimed
+    package_Name: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    buyer_Name: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    dropOff_Date: {
+      type: DataTypes.DATEONLY,
+      allowNull: false
+    },
+    package_Size: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    price: {
+      type: DataTypes.DECIMAL(10,2),
+      allowNull: false
+    },
+    handling_Fee: {
+      type: DataTypes.DECIMAL(10,2),
+      allowNull: false
+    },
+    payment_Status: {
+      type: DataTypes.STRING,       // paid / unpaid
+      allowNull: false
+    },
+
+    payment_Method: {
+      type: DataTypes.STRING,       // cash / gcash
+      allowNull: false
+    },
+    package_Status: {
+      type: DataTypes.STRING,       // claimed / unclaimed
+      allowNull: false
+    },
   }, {
     sequelize,
     modelName: 'Package',

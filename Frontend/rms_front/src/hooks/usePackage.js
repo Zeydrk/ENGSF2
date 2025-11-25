@@ -1,62 +1,93 @@
 import axios from 'axios';
 import { useState } from 'react';
 
-export function usePackage(){
-    const [packages, setPackage] = useState([]);
-    const BASE_URL = 'http://localhost:3000';
+export function usePackage() {
+  const [packages, setPackages] = useState([]);
+  const [sellers, setSellers] = useState([]);
+  const BASE_URL = "http://localhost:3000";
 
-    async function getAllPackage(){
-        const packages = await axios.get(`${BASE_URL}/packages`);
-        setPackage(packages.data)
-    }
-    
-    async function createPackage(packg){
-         try{
-     const response = await axios.post(`${BASE_URL}/packages/create`, {
-        seller_Name: packg.seller_Name, // Changed from seller_Id to seller_Name
-        package_Name: packg.package_Name,
-        recipient_Name: packg.recipient_Name,
-        descrtion: packg.descrtion,
-      });
-      
-        setPackage(prev => [...prev, response.data]);
-    }
-    catch (error) {
-    // If there's an error, handle it here
-    if (error.response) {
-      // Server responded with a status outside 2xx
-      console.error('Server Error:', error.response.status, error.response.data);
-    } else if (error.request) {
-      // Request was made but no response received
-      console.error('No Response:', error.request);
-    } else {
-      // Something else happened
-      console.error('Error:', error.message);
+  // Get all packages
+  async function getAllPackage() {
+    try {
+      const res = await axios.get(`${BASE_URL}/packages`);
+      setPackages(res.data);
+    } catch (err) {
+      console.error("Error fetching packages:", err);
     }
   }
-    }
-    
-    async function deletePackage(packg){
-        const response = await axios.post(`${BASE_URL}/packages/delete`, {
-            id: packg.id
-        });
-    }
-    
-    async function updatePackage(packg){      
-      await axios.post(`${BASE_URL}/packages/update`,{
-            id: packg.id,
-            seller_Name: packg.seller_Name, // Changed from seller_Id to seller_Name
-            package_Name: packg.package_Name,
-            recipient_Name: packg.recipient_Name,
-            descrtion: packg.descrtion,
-        })
-    }
 
-    return {
-        packages,
-        getAllPackage,
-        createPackage,
-        deletePackage,
-        updatePackage
-    };
+  // Create a new package
+  async function createPackage(packg) {
+    try {
+      const res = await axios.post(`${BASE_URL}/packages/create`, {
+        seller_Name: packg.seller_Name,
+        package_Name: packg.package_Name,
+        buyer_Name: packg.buyer_Name,
+        dropOff_Date: packg.dropOff_Date,
+        package_Size: packg.package_Size,
+        price: packg.price,
+        handling_Fee: packg.handling_Fee,
+        payment_Method: packg.payment_Method,
+        payment_Status: packg.payment_Status,
+        package_Status: packg.package_Status,
+      });
+
+      setPackages(prev => [...prev, res.data]);
+    } catch (err) {
+      console.error("Error creating package:", err);
+    }
+  }
+
+  // Delete a package
+  async function deletePackage(packg) {
+    try {
+      await axios.post(`${BASE_URL}/packages/delete`, { id: packg.id });
+      setPackages(prev => prev.filter(p => p.id !== packg.id));
+    } catch (err) {
+      console.error("Error deleting package:", err);
+    }
+  }
+
+  // Update a package
+  async function updatePackage(packg) {
+    try {
+      const res = await axios.post(`${BASE_URL}/packages/update`, {
+        id: packg.id,
+        seller_Name: packg.seller_Name,
+        package_Name: packg.package_Name,
+        buyer_Name: packg.buyer_Name,
+        dropOff_Date: packg.dropOff_Date,
+        package_Size: packg.package_Size,
+        price: packg.price,
+        handling_Fee: packg.handling_Fee,
+        payment_Method: packg.payment_Method,
+        payment_Status: packg.payment_Status,
+        package_Status: packg.package_Status,
+      });
+
+      setPackages(prev => prev.map(p => p.id === packg.id ? res.data.package || res.data : p));
+    } catch (err) {
+      console.error("Error updating package:", err);
+    }
+  }
+
+  // Get all sellers for dropdown
+  async function getAllSellers() {
+    try {
+      const res = await axios.get(`${BASE_URL}/packages/sellers/list`);
+      setSellers(res.data);
+    } catch (err) {
+      console.error("Error fetching sellers:", err);
+    }
+  }
+
+  return {
+    packages,
+    sellers,
+    getAllPackage,
+    createPackage,
+    deletePackage,
+    updatePackage,
+    getAllSellers,
+  };
 }
