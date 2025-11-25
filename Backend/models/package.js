@@ -9,7 +9,6 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
   }
-
   Package.init({
     seller_Id: {
       type: DataTypes.INTEGER,
