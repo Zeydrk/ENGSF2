@@ -128,7 +128,7 @@ async function addProduct(req, res) {
       return res.status(400).json({ message: "Product expires too soon (within 5 days)." });
     }
   const baseUrl = process.env.APP_URL || 'http://localhost:5173';
-  const qrValue = `${baseUrl}/products/${newProduct.id}`;
+  const qrValue = `http://localhost:3000/products/scan/${newProduct.id}`;
   const svgString = await QRCode.toString(qrValue, { type: 'svg', margin: 1 });
 
     fs.mkdirSync(UPLOAD_DIR, { recursive: true });
@@ -152,27 +152,40 @@ async function addProduct(req, res) {
   }
 }
 
-
 async function deleteProduct(req, res) {
-try {
-  const { id } = req.body;
-  const product = await models["Products"].findByPk(id);
+  try {
+    const { id } = req.body;
+    const product = await models["Products"].findByPk(id);
 
-  if (!product) {
-    return res.status(404).json({ message: "Product not found" });
-  }
-  if (product.product_Stock <= 0) {
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    if (product.product_Stock > 0) {
+      return res.status(400).json({ message: "Product still has stock." });
+    }
+
+    if (product.product_QrCodePath) {
+      const qrFilePath = path.join(__dirname, "..", "..", "public", product.product_QrCodePath);
+      if (fs.existsSync(qrFilePath)) {
+        fs.unlinkSync(qrFilePath);
+        console.log(`Deleted QR code: ${qrFilePath}`);
+      } else {
+        console.log("QR file not found, skipping deletion.");
+      }
+    }
+
     await models["Products"].destroy({ where: { id } });
-    return res.status(200).json({ message: "Product deleted successfully" });
-  } else {
-    return res.status(400).json({ message: "Product still has stock." });
+
+    return res.status(200).json({ message: "Product and QR deleted successfully" });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: err.message });
   }
-} catch (err) {
-  console.error(err);
-  return res.status(500).json({ error: err.message });
 }
 
-}
+
 
 async function updateProduct(req, res) {
   try {
@@ -282,6 +295,31 @@ async function categorySort(req,res){
     res.status(500).json({error: err.message});
   }
 }
+async function scanProduct(req, res) {
+  try {
+    const id = req.params.id;
+
+    const product = await models["Products"].findByPk(id);
+    if (!product) return res.status(404).json({ error: "Product not found" });
+
+    if (product.product_Stock <= 0) {
+      return res.status(400).json({ error: "Out of stock" });
+    }
+
+    // Deduct only once
+    product.product_Stock -= 1;
+    await product.save();
+
+    return res.json({
+      message: "Scan successful",
+      newStock: product.product_Stock,
+      product
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
 
 
 module.exports = {
@@ -297,4 +335,5 @@ module.exports = {
     archiveAddBack,
     searchArchiveProduct,
     categoryArchiveSort,
+    scanProduct
 }

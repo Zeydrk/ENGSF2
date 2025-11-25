@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useProduct } from "../hooks/useProduct";
-import {QRCodeSVG} from 'qrcode.react';
-import { Await } from "react-router-dom";
+import { QRCodeSVG } from "qrcode.react";
+import { useRef } from "react";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 export default function ProductsWithTable() {
   const productApi = useProduct();
@@ -33,6 +36,11 @@ export default function ProductsWithTable() {
   const products = productApi.products || [];
   const archived = productApi.archived || [];
 
+  // Debounce
+  const debounceRef = useRef(null);
+
+  // etc
+  const [errors, setErrors] = useState({});
   // Reset pagination & filters on mode change
   useEffect(() => {
     setPage(1);
@@ -58,31 +66,42 @@ export default function ProductsWithTable() {
   }
 
   // --- Search handler ---
-  async function handleSearch(e) {
-    const input = e.target.value.toLowerCase();
+ 
+async function handleSearch(e) {
+  const input = e.target.value.toLowerCase();
 
-    if (!input.trim()) {
-      setFilteredResults(null);
-      refresh();
-      return;
-    }
+  // clear old timer
+  clearTimeout(debounceRef.current);
 
-    setLoading(true);
-    try {
-      if (mode === "product") {
-        await productApi.searchProduct(input); // searchProduct updates state internally
-      } else {
-        await productApi.searchArchivedProduct(input); // searchArchivedProduct updates state internally
-      }
-      setPage(1);
-      setTotalPages(1);
-      setFilteredResults(null); // no need to manually set results; hook state updates UI
-    } catch (err) {
-      setError((err && err.message) || "Search failed");
-    } finally {
-      setLoading(false);
-    }
+  debounceRef.current = setTimeout(() => {
+    runSearch(input);
+  }, 300);
+}
+
+async function runSearch(input) {
+  if (input.trim() === '') {
+    setFilteredResults(null);
+    refresh();
+    return;
   }
+
+  setLoading(true);
+  try {
+    if (mode === "product") {
+      await productApi.searchProduct(input);
+    } else {
+      await productApi.searchArchivedProduct(input);
+    }
+
+    setPage(1);
+    setTotalPages(1);
+    setFilteredResults(null);
+  } catch (err) {
+    setError(err?.message || "Search failed");
+  } finally {
+    setLoading(false);
+  }
+}
 
   // --- Category dropdown handler ---
   async function handleDropDown(option) {
@@ -112,75 +131,240 @@ export default function ProductsWithTable() {
     });
   }
 
-  function validateExpiry(expiryDate) {
-    const today = new Date();
-    const expiry = new Date(expiryDate);
-    const diff = (expiry - today) / (1000 * 60 * 60 * 24);
-    if (expiry < today) {
-      alert("You cannot add an expired product!");
-      return false;
-    } else if (diff <= 5) {
-      alert("Product expiry is too soon (less than 5 days)!");
-      return false;
-    }
-    return true;
+ function validateProduct(payload) {
+  const newErrors = {};
+
+  // Expiry
+  const today = new Date();
+  const expiry = new Date(payload.product_Expiry);
+  const diff = (expiry - today) / (1000 * 60 * 60 * 24);
+
+  if (expiry < today) {
+    newErrors.product_Expiry = "Expiry date cannot be in the past.";
+  } else if (diff <= 5) {
+    newErrors.product_Expiry = "Expiry must be more than 5 days from today.";
   }
+
+  // Retail price
+  if (!payload.product_RetailPrice || payload.product_RetailPrice <= 0) {
+    newErrors.product_RetailPrice = "Retail price must be greater than 0.";
+  }
+
+  // Buying price
+  if (!payload.product_BuyingPrice || payload.product_BuyingPrice <= 0) {
+    newErrors.product_BuyingPrice = "Buying price must be greater than 0.";
+  }
+
+  // Stock
+  if (!payload.product_Stock || payload.product_Stock <= 0) {
+    newErrors.product_Stock = "Stock must be greater than 0.";
+  }
+
+  // Name
+  if (!payload.product_Name.trim()) {
+    newErrors.product_Name = "Product name is required.";
+  }
+
+  // Description
+  if (!payload.product_Description.trim()) {
+    newErrors.product_Description = "Description is required.";
+  }
+
+  // Category
+  if (!payload.product_Category.trim()) {
+    newErrors.product_Category = "Category is required.";
+  }
+
+  return newErrors;
+}
+
 
   // --- CRUD handlers ---
-  async function handleCreate(e) {
-    e.preventDefault();
-    try {
-      const payload = {
-        product_Name: form.p_Name.trim(),
-        product_Description: form.p_Desc.trim(),
-        product_RetailPrice: parseFloat(form.p_Retail),
-        product_BuyingPrice: parseFloat(form.p_Buying),
-        product_Stock: parseFloat(form.p_Stock),
-        product_Category: form.p_Cat.trim(),
-        product_Expiry: new Date(form.p_Expiry).toISOString().split("T")[0],
-      };
+async function handleCreate(e) {
+  e.preventDefault();
 
-      if (!validateExpiry(payload.product_Expiry)) return;
+  const payload = {
+    product_Name: form.p_Name.trim(),
+    product_Description: form.p_Desc.trim(),
+    product_RetailPrice: parseFloat(form.p_Retail),
+    product_BuyingPrice: parseFloat(form.p_Buying),
+    product_Stock: parseFloat(form.p_Stock),
+    product_Category: form.p_Cat.trim(),
+    product_Expiry: new Date(form.p_Expiry).toISOString().split("T")[0],
+  };
 
-      await productApi.createProduct(payload);
-      resetForm();
-      setShowProductForm(false);
-      refresh();
-    } catch (err) {
-      setError(err.message || "Create failed");
-    }
+  const validationErrors = validateProduct(payload);
+
+  // Frontend check for duplicate name
+  const duplicate = tableData.some(
+    (p) =>
+      p.product_Name.toLowerCase() === payload.product_Name.toLowerCase()
+  );
+  if (duplicate) {
+    validationErrors.product_Name = "Product name already exists!";
   }
+
+  setErrors(validationErrors);
+
+  if (Object.keys(validationErrors).length > 0) {
+    // Show toast for immediate feedback
+    if (validationErrors.product_Name) {
+      toast.error(validationErrors.product_Name, {
+        duration: 4000,
+        position: "top-right",
+      });
+    }
+    return;
+  }
+
+  try {
+    const response = await productApi.createProduct(payload);
+    resetForm();
+    setShowProductForm(false);
+    refresh();
+    toast.success("Product created successfully!", {
+      duration: 4000,
+      position: "top-right",
+    });
+  } catch (err) {
+    const msg = err?.response?.data?.message || "Create failed";
+    toast.error(msg, {
+      duration: 4000,
+      position: "top-right",
+    });
+    setError(msg);
+  }
+}
+
 
   async function handleDelete(id, stock) {
-    if (!window.confirm("Delete this product? This action cannot be undone.")) return;
-    if (stock > 0) {
-      alert("Cannot delete a product with stock");
-      return;
-    }
-    try {
-      await productApi.deleteProduct({ id });
-      refresh();
-    } catch (err) {
-      setError(err.message || "Delete failed");
-    }
+  if (stock > 0) {
+    toast.error("Cannot delete a product with stock", {
+      duration: 4000,
+      position: "top-right",
+      style: { background: "#cf2b2bff", color: "#fff" },
+    });
+    return;
   }
 
-  async function handleArchive(id) {
-    if (!window.confirm("Archive this product?")) return;
+  // Show toast confirmation
+  const confirmDelete = await new Promise((resolve) => {
+    const toastId = toast(
+      (t) => (
+        <div className="flex flex-col gap-2">
+          <span>Delete this product? This action cannot be undone.</span>
+          <div className="flex gap-2 justify-end mt-2">
+            <button
+              className="btn btn-sm btn-error"
+              onClick={() => {
+                resolve(false);
+                toast.dismiss(t.id);
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              className="btn btn-sm btn-success"
+              onClick={() => {
+                resolve(true);
+                toast.dismiss(t.id);
+              }}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      ),
+      { duration: Infinity, position: "top-right" }
+    );
+  });
+
+  if (!confirmDelete) return;
+
+  try {
+    await productApi.deleteProduct({ id });
+    toast.success("Product deleted successfully", {
+      duration: 3000,
+      position: "top-right",
+      style: { background: "#34d399", color: "#fff" },
+    });
+    refresh();
+  } catch (err) {
+    toast.error(err.message || "Delete failed", {
+      duration: 4000,
+      position: "top-right",
+      style: { background: "#f87171", color: "#fff" },
+    });
+    setError(err.message || "Delete failed");
+  }
+}
+  async function handleArchive (id) {
+    const confirmArchive = await new Promise((resolve) => {
+    const toastId = toast(
+      (t) => (
+        <div className="flex flex-col gap-2">
+          <span>Archive this product?</span>
+          <div className="flex gap-2 justify-end mt-2">
+            <button
+              className="btn btn-sm btn-error"
+              onClick={() => {
+                resolve(false);
+                toast.dismiss(t.id);
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              className="btn btn-sm btn-success"
+              onClick={() => {
+                resolve(true);
+                toast.dismiss(t.id);
+              }}
+            >
+              Archive
+            </button>
+          </div>
+        </div>
+      ),
+      { duration: Infinity, position: "top-right" }
+    );
+  });
+    if(!confirmArchive) return;
+    
     try {
       await productApi.archiveProduct({ id });
+      toast.success("Product archived successfully", {
+      duration: 3000,
+      position: "top-right",
+      style: { background: "#34d399", color: "#fff" },
+    });
       refresh();
     } catch (err) {
-      setError(err.message || "Archive failed");
+      toast.error(err.message || "Archive failed", {
+      duration: 4000,
+      position: "top-right",
+      style: { background: "#f87171", color: "#fff" },
+    });
+    setError(err.message || "Archive failed");
     }
   }
 
   async function handleAddBack(id) {
     try {
       await productApi.archiveAddBack({ id });
+      toast.success("Product added back successfully", {
+      duration: 3000,
+      position: "top-right",
+      style: { background: "#34d399", color: "#fff" },
+    });
       refresh();
     } catch (err) {
-      setError(err.message || "Add back failed");
+      toast.error(err.message || "Adding back failed", {
+      duration: 4000,
+      position: "top-right",
+      style: { background: "#f87171", color: "#fff" },
+    });
+    setError(err.message || "Adding back  failed");
     }
   }
 
@@ -214,13 +398,30 @@ export default function ProductsWithTable() {
       product_Category: form.p_Cat.trim(),
       product_Expiry: form.p_Expiry,
     };
+
+     const validationErrors = validateProduct(payload);
+      setErrors(validationErrors);
+
+        if (Object.keys(validationErrors).length > 0) {
+    return;
+  }
     try {
       await productApi.updateProduct(payload);
       setEditing(null);
       resetForm();
-      refresh();
+       toast.success("Product Updated successfully", {
+      duration: 3000,
+      position: "top-right",
+      style: { background: "#34d399", color: "#fff" },
+    });
+     refresh();
     } catch (err) {
-      setError(err.message || "Update failed");
+      toast.error(err.message || "Update failed", {
+      duration: 4000,
+      position: "top-right",
+      style: { background: "#f87171", color: "#fff" },
+    });
+    setError(err.message || "Update failed");
     }
   }
 
@@ -336,90 +537,150 @@ export default function ProductsWithTable() {
       )}
 
       {/* Product Form */}
-      {showProductForm && !editing && (
-        <div className="card bg-base-200 p-4 mb-6">
-          <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-            {/* Inputs simplified */}
-            <input
-              type="text"
-              placeholder="Name"
-              value={form.p_Name}
-              onChange={(e) => setForm((f) => ({ ...f, p_Name: e.target.value }))}
-              className="input input-bordered w-full"
-              required
-            />
-            <input
-              type="text"
-              placeholder="Description"
-              value={form.p_Desc}
-              onChange={(e) => setForm((f) => ({ ...f, p_Desc: e.target.value }))}
-              className="input input-bordered w-full"
-              required
-            />
-            <input
-              type="number"
-              placeholder="Retail Price"
-              value={form.p_Retail}
-              onChange={(e) => setForm((f) => ({ ...f, p_Retail: e.target.value }))}
-              className="input input-bordered w-full"
-              required
-            />
-            <input
-              type="number"
-              placeholder="Buying Price"
-              value={form.p_Buying}
-              onChange={(e) => setForm((f) => ({ ...f, p_Buying: e.target.value }))}
-              className="input input-bordered w-full"
-              required
-            />
-            <input
-              type="number"
-              placeholder="Stock"
-              value={form.p_Stock}
-              onChange={(e) => setForm((f) => ({ ...f, p_Stock: e.target.value }))}
-              className="input input-bordered w-full"
-              required
-            />
-            <input
-              type="date"
-              value={form.p_Expiry}
-              onChange={(e) => setForm((f) => ({ ...f, p_Expiry: e.target.value }))}
-              className="input input-bordered w-full"
-              required
-            />
-            <select
-              value={form.p_Cat}
-              onChange={(e) => setForm((f) => ({ ...f, p_Cat: e.target.value }))}
-              className="select select-bordered w-full"
-              required
-            >
-              <option value="">-- Select Category --</option>
-              {[
-                "Beverages",
-                "Snacks",
-                "Dairy",
-                "Meat & Poultry",
-                "Seafood",
-                "Fruits & Vegetables",
-                "Grains & Cereals",
-                "Frozen Food",
-                "Condiments & Sauces",
-                "Cleaning Supplies",
-                "Personal Care",
-                "Household Essentials",
-                "Others",
-              ].map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
-            <button type="submit" className="btn btn-success w-full">
-              Create
-            </button>
-          </form>
-        </div>
-      )}
+ {showProductForm && !editing && (
+  <div className="card bg-base-200 p-4 mb-6">
+    <form
+      onSubmit={handleCreate}
+      className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end"
+    >
+      {/* NAME */}
+      <div>
+        <input
+          type="text"
+          placeholder="Name"
+          value={form.p_Name}
+          onChange={(e) => setForm((f) => ({ ...f, p_Name: e.target.value }))}
+          className="input input-bordered w-full"
+          required
+        />
+        {errors.product_Name && (
+          <p className="text-red-500 text-sm">{errors.product_Name}</p>
+        )}
+      </div>
+
+      {/* DESCRIPTION */}
+      <div>
+        <input
+          type="text"
+          placeholder="Description"
+          value={form.p_Desc}
+          onChange={(e) => setForm((f) => ({ ...f, p_Desc: e.target.value }))}
+          className="input input-bordered w-full"
+          required
+        />
+        {errors.product_Description && (
+          <p className="text-red-500 text-sm">{errors.product_Description}</p>
+        )}
+      </div>
+
+      {/* RETAIL PRICE */}
+      <div>
+        <input
+          type="number"
+          placeholder="Retail Price"
+          value={form.p_Retail}
+          onChange={(e) =>
+            setForm((f) => ({ ...f, p_Retail: e.target.value }))
+          }
+          className="input input-bordered w-full"
+          required
+        />
+        {errors.product_RetailPrice && (
+          <p className="text-red-500 text-sm">{errors.product_RetailPrice}</p>
+        )}
+      </div>
+
+      {/* BUYING PRICE */}
+      <div>
+        <input
+          type="number"
+          placeholder="Buying Price"
+          value={form.p_Buying}
+          onChange={(e) =>
+            setForm((f) => ({ ...f, p_Buying: e.target.value }))
+          }
+          className="input input-bordered w-full"
+          required
+        />
+        {errors.product_BuyingPrice && (
+          <p className="text-red-500 text-sm">{errors.product_BuyingPrice}</p>
+        )}
+      </div>
+
+      {/* STOCK */}
+      <div>
+        <input
+          type="number"
+          placeholder="Stock"
+          value={form.p_Stock}
+          onChange={(e) =>
+            setForm((f) => ({ ...f, p_Stock: e.target.value }))
+          }
+          className="input input-bordered w-full"
+          required
+        />
+        {errors.product_Stock && (
+          <p className="text-red-500 text-sm">{errors.product_Stock}</p>
+        )}
+      </div>
+
+      {/* EXPIRY DATE */}
+      <div>
+        <input
+          type="date"
+          value={form.p_Expiry}
+          onChange={(e) =>
+            setForm((f) => ({ ...f, p_Expiry: e.target.value }))
+          }
+          className="input input-bordered w-full"
+          required
+        />
+        {errors.product_Expiry && (
+          <p className="text-red-500 text-sm">{errors.product_Expiry}</p>
+        )}
+      </div>
+
+      {/* CATEGORY */}
+      <div>
+        <select
+          value={form.p_Cat}
+          onChange={(e) => setForm((f) => ({ ...f, p_Cat: e.target.value }))}
+          className="select select-bordered w-full"
+          required
+        >
+          <option value="">-- Select Category --</option>
+          {[
+            "Beverages",
+            "Snacks",
+            "Dairy",
+            "Meat & Poultry",
+            "Seafood",
+            "Fruits & Vegetables",
+            "Grains & Cereals",
+            "Frozen Food",
+            "Condiments & Sauces",
+            "Cleaning Supplies",
+            "Personal Care",
+            "Household Essentials",
+            "Others",
+          ].map((cat) => (
+            <option key={cat} value={cat}>
+              {cat}
+            </option>
+          ))}
+        </select>
+        {errors.product_Category && (
+          <p className="text-red-500 text-sm">{errors.product_Category}</p>
+        )}
+      </div>
+
+      {/* SUBMIT */}
+      <button type="submit" className="btn btn-success w-full">
+        Create
+      </button>
+    </form>
+  </div>
+)}
 
       {/* Edit Form */}
      {editing && (
@@ -438,6 +699,9 @@ export default function ProductsWithTable() {
           className="input input-bordered w-full"
           required
         />
+          {errors.product_Name && (
+          <p className="text-red-500 text-sm">{errors.product_Name}</p>
+        )}
       </div>
 
       {/* Description */}
@@ -452,6 +716,9 @@ export default function ProductsWithTable() {
           className="input input-bordered w-full"
           required
         />
+          {errors.product_Description && (
+          <p className="text-red-500 text-sm">{errors.product_Description}</p>
+        )}
       </div>
 
       {/* Retail Price */}
@@ -466,6 +733,9 @@ export default function ProductsWithTable() {
           className="input input-bordered w-full"
           required
         />
+          {errors.product_RetailPrice && (
+          <p className="text-red-500 text-sm">{errors.product_RetailPrice}</p>
+        )}
       </div>
 
       {/* Buying Price */}
@@ -480,6 +750,9 @@ export default function ProductsWithTable() {
           className="input input-bordered w-full"
           required
         />
+          {errors.product_BuyingPrice && (
+          <p className="text-red-500 text-sm">{errors.product_BuyingPrice}</p>
+        )}
       </div>
 
       {/* Stock */}
@@ -494,6 +767,9 @@ export default function ProductsWithTable() {
           className="input input-bordered w-full"
           required
         />
+          {errors.product_Stock && (
+          <p className="text-red-500 text-sm">{errors.product_Stock}</p>
+        )}
       </div>
 
       {/* Expiry Date */}
@@ -508,6 +784,9 @@ export default function ProductsWithTable() {
           className="input input-bordered w-full"
           required
         />
+          {errors.product_Expiry && (
+          <p className="text-red-500 text-sm">{errors.product_Expiry}</p>
+        )}
       </div>
 
       {/* Category */}
@@ -542,6 +821,9 @@ export default function ProductsWithTable() {
             </option>
           ))}
         </select>
+          {errors.product_Category && (
+          <p className="text-red-500 text-sm">{errors.product_Category}</p>
+        )}
       </div>
 
       {/* Buttons */}
@@ -601,7 +883,7 @@ export default function ProductsWithTable() {
                   <td>
                     <QRCodeSVG
                       id={`qr-${item.id}`}
-                      value={item.qrCodeValue || `${window.location.origin}/product/${item.id || ""}`}
+                      value={item.qrCodeValue || `${window.location.origin}/scan/${item.id}`}
                       size={64}
                     />
                   </td>

@@ -79,7 +79,7 @@ function App() {
             }
           />
         <Route
-            path="/product/:id"
+            path="/scan/:id"
             element={
               <ProtectedLayout onLogout={handleLogout}>
                 <ProductPage />

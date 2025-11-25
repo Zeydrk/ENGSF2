@@ -62,7 +62,8 @@ export function useProduct() {
   // --- CRUD Operations ---
   const createProduct = async (product) => {
     try {
-      await axios.post(`${BASE_URL}/products/create`, product);
+      const response = await axios.post(`${BASE_URL}/products/create`, product);
+          console.log("Hook",response);
       await getAllProducts();
     } catch (err) {
       handleError(err);
@@ -71,7 +72,8 @@ export function useProduct() {
 
   const updateProduct = async (product) => {
     try {
-      await axios.post(`${BASE_URL}/products/update`, product);
+    await axios.post(`${BASE_URL}/products/update`, product);
+  
       await getAllProducts();
     } catch (err) {
       handleError(err);
@@ -132,7 +134,6 @@ export function useProduct() {
         return;
       }
       try {
-        console.log("HOOK archived search:", query);
         const res = await axios.get(`${BASE_URL}/products/searchArchive`, { params: { query } });
         setArchived(res.data || []);
         setError("");

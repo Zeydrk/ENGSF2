@@ -1,49 +1,33 @@
-import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useEffect,useRef } from "react";
+import toast from "react-hot-toast";
 
-function ProductPage() {
+export default function ScanPage() {
   const { id } = useParams();
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+  const hasRun = useRef(false);
+useEffect(() => {
+  if (hasRun.current) return;  // ⛔ prevent second run
+  hasRun.current = true;
 
-  useEffect(() => {
-    // Fetch product details from backend
-    fetch(`http://localhost:3000/products/${id}`)
-      .then(res => {
-        if (!res.ok) throw new Error("Failed to fetch product");
-        return res.json();
-      })
-      .then(data => {
-        setProduct(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        setError(err.message);
-        setLoading(false);
-      });
-  }, [id]);
-
-  if (loading) return <p>Loading product...</p>;
-  if (error) return <p>Error: {error}</p>;
-  if (!product) return <p>Product not found</p>;
+  fetch(`http://localhost:3000/products/scan/${id}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.error) toast.error(data.error);
+      else toast.success("Stock reduced");
+      navigate("/product");
+    });
+}, [id]);
 
   return (
-    <div style={{ padding: "2rem" }}>
-      <h2>{product.product_Name}</h2>
-      <p><strong>Price:</strong> ₱{product.product_Price}</p>
-      <p><strong>Stock:</strong> {product.product_Stock}</p>
-      <p><strong>Expiry:</strong> {new Date(product.product_Expiry).toISOString().split('T')[0]}</p>
-
-      {product.product_QrCodePath && (
-        <img
-          src={`http://localhost:3000/${product.product_QrCodePath.replace(/^\//, "")}`}
-          alt="Product QR"
-          style={{ width: "150px", marginTop: "1rem" }}
-        />
-      )}
+    <div
+      style={{
+        padding: "2rem",
+        textAlign: "center",
+        fontSize: "1.2rem",
+      }}
+    >
+      <p>Scanning product...</p>
     </div>
   );
 }
-
-export default ProductPage;
