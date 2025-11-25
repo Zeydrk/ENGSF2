@@ -32,13 +32,6 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
-      seller_Password: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      seller_ContactNo: {
-        type: Sequelize.INTEGER
-      }
 
     });
   },
