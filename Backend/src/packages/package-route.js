@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const packageController = require('./package-controller');
+const controller = require('./package-controller');
 
-router.get('/', packageController.getPackage);
-router.post('/create', packageController.addPackage);
-router.post('/delete', packageController.deletePackage);
-router.post('/update', packageController.updatePackage);
-router.get('/:id', packageController.getPackageById);
-router.get('/sellers/list', packageController.getSellers); // Add this route
+router.get('/', controller.getPackage);
+router.post('/create', controller.addPackage);
+router.post('/delete', controller.deletePackage);
+router.post('/update', controller.updatePackage);
+router.get('/sellers/list', controller.getSellers);
+router.get('/:id', controller.getPackageById);
 
 module.exports = router;

@@ -1,5 +1,6 @@
 'use strict';
-/** @type {import('sequelize-cli').Migration} */
+
+/** @type {import('sequelize-cli').Migration} */ 
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('Sellers', {
@@ -9,14 +10,9 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      seller_FName: {
-        type: Sequelize.STRING
-      },
-      seller_MName: {
-        type: Sequelize.STRING
-      },
-      seller_LName: {
-        type: Sequelize.STRING
+      seller_Name: {
+        type: Sequelize.STRING,
+        allowNull: false
       },
       seller_Email: {
         type: Sequelize.STRING,
@@ -26,9 +22,15 @@ module.exports = {
       seller_Phone: {
         type: Sequelize.STRING,
         allowNull: false
+      },
+      balance: {
+        type: Sequelize.DECIMAL(10, 2),
+        allowNull: false,
+        defaultValue: 0.00
       }
     });
   },
+
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('Sellers');
   }
