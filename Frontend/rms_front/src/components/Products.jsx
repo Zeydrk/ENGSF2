@@ -457,6 +457,39 @@ async function handleCreate(e) {
           </button>
         </div>
       </div>
+      <div className="flex items-center">
+        <label className="input">
+  <svg className="h-[1em] opacity-50" viewBox="0 0 24 24">
+    <g
+      strokeLinejoin="round"
+      strokeLinecap="round"
+      strokeWidth="2.5"
+      fill="none"
+      stroke="currentColor"
+    >
+      <circle cx="11" cy="11" r="8"></circle>
+      <path d="m21 21-4.3-4.3"></path>
+    </g>
+  </svg>
+  <input type="search" name="input" onChange={handleSearch} className="grow" placeholder="Search Product" />
+</label>
+<div className="dropdown">
+  <div tabIndex={0} role="button" className="btn m-1">
+    Sort by
+  </div>
+  <ul
+    tabIndex={0}
+    className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"
+  >
+    <li onClick={() => handleDropDown("priceAsc")}><a>Price (↑)</a></li>
+    <li onClick={() => handleDropDown("priceDesc")}><a>Price (↓)</a></li>
+    <li onClick={() => handleDropDown("stockAsc")}><a>Stock (↑)</a></li>
+    <li onClick={() => handleDropDown("stockDesc")}><a>Stock (↓)</a></li>
+    <li onClick={() => handleDropDown("expiryAsc")}><a>Expiry (↑)</a></li>
+    <li onClick={() => handleDropDown("expiryDesc")}><a>Expiry (↓)</a></li>
+  </ul>
+</div>
+      </div>
 
       {/* Search & Sort */}
       <div className="flex items-center gap-3 mb-4">
