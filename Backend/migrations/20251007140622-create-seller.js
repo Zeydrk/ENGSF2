@@ -18,6 +18,15 @@ module.exports = {
       seller_LName: {
         type: Sequelize.STRING
       },
+      seller_Email: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        unique: true
+      },
+      seller_Phone: {
+        type: Sequelize.STRING,
+        allowNull: false
+      }
     });
   },
   async down(queryInterface, Sequelize) {
