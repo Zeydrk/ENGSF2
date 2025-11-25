@@ -22,10 +22,19 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE
       },
+<<<<<<<< HEAD:Backend/migrations/20250925092045-create-account.js
       updatedAt: {
         allowNull: false,
         type: Sequelize.DATE
       }
+========
+      product_QrCodeValue:{ 
+        type: Sequelize.STRING
+      },
+      product_QrCodePath: {
+        type: Sequelize.STRING
+      },
+>>>>>>>> 372e365fbdf671ba332218d310481e04fd82c2e0:Backend/migrations/20251005095218-create-products.js
     });
   },
   async down(queryInterface, Sequelize) {

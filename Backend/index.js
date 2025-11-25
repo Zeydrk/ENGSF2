@@ -9,6 +9,8 @@ const session = require('express-session');
 require('dotenv').config();
 require('./src/accounts/middleware/accounts-middleware')
 
+
+
 // importing routes here
 const adminsRoutes = require('./src/admin/admins-routes')
 const productRoutes = require('./src/products/product-route')
