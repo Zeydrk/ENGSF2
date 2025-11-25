@@ -14,10 +14,24 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'seller_Id',
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE'
+      }),
+
+      Seller.belongsTo(models.Account,{
+        foreignKey: 'account_Id',
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
       })
+      
     }
   }
   Seller.init({
+    account_Id: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: "Account",
+        key: "id"
+      }
+    },
     seller_FName: DataTypes.STRING,
     seller_MName: DataTypes.STRING,
     seller_LName: DataTypes.STRING,
