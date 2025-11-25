@@ -1,37 +1,41 @@
-// all required packages
-const passport = require('passport')
-const session = require('express-session')
-const LocalStrategy = require('passport-local')
+  // all required packages
+  const passport = require('passport')
+  const session = require('express-session')
+  const model = require('../../../models')
+  const Account = model['Account']
+  const LocalStrategy = require('passport-local')
 
-// all midlleware functions 
-// test if it will word
+  // all midlleware functions 
+  // test if it will word
 
-// Serializing za user
-passport.serializeUser((user, done) =>{
-  done(null,user.email)
-})
-
-// deserializing za user
-passport.deserializeUser((email, done) =>{
-  if (email){
-    done(null, user)
-  }
-  else{
-    done(err, null)
-  }
-})
-
-// test for exporting local strategy
-passport.use(
-  new LocalStrategy((email, password, done) => {
-    if (err) {
-      done(err, null);
-    };
-    if (user !== null) {
-      done(null, user);
-    }
-  
+  // Serializing za user
+  passport.serializeUser((user, done) =>{
+    done(null,user.email, user.role)
   })
 
-)
-module.exports = passport
+  // deserializing za user
+  passport.deserializeUser(async (email,role, done) =>{
+    const result =  await Account.findOne({ where: { email: email, role: role } })
+    if (result) {
+      done(null, result)
+    }
+    else {
+      done (null, false)
+    }
+  })
+
+  // test for exporting local strategy
+  passport.use(
+    new LocalStrategy({usernameField: 'email', passwordField: 'password'},
+      async (email, password, done) => {
+      const result = await Account.findOne({ where: { email: email, password: password } })
+      if (result !== null){
+        done (null, result)
+      }
+      else{
+        done (null, false)
+      }
+    })
+
+  )
+  module.exports = passport
