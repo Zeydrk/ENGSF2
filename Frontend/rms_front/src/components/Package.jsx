@@ -1,446 +1,319 @@
 import React, { useEffect, useState } from "react";
 import { usePackage } from "../hooks/usePackage";
-import { QRCodeSVG } from "qrcode.react";
 
-export default function PackageWithTable() {
+export default function PackageManager() {
   const packgApi = usePackage();
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ seller_Name: "", pk_Name: "", r_Name: "", dSc: "" });
   const [editing, setEditing] = useState(null);
-  const [error, setError] = useState(null);
-  const [searchText, setSearchText] = useState("");
-  const [filteredPackages, setFilteredPackages] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [search, setSearch] = useState("");
 
-  // load packages on mount
-  useEffect(() => {
-    refresh();
-  }, []);
-
-  async function refresh() {
-    try {
-      setLoading(true);
-      await packgApi.getAllPackage();
-    } catch (err) {
-      console.error(err);
-      setError(err.message || "Failed to load");
-    } finally {
-      setLoading(false);
-    }
-  }
+  const [form, setForm] = useState({
+    seller_Name: "",
+    package_Name: "",
+    buyer_Name: "",
+    dropOff_Date: "",
+    package_Size: "",
+    price: "",
+    handling_Fee: "",
+    payment_Method: "",
+    payment_Status: "unpaid",
+    package_Status: "unclaimed",
+  });
 
   function resetForm() {
-    setForm({ seller_Name: "", pk_Name: "", r_Name: "", dSc: "" });
+    setForm({
+      seller_Name: "",
+      package_Name: "",
+      buyer_Name: "",
+      dropOff_Date: "",
+      package_Size: "",
+      price: "",
+      handling_Fee: "",
+      payment_Method: "",
+      payment_Status: "unpaid",
+      package_Status: "unclaimed",
+    });
+  }
+
+  useEffect(() => {
+    load();
+    packgApi.getAllSellers();
+  }, []);
+
+  async function load() {
+    setLoading(true);
+    await packgApi.getAllPackage();
+    setLoading(false);
   }
 
   async function handleCreate(e) {
     e.preventDefault();
-    try {
-      if (!form.seller_Name?.trim() || !form.pk_Name?.trim() || !form.r_Name?.trim() || !form.dSc?.trim()) {
-        setError("Seller Name, Package Name, Recipient Name, and Description are required");
-        return;
-      }
-
-      const payload = {
-        seller_Name: form.seller_Name?.trim() || "",
-        package_Name: form.pk_Name?.trim() || "",
-        recipient_Name: form.r_Name?.trim() || "",
-        descrtion: form.dSc?.trim() || "",
-      };
-
-      await packgApi.createPackage(payload);
-      resetForm();
-      setShowForm(false);
-      refresh();
-    } catch (err) {
-      console.error(err);
-      setError(err.message || "Create failed");
-    }
-  }
-
-  async function handleDelete(id) {
-    const ok = window.confirm("Delete this package? This action cannot be undone.");
-    if (!ok) return;
-    try {
-      await packgApi.deletePackage({ id });
-      refresh();
-    } catch (err) {
-      console.error(err);
-      setError(err.message || "Delete failed");
-    }
-  }
-
-  function openEdit(packg) {
-    setEditing(packg);
-    setForm({
-      seller_Name: packg.seller_Name || "",
-      pk_Name: packg.package_Name?.trim() || "",
-      r_Name: packg.recipient_Name?.trim() || "",
-      dSc: packg.descrtion || "",
-    });
+    const priceNumber = parseFloat(form.price) || 0;
+    await packgApi.createPackage({ ...form, price: priceNumber });
+    resetForm();
+    setShowForm(false);
+    load();
   }
 
   async function handleUpdate(e) {
     e.preventDefault();
-    try {
-      if (!editing) return;
+    const priceNumber = parseFloat(form.price) || 0;
+    await packgApi.updatePackage({ id: editing.id, ...form, price: priceNumber });
+    resetForm();
+    setEditing(null);
+    setShowForm(false);
+    load();
+  }
 
-      const payload = {
-        id: editing.id,
-        seller_Name: form.seller_Name?.trim(),
-        package_Name: form.pk_Name?.trim(),
-        recipient_Name: form.r_Name?.trim(),
-        descrtion: form.dSc?.trim(),
-      };
+  async function handleDelete(id) {
+    if (!window.confirm("Delete this package?")) return;
+    await packgApi.deletePackage({ id });
+    load();
+  }
 
-      if (!payload.seller_Name || !payload.package_Name || !payload.recipient_Name || !payload.descrtion) {
-        setError("All fields are required");
-        return;
-      }
-
-      await packgApi.updatePackage(payload);
-      setEditing(null);
-      resetForm();
-      refresh();
-    } catch (err) {
-      console.error(err);
-      setError(err.message || "Update failed");
-    }
+  function openEdit(p) {
+    setEditing(p);
+    setForm({
+      seller_Name: p.seller_Name,
+      package_Name: p.package_Name,
+      buyer_Name: p.buyer_Name,
+      dropOff_Date: p.dropOff_Date,
+      package_Size: p.package_Size,
+      price: p.price,
+      handling_Fee: p.handling_Fee,
+      payment_Method: p.payment_Method,
+      payment_Status: p.payment_Status,
+      package_Status: p.package_Status,
+    });
+    setShowForm(true);
   }
 
   const packages = packgApi.packages || [];
+  const sellers = packgApi.sellers || [];
 
-  // Filter suggestions for autocomplete
-  const sellerSuggestions = Array.from(
-    new Set(packages.map((p) => p.seller_Name).filter(Boolean))
-  ).filter((name) =>
-    name.toLowerCase().includes(searchText.toLowerCase())
+  // Filter packages based on search input
+  const filteredPackages = packages.filter(
+    (p) =>
+      p.seller_Name.toLowerCase().includes(search.toLowerCase()) ||
+      p.buyer_Name.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Search logic
-  function handleSearch() {
-    if (!searchText.trim()) {
-      setFilteredPackages(packages);
-      return;
-    }
-    const result = packages.filter((p) =>
-      p.seller_Name?.toLowerCase().includes(searchText.toLowerCase())
-    );
-    setFilteredPackages(result);
-    setShowSuggestions(false);
-  }
-
-  useEffect(() => {
-    setFilteredPackages(packages);
-  }, [packages]);
-
   return (
-    <div data-theme="autumn" className="p-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row items-center justify-between mb-4 gap-3">
-        <h2 className="text-2xl font-semibold">Packages</h2>
-        <div className="flex gap-2">
-          <button
-            className="btn btn-sm btn-primary"
-            onClick={() => {
-              setShowForm((s) => !s);
-              resetForm();
-              setEditing(null);
-              setError(null);
-            }}
-          >
-            {showForm ? "Close" : "Add Package"}
-          </button>
-          <button className="btn btn-sm" onClick={refresh}>
-            Refresh
-          </button>
-        </div>
+    <div className="p-6">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-2xl font-semibold">Package List</h2>
+        <button
+          className="btn btn-primary"
+          onClick={() => {
+            resetForm();
+            setEditing(null);
+            setShowForm(!showForm);
+          }}
+        >
+          {showForm ? "Close Form" : "Add Package"}
+        </button>
       </div>
 
-      {/* Search bar with suggestions */}
-      <div className="relative mb-6">
-        <div className="flex gap-2 items-center">
-          <input
-            type="text"
-            placeholder="Search by seller name..."
-            className="input input-bordered w-full"
-            value={searchText}
-            onChange={(e) => {
-              setSearchText(e.target.value);
-              setShowSuggestions(true);
-            }}
-            onFocus={() => setShowSuggestions(true)}
-          />
-          <button onClick={handleSearch} className="btn btn-primary">
-            Search
-          </button>
-        </div>
-
-        {showSuggestions && sellerSuggestions.length > 0 && (
-          <ul className="absolute left-0 w-full bg-base-100 border rounded-md mt-1 max-h-40 overflow-y-auto z-10">
-            {sellerSuggestions.map((name, idx) => (
-              <li
-                key={idx}
-                className="p-2 hover:bg-base-200 cursor-pointer"
-                onClick={() => {
-                  setSearchText(name);
-                  setShowSuggestions(false);
-                  setFilteredPackages(
-                    packages.filter(
-                      (p) =>
-                        p.seller_Name?.toLowerCase() === name.toLowerCase()
-                    )
-                  );
-                }}
-              >
-                {name}
-              </li>
-            ))}
-          </ul>
-        )}
+      {/* SEARCH BAR */}
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="Search by Seller or Customer Name"
+          className="input input-bordered w-full md:w-1/2"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
       </div>
 
-      {/* Error alert */}
-      {error && (
-        <div className="alert alert-error mb-4">
-          <div>
-            <span>{error}</span>
-          </div>
-        </div>
-      )}
-
-      {/* Create / Edit form */}
-      {showForm && !editing && (
+      {/* FORM */}
+      {showForm && (
         <div className="card bg-base-200 p-4 mb-6">
           <form
-            onSubmit={handleCreate}
-            className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end"
+            onSubmit={editing ? handleUpdate : handleCreate}
+            className="grid grid-cols-1 md:grid-cols-3 gap-4"
           >
-            <div>
-              <label className="label">
-                <span className="label-text">Seller Name</span>
-              </label>
-              <input
-                type="text"
-                name="seller_Name"
-                value={form.seller_Name}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, seller_Name: e.target.value }))
-                }
-                className="input input-bordered w-full"
-                placeholder="Enter seller name"
-              />
+            {/* SELLER DROPDOWN */}
+            <select
+              className="input input-bordered"
+              value={form.seller_Name}
+              onChange={(e) => setForm({ ...form, seller_Name: e.target.value })}
+              required
+            >
+              <option value="">Select Seller</option>
+              {sellers.map((s) => (
+                <option key={s.id} value={s.seller_Name}>{s.seller_Name}</option>
+              ))}
+            </select>
+
+            <input
+              type="text"
+              placeholder="Package Name"
+              className="input input-bordered"
+              value={form.package_Name}
+              onChange={(e) => setForm({ ...form, package_Name: e.target.value })}
+              required
+            />
+
+            <input
+              type="text"
+              placeholder="Buyer Name"
+              className="input input-bordered"
+              value={form.buyer_Name}
+              onChange={(e) => setForm({ ...form, buyer_Name: e.target.value })}
+              required
+            />
+
+            <input
+              type="date"
+              className="input input-bordered"
+              value={form.dropOff_Date}
+              onChange={(e) => setForm({ ...form, dropOff_Date: e.target.value })}
+              required
+            />
+
+            {/* PACKAGE SIZE */}
+            <div className="flex flex-col">
+              <label className="mb-1">Package Size</label>
+              <div className="flex gap-2">
+                {["S", "M", "L"].map((size) => (
+                  <button
+                    type="button"
+                    key={size}
+                    className={`btn btn-sm ${form.package_Size === size ? "btn-success" : "btn-outline"}`}
+                    onClick={() => setForm({ ...form, package_Size: size })}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
             </div>
-            <div>
-              <label className="label">
-                <span className="label-text">Package Name</span>
-              </label>
-              <input
-                type="text"
-                name="pk_Name"
-                value={form.pk_Name}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, pk_Name: e.target.value }))
-                }
-                className="input input-bordered w-full"
-              />
+
+            <input
+              type="number"
+              placeholder="Price"
+              className="input input-bordered"
+              value={form.price}
+              onChange={(e) => setForm({ ...form, price: e.target.value })}
+              required
+            />
+
+            <input
+              type="number"
+              placeholder="Handling Fee"
+              className="input input-bordered"
+              value={form.handling_Fee}
+              onChange={(e) => setForm({ ...form, handling_Fee: e.target.value })}
+              required
+            />
+
+            {/* PAYMENT METHOD */}
+            <div className="flex flex-col">
+              <label className="mb-1">Payment Method</label>
+              <div className="flex gap-2">
+                {["cash", "gcash"].map((m) => (
+                  <button
+                    type="button"
+                    key={m}
+                    className={`btn btn-sm ${form.payment_Method === m ? "btn-success" : "btn-outline"}`}
+                    onClick={() => setForm({ ...form, payment_Method: m })}
+                  >
+                    {m.toUpperCase()}
+                  </button>
+                ))}
+              </div>
             </div>
-            <div>
-              <label className="label">
-                <span className="label-text">Recipient Name</span>
-              </label>
-              <input
-                type="text"
-                name="r_Name"
-                value={form.r_Name}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, r_Name: e.target.value }))
-                }
-                className="input input-bordered w-full"
-              />
-            </div>
-            <div>
-              <label className="label">
-                <span className="label-text">Description</span>
-              </label>
-              <input
-                type="text"
-                name="dSc"
-                value={form.dSc}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, dSc: e.target.value }))
-                }
-                className="input input-bordered w-full"
-              />
-            </div>
-            <div>
-              <button type="submit" className="btn btn-success w-full">
-                Create
-              </button>
-            </div>
+
+            {/* EDITING ONLY: PAYMENT STATUS */}
+            {editing && (
+              <div className="flex flex-col">
+                <label className="mb-1">Payment Status</label>
+                <div className="flex gap-2">
+                  {["paid", "unpaid"].map((s) => (
+                    <button
+                      type="button"
+                      key={s}
+                      className={`btn btn-sm ${form.payment_Status === s ? "btn-success" : "btn-outline"}`}
+                      onClick={() => setForm({ ...form, payment_Status: s })}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* EDITING ONLY: PACKAGE STATUS */}
+            {editing && (
+              <div className="flex flex-col">
+                <label className="mb-1">Package Status</label>
+                <div className="flex gap-2">
+                  {["claimed", "unclaimed"].map((s) => (
+                    <button
+                      type="button"
+                      key={s}
+                      className={`btn btn-sm ${form.package_Status === s ? "btn-success" : "btn-outline"}`}
+                      onClick={() => setForm({ ...form, package_Status: s })}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <button type="submit" className="btn btn-primary mt-4">
+              {editing ? "Save Changes" : "Create Package"}
+            </button>
           </form>
         </div>
       )}
 
-      {/* Edit form */}
-      {editing && (
-        <div className="card bg-base-200 p-4 mb-6">
-          <h3 className="font-medium mb-2">Edit Package</h3>
-          <form
-            onSubmit={handleUpdate}
-            className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end"
-          >
-            <div>
-              <label className="label">
-                <span className="label-text">Seller Name</span>
-              </label>
-              <input
-                type="text"
-                name="seller_Name"
-                value={form.seller_Name}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, seller_Name: e.target.value }))
-                }
-                className="input input-bordered w-full"
-              />
-            </div>
-            <div>
-              <label className="label">
-                <span className="label-text">Package Name</span>
-              </label>
-              <input
-                type="text"
-                name="pk_Name"
-                value={form.pk_Name}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, pk_Name: e.target.value }))
-                }
-                className="input input-bordered w-full"
-              />
-            </div>
-            <div>
-              <label className="label">
-                <span className="label-text">Recipient Name</span>
-              </label>
-              <input
-                type="text"
-                name="r_Name"
-                value={form.r_Name}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, r_Name: e.target.value }))
-                }
-                className="input input-bordered w-full"
-              />
-            </div>
-            <div>
-              <label className="label">
-                <span className="label-text">Description</span>
-              </label>
-              <input
-                type="text"
-                name="dSc"
-                value={form.dSc}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, dSc: e.target.value }))
-                }
-                className="input input-bordered w-full"
-              />
-            </div>
-            <div className="flex gap-2">
-              <button type="submit" className="btn btn-primary">
-                Save
-              </button>
-              <button
-                type="button"
-                className="btn"
-                onClick={() => {
-                  setEditing(null);
-                  resetForm();
-                }}
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* Table */}
+      {/* TABLE */}
       <div className="overflow-x-auto bg-base-100 p-4 rounded-lg shadow">
-        <table className="table w-full">
+        <table className="table">
           <thead>
             <tr>
               <th>#</th>
-              <th>Seller Name</th>
-              <th>Package Name</th>
-              <th>Recipient Name</th>
-              <th>Description</th>
-              <th>QR Code</th>
+              <th>Seller</th>
+              <th>Package</th>
+              <th>Buyer</th>
+              <th>Drop Off</th>
+              <th>Size</th>
+              <th>Price</th>
+              <th>Handling Fee</th>
+              <th>Pay Method</th>
+              <th>Payment Status</th>
+              <th>Package Status</th>
               <th>Actions</th>
             </tr>
           </thead>
+
           <tbody>
             {loading ? (
-              <tr>
-                <td colSpan="7">Loading...</td>
-              </tr>
+              <tr><td colSpan="12">Loading...</td></tr>
             ) : filteredPackages.length === 0 ? (
-              <tr>
-                <td colSpan="7">No packages found</td>
-              </tr>
+              <tr><td colSpan="12">No packages found</td></tr>
             ) : (
-              filteredPackages.map((p, idx) => {
-                const qrValue =
-                  p.qrCodeValue || `${window.location.origin}/package/${p.id || ""}`;
-
-                const downloadQR = () => {
-                  const svgElement = document.getElementById(`qr-${p.id}`);
-                  const svgData = new XMLSerializer().serializeToString(svgElement);
-                  const blob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
-                  const url = URL.createObjectURL(blob);
-                  const link = document.createElement("a");
-                  link.href = url;
-                  link.download = `${p.seller_Name || "package"}_QR.svg`;
-                  link.click();
-                  URL.revokeObjectURL(url);
-                };
-
-                return (
-                  <tr key={p.id ?? idx}>
-                    <th>{idx + 1}</th>
-                    <td>{p.seller_Name}</td>
-                    <td>{p.package_Name}</td>
-                    <td>{p.recipient_Name}</td>
-                    <td>{p.descrtion}</td>
-                    <td>
-                      <div className="flex flex-col items-center gap-1">
-                        <QRCodeSVG id={`qr-${p.id}`} value={qrValue} size={64} />
-                        <button
-                          className="btn btn-xs btn-outline btn-info"
-                          onClick={downloadQR}
-                        >
-                          Download
-                        </button>
-                      </div>
-                    </td>
-                    <td className="flex gap-2">
-                      <button
-                        className="btn btn-sm btn-ghost"
-                        onClick={() => openEdit(p)}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className="btn btn-sm btn-error"
-                        onClick={() => handleDelete(p.id)}
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })
+              filteredPackages.map((p, idx) => (
+                <tr key={p.id}>
+                  <td>{idx + 1}</td>
+                  <td>{p.seller_Name}</td>
+                  <td>{p.package_Name}</td>
+                  <td>{p.buyer_Name}</td>
+                  <td>{p.dropOff_Date}</td>
+                  <td>{p.package_Size}</td>
+                  <td>{p.price}</td>
+                  <td>{p.handling_Fee}</td>
+                  <td>{p.payment_Method}</td>
+                  <td>{p.payment_Status}</td>
+                  <td>{p.package_Status}</td>
+                  <td className="flex gap-2">
+                    <button className="btn btn-sm btn-ghost" onClick={() => openEdit(p)}>Edit</button>
+                    <button className="btn btn-sm btn-error" onClick={() => handleDelete(p.id)}>Delete</button>
+                  </td>
+                </tr>
+              ))
             )}
           </tbody>
         </table>
