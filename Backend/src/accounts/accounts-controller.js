@@ -57,18 +57,31 @@ async function createAccount2(req,res){
 
 
 
-async function login(req,res){
-    const email = req.body.email
-    const password = req.body.password
-
+async function login(req,res,next){
     if (req.isAuthenticated()){
-        res.send("authentication works")
+       next()
     }
-
-    // if(req.isAuthenticated()){
-    //     res.send("authentication works")
-    // }
+    else{
+        res.status(401).send("error 401: Unauthorized")
+    }
 }
+
+async function loginRole(req,res){
+    if(req.user.role === "admin"){
+        res.send({
+            status: 200,
+            message:"Welcome Admin"})
+    }
+    else if (req.user.role === 'seller'){
+        res.send({
+            status: 200,
+            message:"Welcome Seller"})
+    }
+    else{
+        res.send("An error occured")
+    }
+}
+
 
 
 
@@ -82,4 +95,5 @@ module.exports = {
     createAccount,
     createAccount2,
     login,
+    loginRole,
 }
