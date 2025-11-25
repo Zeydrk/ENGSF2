@@ -13,6 +13,7 @@ router.get('/categoryArchive', controller.categoryArchiveSort);
 router.post('/archive', controller.archiveProduct);
 router.post('/addBack', controller.archiveAddBack);
 router.get('/archived', controller.archivedProducts);
+router.get('/scan/:id', controller.scanProduct);
 router.get('/:id', controller.getProductById);
 
 module.exports = router;

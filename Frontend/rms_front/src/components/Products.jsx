@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useProduct } from "../hooks/useProduct";
 import { QRCodeSVG } from "qrcode.react";
 import { useRef } from "react";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 export default function ProductsWithTable() {
   const productApi = useProduct();
@@ -177,7 +180,7 @@ async function runSearch(input) {
 
 
   // --- CRUD handlers ---
-  async function handleCreate(e) {
+async function handleCreate(e) {
   e.preventDefault();
 
   const payload = {
@@ -191,54 +194,177 @@ async function runSearch(input) {
   };
 
   const validationErrors = validateProduct(payload);
+
+  // Frontend check for duplicate name
+  const duplicate = tableData.some(
+    (p) =>
+      p.product_Name.toLowerCase() === payload.product_Name.toLowerCase()
+  );
+  if (duplicate) {
+    validationErrors.product_Name = "Product name already exists!";
+  }
+
   setErrors(validationErrors);
 
   if (Object.keys(validationErrors).length > 0) {
-    // Stop submission
+    // Show toast for immediate feedback
+    if (validationErrors.product_Name) {
+      toast.error(validationErrors.product_Name, {
+        duration: 4000,
+        position: "top-right",
+      });
+    }
     return;
   }
 
   try {
-    await productApi.createProduct(payload);
+    const response = await productApi.createProduct(payload);
     resetForm();
     setShowProductForm(false);
     refresh();
+    toast.success("Product created successfully!", {
+      duration: 4000,
+      position: "top-right",
+    });
   } catch (err) {
-    setError(err.message || "Create failed");
+    const msg = err?.response?.data?.message || "Create failed";
+    toast.error(msg, {
+      duration: 4000,
+      position: "top-right",
+    });
+    setError(msg);
   }
 }
 
 
   async function handleDelete(id, stock) {
-    if (!window.confirm("Delete this product? This action cannot be undone.")) return;
-    if (stock > 0) {
-      alert("Cannot delete a product with stock");
-      return;
-    }
-    try {
-      await productApi.deleteProduct({ id });
-      refresh();
-    } catch (err) {
-      setError(err.message || "Delete failed");
-    }
+  if (stock > 0) {
+    toast.error("Cannot delete a product with stock", {
+      duration: 4000,
+      position: "top-right",
+      style: { background: "#cf2b2bff", color: "#fff" },
+    });
+    return;
   }
 
-  async function handleArchive(id) {
-    if (!window.confirm("Archive this product?")) return;
+  // Show toast confirmation
+  const confirmDelete = await new Promise((resolve) => {
+    const toastId = toast(
+      (t) => (
+        <div className="flex flex-col gap-2">
+          <span>Delete this product? This action cannot be undone.</span>
+          <div className="flex gap-2 justify-end mt-2">
+            <button
+              className="btn btn-sm btn-error"
+              onClick={() => {
+                resolve(false);
+                toast.dismiss(t.id);
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              className="btn btn-sm btn-success"
+              onClick={() => {
+                resolve(true);
+                toast.dismiss(t.id);
+              }}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      ),
+      { duration: Infinity, position: "top-right" }
+    );
+  });
+
+  if (!confirmDelete) return;
+
+  try {
+    await productApi.deleteProduct({ id });
+    toast.success("Product deleted successfully", {
+      duration: 3000,
+      position: "top-right",
+      style: { background: "#34d399", color: "#fff" },
+    });
+    refresh();
+  } catch (err) {
+    toast.error(err.message || "Delete failed", {
+      duration: 4000,
+      position: "top-right",
+      style: { background: "#f87171", color: "#fff" },
+    });
+    setError(err.message || "Delete failed");
+  }
+}
+  async function handleArchive (id) {
+    const confirmArchive = await new Promise((resolve) => {
+    const toastId = toast(
+      (t) => (
+        <div className="flex flex-col gap-2">
+          <span>Archive this product?</span>
+          <div className="flex gap-2 justify-end mt-2">
+            <button
+              className="btn btn-sm btn-error"
+              onClick={() => {
+                resolve(false);
+                toast.dismiss(t.id);
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              className="btn btn-sm btn-success"
+              onClick={() => {
+                resolve(true);
+                toast.dismiss(t.id);
+              }}
+            >
+              Archive
+            </button>
+          </div>
+        </div>
+      ),
+      { duration: Infinity, position: "top-right" }
+    );
+  });
+    if(!confirmArchive) return;
+    
     try {
       await productApi.archiveProduct({ id });
+      toast.success("Product archived successfully", {
+      duration: 3000,
+      position: "top-right",
+      style: { background: "#34d399", color: "#fff" },
+    });
       refresh();
     } catch (err) {
-      setError(err.message || "Archive failed");
+      toast.error(err.message || "Archive failed", {
+      duration: 4000,
+      position: "top-right",
+      style: { background: "#f87171", color: "#fff" },
+    });
+    setError(err.message || "Archive failed");
     }
   }
 
   async function handleAddBack(id) {
     try {
       await productApi.archiveAddBack({ id });
+      toast.success("Product added back successfully", {
+      duration: 3000,
+      position: "top-right",
+      style: { background: "#34d399", color: "#fff" },
+    });
       refresh();
     } catch (err) {
-      setError(err.message || "Add back failed");
+      toast.error(err.message || "Adding back failed", {
+      duration: 4000,
+      position: "top-right",
+      style: { background: "#f87171", color: "#fff" },
+    });
+    setError(err.message || "Adding back  failed");
     }
   }
 
@@ -272,13 +398,30 @@ async function runSearch(input) {
       product_Category: form.p_Cat.trim(),
       product_Expiry: form.p_Expiry,
     };
+
+     const validationErrors = validateProduct(payload);
+      setErrors(validationErrors);
+
+        if (Object.keys(validationErrors).length > 0) {
+    return;
+  }
     try {
       await productApi.updateProduct(payload);
       setEditing(null);
       resetForm();
-      refresh();
+       toast.success("Product Updated successfully", {
+      duration: 3000,
+      position: "top-right",
+      style: { background: "#34d399", color: "#fff" },
+    });
+     refresh();
     } catch (err) {
-      setError(err.message || "Update failed");
+      toast.error(err.message || "Update failed", {
+      duration: 4000,
+      position: "top-right",
+      style: { background: "#f87171", color: "#fff" },
+    });
+    setError(err.message || "Update failed");
     }
   }
 
@@ -523,6 +666,9 @@ async function runSearch(input) {
           className="input input-bordered w-full"
           required
         />
+          {errors.product_Name && (
+          <p className="text-red-500 text-sm">{errors.product_Name}</p>
+        )}
       </div>
 
       {/* Description */}
@@ -537,6 +683,9 @@ async function runSearch(input) {
           className="input input-bordered w-full"
           required
         />
+          {errors.product_Description && (
+          <p className="text-red-500 text-sm">{errors.product_Description}</p>
+        )}
       </div>
 
       {/* Retail Price */}
@@ -551,6 +700,9 @@ async function runSearch(input) {
           className="input input-bordered w-full"
           required
         />
+          {errors.product_RetailPrice && (
+          <p className="text-red-500 text-sm">{errors.product_RetailPrice}</p>
+        )}
       </div>
 
       {/* Buying Price */}
@@ -565,6 +717,9 @@ async function runSearch(input) {
           className="input input-bordered w-full"
           required
         />
+          {errors.product_BuyingPrice && (
+          <p className="text-red-500 text-sm">{errors.product_BuyingPrice}</p>
+        )}
       </div>
 
       {/* Stock */}
@@ -579,6 +734,9 @@ async function runSearch(input) {
           className="input input-bordered w-full"
           required
         />
+          {errors.product_Stock && (
+          <p className="text-red-500 text-sm">{errors.product_Stock}</p>
+        )}
       </div>
 
       {/* Expiry Date */}
@@ -593,6 +751,9 @@ async function runSearch(input) {
           className="input input-bordered w-full"
           required
         />
+          {errors.product_Expiry && (
+          <p className="text-red-500 text-sm">{errors.product_Expiry}</p>
+        )}
       </div>
 
       {/* Category */}
@@ -627,6 +788,9 @@ async function runSearch(input) {
             </option>
           ))}
         </select>
+          {errors.product_Category && (
+          <p className="text-red-500 text-sm">{errors.product_Category}</p>
+        )}
       </div>
 
       {/* Buttons */}
@@ -686,7 +850,7 @@ async function runSearch(input) {
                   <td>
                     <QRCodeSVG
                       id={`qr-${item.id}`}
-                      value={item.qrCodeValue || `${window.location.origin}/product/${item.id || ""}`}
+                      value={item.qrCodeValue || `${window.location.origin}/scan/${item.id}`}
                       size={64}
                     />
                   </td>
