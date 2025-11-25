@@ -3,20 +3,19 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.bulkInsert('Admins', [
+    await queryInterface.bulkInsert('Admins',[
       {
-        id: 1,
-        username: 'admin',
-        password: 'admin123',
-      },
+        username:'NewAdmin',
+        password:'newadmin123',
+      }
     ])
   },
 
   async down (queryInterface, Sequelize) {
+    
     await queryInterface.bulkDelete('Admins', {
-      admin_id: {
-        [Sequelize.Op.in]: [1],
-      }
+      username:'NewAdmin'
     });
+   
   }
 };

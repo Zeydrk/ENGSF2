@@ -18,7 +18,8 @@
     "nodemailer": "^7.0.9",
     "qrcode": "^1.5.4",
     "qrcode.react": "^4.2.0",
-    "sequelize": "^6.37.7"
+    "sequelize": "^6.37.7",
+    "socket.io": "^4.8.1"
   },
   "devDependencies": {
     "sequelize-cli": "^6.6.3"
