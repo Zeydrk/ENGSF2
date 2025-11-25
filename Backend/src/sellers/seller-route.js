@@ -8,5 +8,4 @@ router.post('/delete', controller.deleteSeller);
 router.post('/update', controller.updateSeller);
 router.post('/claim', controller.claimSeller);
 
-
 module.exports = router;
