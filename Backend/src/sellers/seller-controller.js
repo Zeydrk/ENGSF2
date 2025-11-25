@@ -58,9 +58,4 @@ async function updateSeller(req, res) {
     }
 }
 
-module.exports = {
-  getSeller,
-  addSeller,
-  deleteSeller,
-  updateSeller,
-};
+module.exports = { getSeller, addSeller, deleteSeller, updateSeller };
