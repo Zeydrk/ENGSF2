@@ -9,6 +9,16 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      account_Id: {
+          type: Sequelize.INTEGER,
+          allowNull:false,
+          references: {
+            model: "Accounts",
+            key: "id"
+          },
+          onDelete: 'CASCADE',
+          onUpdate: 'CASCADE'
+      },
       username: {
         type: Sequelize.STRING
       },
