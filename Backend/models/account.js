@@ -11,13 +11,21 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Account.hasOne(models.Admin,{
+        foreignKey: 'account_Id',
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
+      })
+      Account.hasOne(models.Seller,{
+        foreignKey: 'account_Id',
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
+      })
     }
   }
   Account.init({
-    firstName: DataTypes.STRING,
-    lastName: DataTypes.STRING,
     email: DataTypes.STRING,
-    contactNo: DataTypes.INTEGER
+    password: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'Account',
