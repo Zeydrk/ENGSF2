@@ -132,7 +132,6 @@ export function useProduct() {
         return;
       }
       try {
-        console.log("HOOK archived search:", query);
         const res = await axios.get(`${BASE_URL}/products/searchArchive`, { params: { query } });
         setArchived(res.data || []);
         setError("");
