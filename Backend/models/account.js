@@ -11,16 +11,16 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      Account.hasOne(models.Admin,{
-        foreignKey: 'account_Id',
-        onDelete: 'CASCADE',
-        onUpdate: 'CASCADE'
-      })
-      Account.hasOne(models.Seller,{
-        foreignKey: 'account_Id',
-        onDelete: 'CASCADE',
-        onUpdate: 'CASCADE'
-      })
+      // Account.hasOne(models.Admin,{
+      //   foreignKey: 'account_Id',
+      //   onDelete: 'CASCADE',
+      //   onUpdate: 'CASCADE'
+      // })
+      // Account.hasOne(models.Seller,{
+      //   foreignKey: 'account_Id',
+      //   onDelete: 'CASCADE',
+      //   onUpdate: 'CASCADE'
+      // })
     }
   }
   Account.init({

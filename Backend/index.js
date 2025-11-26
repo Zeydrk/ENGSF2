@@ -49,7 +49,6 @@ app.use('/products', productRoutes);
 app.use('/packages', packageRoutes);
 app.use('/sellers', sellerRoutes);
 
-app.use('/accounts', accountsRoutes);
 
 
 

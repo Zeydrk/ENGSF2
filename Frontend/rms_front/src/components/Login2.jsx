@@ -1,6 +1,7 @@
 // Importing necessary libraries and hooks
 import { useState } from "react";
 import { useAdmin } from "../hooks/useAdmin";
+import { useAccount } from "../hooks/useAccount";
 import { useNavigate, Link, BrowserRouter as Router } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -8,15 +9,15 @@ import "react-toastify/dist/ReactToastify.css";
 import Forgot from "./Forgot";
 
 export default function Login({ onLogin }) {
-  const loginService = useAdmin();
+  const accountService = useAccount();
   const navigate = useNavigate();
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   //   Setting handlers for input changes
-  const handleUsernameChange = (e) => {
-    setUsername(e.target.value);
+  const handleEmailChange = (e) => {
+    setEmail(e.target.value);
   };
   const handlePasswordChange = (e) => {
     setPassword(e.target.value);
@@ -29,9 +30,10 @@ export default function Login({ onLogin }) {
     e.preventDefault();
     setIsLoading(true);
     // console.log(`Username: ${username}, Password: ${password}`);
-    const user = { username, password };
-    const response = await loginService.fetchAdmins(user);
-    if (response) {
+    const user = { email, password };
+    // const response = await loginService.fetchAdmins(user);
+    accountService.loginAccount(user)
+    .then(res =>{
       toast.success("Login Successful", {
         className: "alert alert-success text-white",
       });
@@ -40,12 +42,30 @@ export default function Login({ onLogin }) {
         setIsLoading(false);
         navigate("/");
       }, 3000);
-    } else {
-      toast.error("Login failed. Please check your credentials.", {
+    })
+    .catch(res =>{
+       toast.error("Login failed. Please check your credentials.", {
         className: "alert alert-error text-white",
       });
       setIsLoading(false);
-    }
+    });
+
+    
+    // if (response) {
+    //   toast.success("Login Successful", {
+    //     className: "alert alert-success text-white",
+    //   });
+    //   onLogin(); // Notify parent component of successful login
+    //   setTimeout(() => {
+    //     setIsLoading(false);
+    //     navigate("/");
+    //   }, 3000);
+    // } else {
+    //   toast.error("Login failed. Please check your credentials.", {
+    //     className: "alert alert-error text-white",
+    //   });
+    //   setIsLoading(false);
+    // }
   }
 
   return (
@@ -67,16 +87,16 @@ export default function Login({ onLogin }) {
             </h2>
 
             <div className="form-control">
-              <label className="label" htmlFor="username">
-                <span className="label-text font-semibold">Username</span>
+              <label className="label" htmlFor="email">
+                <span className="label-text font-semibold">Email</span>
               </label>
               <input
                 type="text"
-                id="username"
-                name="username"
-                placeholder="Enter your username"
+                id="email"
+                name="email"
+                placeholder="Enter your email"
                 className="input input-bordered w-full"
-                onChange={handleUsernameChange}
+                onChange={handleEmailChange}
                 required
               />
             </div>

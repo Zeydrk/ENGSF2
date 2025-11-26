@@ -2,7 +2,6 @@
   const passport = require('passport')
   const session = require('express-session')
   const model = require('../../../models')
-  const Account = model['Account']
   const LocalStrategy = require('passport-local')
 
   // all midlleware functions 
@@ -15,7 +14,7 @@
 
   // deserializing za user
   passport.deserializeUser(async (email, done) =>{
-    const result =  await Account.findOne({ where: { email: email} })
+    const result =  await model['Admin'].findOne({ where: { email: email} })
     if (result) {
       done(null, result)
     }
@@ -28,7 +27,7 @@
   passport.use(
     new LocalStrategy({usernameField: 'email', passwordField: 'password'},
       async (email, password, done) => {
-      const result = await Account.findOne({ where: { email: email, password: password } })
+      const result = await model['Admin'].findOne({ where: { email: email, password: password } })
       if (result !== null){
         done (null, result)
       }

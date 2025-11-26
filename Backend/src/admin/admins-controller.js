@@ -19,10 +19,34 @@ async function createAdmin(req, res) {
 
 
 async function getAdmins(req, res) {
-    const { username, password } = req.body
-    const response = await models['Admin'].findOne({ where: { username, password } })
-    res.send(response); // Unauthorized if no match found
+    if (req.isAuthenticated()){
+       res.send({
+            status: 200,
+            message: "Successfully logined",
+       })
+    }
+    else{
+        res.status(401).send("error 401: Unauthorized")
+    }
 }
+
+
+
+// async function loginRole(req,res){
+//     if(req.user.role === "admin"){
+//         res.send({
+//             status: 200,
+//             message:"Welcome Admin"})
+//     }
+//     else if (req.user.role === 'seller'){
+//         res.send({
+//             status: 200,
+//             message:"Welcome Seller"})
+//     }
+//     else{
+//         res.send("An error occured")
+//     }
+// }
 
 
 // This is so bad, try to upgrade this later
