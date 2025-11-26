@@ -5,6 +5,13 @@ const path = require('path');
 const {Op} = require('sequelize');
 
 const UPLOAD_DIR = path.join(__dirname, '..', '..', 'public', 'uploads', 'qrcodes')
+let lastProductId = 1000000;
+
+function generateProductId() {
+  lastProductId += 1;
+  return lastProductId.toString();
+}
+
 
 async function getProducts(req, res) {
   try {
@@ -109,7 +116,9 @@ async function addProduct(req, res) {
     if (existing) {
       return res.status(400).json({ message: "Product name already exists" });
     }
+        const id = generateProductId();
     const newProduct = await models["Products"].create({
+      id,
       product_Name,
       product_Description,
       product_RetailPrice,
@@ -224,12 +233,29 @@ async function getProductById(req, res) {
 }
 async function searchProduct(req, res){
   try {
-    const {query} = req.query;
-    const search = await models['Products'].findAll({
+    const {query,category} = req.query;
+    if(query && category){
+     await models['Products'].findAll({
+         where: {
+          product_Name: { [Op.like]: `%${query}%` },
+          product_Category: {[Op.like]: `%${category}%`},
+          isArchived: false
+} })
+    }
+    else if (query){
+    await models['Products'].findAll({
          where: {
           product_Name: { [Op.like]: `%${query}%` },
           isArchived: false
 } })
+    }
+    else if (category){
+    await models['Products'].findAll({
+         where: {
+          product_Category: {[Op.like]: `%${category}%`},
+          isArchived: false
+} })
+    }
     res.status(200).json(search.map(p => p.toJSON()));
   }
   catch(err){
