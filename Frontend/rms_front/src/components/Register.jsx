@@ -10,13 +10,13 @@ export default function Register() {
   // Hooks and states
   const loginService = useAdmin();
   const navigate = useNavigate();
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
   //   Setting handlers for input changes
-  const handleUsernameChange = (e) => {
-    setUsername(e.target.value);
+  const handleEmailChange = (e) => {
+    setEmail(e.target.value);
   };
   const handlePasswordChange = (e) => {
     setPassword(e.target.value);
@@ -38,14 +38,18 @@ export default function Register() {
     }
     else{
         // Make sure to add the middleware after learning it this friday
-        const user = { username, password };
-        const response = await loginService.createAdmin(user);
-        if (response) {
-          alert("Registration successful! You can now log in.");
-          navigate("/");
-        } else {
-          alert("Registration failed. Please try again.");
-        }
+        const user = { email, password };
+        loginService.createAdmin(user)
+        .then(res =>{
+          toast.success("Registration Successful", {
+            className: "alert alert-success text-white",
+          })
+        })
+        .catch(res=>{
+          toast.error("Registration failed. Please try again.", {
+            className: "alert alert-error text-white",
+          });
+        })
     }
   }
   return (
@@ -61,16 +65,16 @@ export default function Register() {
             </h2>
 
             <div className="form-control">
-              <label className="label" htmlFor="username">
-                <span className="label-text font-semibold">Username</span>
+              <label className="label" htmlFor="email">
+                <span className="label-text font-semibold">Email</span>
               </label>
               <input
                 type="text"
-                id="username"
-                name="username"
-                placeholder="Enter your username"
+                id="email"
+                name="email"
+                placeholder="Enter your email"
                 className="input input-bordered w-full"
-                onChange={handleUsernameChange}
+                onChange={handleEmailChange}
                 required
               />
             </div>
