@@ -68,36 +68,41 @@ export default function ProductsWithTable() {
   }
 
   // --- Search handler ---
- 
-async function handleSearch(e) {
-  const input = e.target.value.toLowerCase();
+ async function handleSearch(e) {
+  const value = e.target.value.toLowerCase();
+  setSearchText(value);
 
-  // clear old timer
   clearTimeout(debounceRef.current);
 
   debounceRef.current = setTimeout(() => {
-    runSearch(input);
+    applyFilters(value, selectedCategory);
   }, 300);
 }
 
-async function runSearch(input) {
-  if (input.trim() === '') {
-    setFilteredResults(null);
-    refresh();
-    return;
-  }
+  // --- Category dropdown handler ---
+ async function handleDropDown(option) {
+  setSelectedCategory(option);
+  applyFilters(searchText, option);
+}
 
+
+async function applyFilters(newSearch, newCategory) {
   setLoading(true);
+console.log(newSearch,newCategory);
+console.log(mode);
   try {
-    if (mode === "product") {
-      await productApi.searchProduct(input);
-    } else {
-      await productApi.searchArchivedProduct(input);
-    }
-
+    if(mode === "product"){
+    await productApi.searchProduct( newSearch || "", newCategory || "",);
     setPage(1);
     setTotalPages(1);
     setFilteredResults(null);
+  }else if (mode === "archive"){
+    await productApi.searchArchivedProduct(newSearch || "", newCategory || "");
+    setPage(1);
+    setTotalPages(1);
+    setFilteredResults(null);
+  }
+    
   } catch (err) {
     setError(err?.message || "Search failed");
   } finally {
@@ -105,21 +110,6 @@ async function runSearch(input) {
   }
 }
 
-  // --- Category dropdown handler ---
-  async function handleDropDown(option) {
-    setLoading(true);
-    setFilteredResults(null);
-    try {
-      if (mode === "product") await productApi.categorySort(option);
-      else await productApi.categoryArchiveSort(option);
-      setPage(1);
-      setTotalPages(1);
-    } catch (err) {
-      setError("Dropdown failed: " + ((err && err.message) || ""));
-    } finally {
-      setLoading(false);
-    }
-  }
 
   function resetForm() {
     setForm({

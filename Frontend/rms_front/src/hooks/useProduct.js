@@ -108,60 +108,56 @@ export function useProduct() {
   };
 
   // --- Debounced Search ---
-  const searchProduct = useCallback(
-    debounce(async (query) => {
-      if (!query.trim()) {
-        setProducts([]);
-        return;
-      }
-      try {
-        const res = await axios.get(`${BASE_URL}/products/search`, { params: { query } });
-        setProducts(res.data || []);
-        setError("");
-      } catch (err) {
-        handleError(err);
-      }
-    }, 300),
-    []
-  );
+const searchProduct = useCallback(
+  debounce(async (search, category) => {
+
+    const res = await axios.get(`${BASE_URL}/products/search`, {
+      params: {
+        search: search || "",
+        category: category || "",
+      },
+    });
+
+    setProducts(res.data || []);
+  }, 300),
+  []
+);
+
 
   const searchArchivedProduct = useCallback(
-    debounce(async (query) => {
-      if (!query.trim()) {
-        setArchived([]);
-        return;
-      }
-      try {
-        const res = await axios.get(`${BASE_URL}/products/searchArchive`, { params: { query } });
-        setArchived(res.data || []);
-        setError("");
-      } catch (err) {
-        handleError(err);
-      }
-    }, 300),
-    []
+    debounce(async (search, category) => {
+    const res = await axios.get(`${BASE_URL}/products/searchArchive`, {
+      params: {
+        search: search || "",
+        category: category || "",
+      },
+    });
+    console.log("Archive",res.data)
+    setArchived(res.data || []);
+  }, 300),
+  []
   );
 
-  // --- Category Sorting ---
-  const categorySort = async (order) => {
-    try {
-      const res = await axios.get(`${BASE_URL}/products/category`, { params: { sort: order } });
-      setProducts(res.data?.length ? res.data : []);
-      setError(res.data?.length ? "" : `No products for: ${order}`);
-    } catch (err) {
-      handleError(err);
-    }
-  };
+  // // --- Category Sorting ---
+  // const categorySort = async (order) => {
+  //   try {
+  //     const res = await axios.get(`${BASE_URL}/products/category`, { params: { sort: order } });
+  //     setProducts(res.data?.length ? res.data : []);
+  //     setError(res.data?.length ? "" : `No products for: ${order}`);
+  //   } catch (err) {
+  //     handleError(err);
+  //   }
+  // };
 
-  const categoryArchiveSort = async (order) => {
-    try {
-      const res = await axios.get(`${BASE_URL}/products/categoryArchive`, { params: { sort: order } });
-      setArchived(res.data?.length ? res.data : []);
-      setError(res.data?.length ? "" : `No archived products for: ${order}`);
-    } catch (err) {
-      handleError(err);
-    }
-  };
+  // const categoryArchiveSort = async (order) => {
+  //   try {
+  //     const res = await axios.get(`${BASE_URL}/products/categoryArchive`, { params: { sort: order } });
+  //     setArchived(res.data?.length ? res.data : []);
+  //     setError(res.data?.length ? "" : `No archived products for: ${order}`);
+  //   } catch (err) {
+  //     handleError(err);
+  //   }
+  // };
 
   // --- Return everything ---
   return {
@@ -179,7 +175,7 @@ export function useProduct() {
     archiveAddBack,
     searchProduct,
     searchArchivedProduct,
-    categorySort,
-    categoryArchiveSort,
+    //categorySort,
+    //categoryArchiveSort,
   };
 }
