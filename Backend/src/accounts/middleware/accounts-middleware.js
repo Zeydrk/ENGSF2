@@ -14,8 +14,8 @@
   })
 
   // deserializing za user
-  passport.deserializeUser(async (email,role, done) =>{
-    const result =  await Account.findOne({ where: { email: email, role: role } })
+  passport.deserializeUser(async (email, done) =>{
+    const result =  await Account.findOne({ where: { email: email} })
     if (result) {
       done(null, result)
     }
