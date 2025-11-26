@@ -59,11 +59,9 @@ export function useProduct() {
     }
   }, []);
 
-  // --- CRUD Operations ---
   const createProduct = async (product) => {
     try {
       const response = await axios.post(`${BASE_URL}/products/create`, product);
-          console.log("Hook",response);
       await getAllProducts();
     } catch (err) {
       handleError(err);

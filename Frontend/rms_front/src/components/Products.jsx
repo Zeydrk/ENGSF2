@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useProduct } from "../hooks/useProduct";
-import { QRCodeSVG } from "qrcode.react";
 import { useRef } from "react";
 import { toast } from "react-toastify";
+import { QRCodeSVG } from "qrcode.react";
 import "react-toastify/dist/ReactToastify.css";
 
 
@@ -25,6 +25,8 @@ export default function ProductsWithTable() {
   });
   const [editing, setEditing] = useState(null);
   const [error, setError] = useState(null);
+  const [searchText, setSearchText] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
 
   // Pagination & mode
   const [page, setPage] = useState(1);
@@ -458,37 +460,6 @@ async function handleCreate(e) {
         </div>
       </div>
       <div className="flex items-center">
-        <label className="input">
-  <svg className="h-[1em] opacity-50" viewBox="0 0 24 24">
-    <g
-      strokeLinejoin="round"
-      strokeLinecap="round"
-      strokeWidth="2.5"
-      fill="none"
-      stroke="currentColor"
-    >
-      <circle cx="11" cy="11" r="8"></circle>
-      <path d="m21 21-4.3-4.3"></path>
-    </g>
-  </svg>
-  <input type="search" name="input" onChange={handleSearch} className="grow" placeholder="Search Product" />
-</label>
-<div className="dropdown">
-  <div tabIndex={0} role="button" className="btn m-1">
-    Sort by
-  </div>
-  <ul
-    tabIndex={0}
-    className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"
-  >
-    <li onClick={() => handleDropDown("priceAsc")}><a>Price (↑)</a></li>
-    <li onClick={() => handleDropDown("priceDesc")}><a>Price (↓)</a></li>
-    <li onClick={() => handleDropDown("stockAsc")}><a>Stock (↑)</a></li>
-    <li onClick={() => handleDropDown("stockDesc")}><a>Stock (↓)</a></li>
-    <li onClick={() => handleDropDown("expiryAsc")}><a>Expiry (↑)</a></li>
-    <li onClick={() => handleDropDown("expiryDesc")}><a>Expiry (↓)</a></li>
-  </ul>
-</div>
       </div>
 
       {/* Search & Sort */}
@@ -872,7 +843,7 @@ async function handleCreate(e) {
             ) : tableData.length > 0 ? (
               tableData.map((item, idx) => (
                 <tr key={item.id ?? idx}>
-                  <th>{idx + 1}</th>
+                  <th>{item.id}</th>
                   <td>{item.product_Name}</td>
                   <td>{item.product_Description}</td>
                   <td>₱{parseFloat(item.product_RetailPrice || 0).toFixed(2)}</td>
@@ -883,7 +854,7 @@ async function handleCreate(e) {
                   <td>
                     <QRCodeSVG
                       id={`qr-${item.id}`}
-                      value={item.qrCodeValue || `${window.location.origin}/scan/${item.id}`}
+                      value={item.QrCodeValue || `${window.location.origin}/scan/${item.id}`}
                       size={64}
                     />
                   </td>
