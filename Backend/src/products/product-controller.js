@@ -5,13 +5,12 @@ const path = require('path');
 const {Op} = require('sequelize');
 
 const UPLOAD_DIR = path.join(__dirname, '..', '..', 'public', 'uploads', 'qrcodes')
-let lastProductId = 1000000;
-
 function generateProductId() {
-  lastProductId += 1;
-  return lastProductId.toString();
+  const min = 1_000_000; // smallest 7-digit number
+  const max = 9_999_999; // largest 7-digit number
+  const id = Math.floor(Math.random() * (max - min + 1)) + min;
+  return id.toString();
 }
-
 
 async function getProducts(req, res) {
   try {
@@ -231,96 +230,92 @@ async function getProductById(req, res) {
     res.status(500).json({ error: err.message });
   }
 }
-async function searchProduct(req, res){
+async function searchProduct(req, res) {
   try {
-    const {query,category} = req.query;
-    if(query && category){
-     await models['Products'].findAll({
-         where: {
-          product_Name: { [Op.like]: `%${query}%` },
-          product_Category: {[Op.like]: `%${category}%`},
-          isArchived: false
-} })
+    const { search, category } = req.query;
+    console.log("Backend:", search, category);
+
+    const where = { isArchived: false };
+
+    if (search) {
+      where.product_Name = { [Op.like]: `${search}%` };
     }
-    else if (query){
-    await models['Products'].findAll({
-         where: {
-          product_Name: { [Op.like]: `%${query}%` },
-          isArchived: false
-} })
-    }
-    else if (category){
-    await models['Products'].findAll({
-         where: {
-          product_Category: {[Op.like]: `%${category}%`},
-          isArchived: false
-} })
-    }
-    res.status(200).json(search.map(p => p.toJSON()));
+
+    if (category) {
+       where.product_Category = { [Op.like]: `%${category}%` };
+     }
+
+    const products = await models["Products"].findAll({ where });
+
+    return res.status(200).json(products);
+  } catch (err) {
+    console.error("Error fetching products:", err);
+    return res.status(500).json({ error: err.message });
   }
-  catch(err){
-    console.error("Error fetching product name")
-    res.status(500).json({ error : err.message})
-  }
-  
 }
 async function searchArchiveProduct(req, res){
-  try {
-    const {query} = req.query;
-    const search = await models['Products'].findAll({
-      where: {
-          product_Name: { [Op.like]: `%${query}%` },
-          isArchived: true
-}
-, })
-    res.status(200).json(search);
-  }
-  catch(err){
-    console.error("Error fetching arhchived product name")
-    res.status(500).json({ error : err.message})
-  }
-  
-}
-async function categoryArchiveSort(req,res){
-  try{
-    const sort = req.query.sort;
-    const sortedCategory = await models['Products'].findAll({
-      where: {product_Category: {[Op.eq]: `${sort}`},
-              isArchived:true},
-      order: [['product_Name', 'ASC']],
-    })
-    // if (!sortedCategory || sortedCategory.length === 0) {
-    //   return res.status(404).json({
-    //     message: `No products found for category: ${sort}`,
-    //   });
-    // }
-    res.status(200).json(sortedCategory);
-  }
-  catch (err){
-    console.error("Error finding Category");
-    res.status(500).json({error: err.message});
+ try {
+    const { search, category } = req.query;
+    console.log("Backend:", search, category);
+
+    const where = { isArchived: true };
+
+    if (search) {
+      where.product_Name = { [Op.like]: `${search}%` };
+    }
+
+    if (category) {
+       where.product_Category = { [Op.like]: `%${category}%` };
+     }
+
+    const products = await models["Products"].findAll({ where });
+
+    return res.status(200).json(products);
+  } catch (err) {
+    console.error("Error fetching products:", err);
+    return res.status(500).json({ error: err.message });
   }
 }
-async function categorySort(req,res){
-  try{
-    const sort = req.query.sort;
-    const sortedCategory = await models['Products'].findAll({
-      where: {product_Category: {[Op.eq]: `${sort}`},
-              isArchived:false},
-      order: [['product_Name', 'ASC']],
-    })
-    // if (!sortedCategory || sortedCategory.length === 0) {
-    //   return res.status(404).json({
-    //     message: `No products found for category: ${sort}`,
-    //   });
-    // }
-    res.status(200).json(sortedCategory);
-  }
-  catch (err){
-    console.error("Error finding Category");
-    res.status(500).json({error: err.message});
-  }
-}
+// async function categoryArchiveSort(req,res){
+//   try{
+//     const sort = req.query.sort;
+//     const sortedCategory = await models['Products'].findAll({
+//       where: {product_Category: {[Op.eq]: `${sort}`},
+//               isArchived:true},
+//       order: [['product_Name', 'ASC']],
+//     })
+//     // if (!sortedCategory || sortedCategory.length === 0) {
+//     //   return res.status(404).json({
+//     //     message: `No products found for category: ${sort}`,
+//     //   });
+//     // }
+//     res.status(200).json(sortedCategory);
+//   }
+//   catch (err){
+//     console.error("Error finding Category");
+//     res.status(500).json({error: err.message});
+//   }
+// }
+// async function categorySort(req,res){
+//   try{
+//     const sort = req.query.sort;
+//     const sortedCategory = await models['Products'].findAll({
+//       where: {product_Category: {[Op.eq]: `${sort}`},
+//               isArchived:false},
+//       order: [['product_Name', 'ASC']],
+//     })
+//     // if (!sortedCategory || sortedCategory.length === 0) {
+//     //   return res.status(404).json({
+//     //     message: `No products found for category: ${sort}`,
+//     //   });
+//     // }
+//     res.status(200).json(sortedCategory);
+//   }
+//   catch (err){
+//     console.error("Error finding Category");
+//     res.status(500).json({error: err.message});
+//   }
+// }
 async function scanProduct(req, res) {
   try {
     const id = req.params.id;
@@ -355,11 +350,11 @@ module.exports = {
     updateProduct,
     getProductById,
     searchProduct,
-    categorySort,
+    //categorySort,
     archivedProducts,
     archiveProduct,
     archiveAddBack,
     searchArchiveProduct,
-    categoryArchiveSort,
+    //categoryArchiveSort,
     scanProduct
 }
