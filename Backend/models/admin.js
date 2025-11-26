@@ -11,20 +11,12 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      Admin.belongsTo(models.Account,{
-        foreignKey: 'account_Id',
-      })
+      // Admin.belongsTo(models.Account,{
+      //   foreignKey: 'account_Id',
+      // })
     }
   }
   Admin.init({
-    account_Id: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: "Account",
-        key: "id"
-      }
-    },
-    username: DataTypes.STRING,
     password: DataTypes.STRING,
     email: DataTypes.STRING
   }, {
