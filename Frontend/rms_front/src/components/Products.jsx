@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { toast } from "react-toastify";
 import { QRCodeSVG } from "qrcode.react";
 import "react-toastify/dist/ReactToastify.css";
+import AdminLogger from "./adminlogger";
 
 
 export default function ProductsWithTable() {
