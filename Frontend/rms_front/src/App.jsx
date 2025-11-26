@@ -19,6 +19,7 @@ import Reset from './components/Reset'
 import Package from './components/Package'
 import PackagePage from './components/PackagePage'
 import Register2 from './components/Register2'
+import Login2 from './components/Login2'
 
 const ProtectedLayout = ({ children, onLogout }) => (
   <>
@@ -59,6 +60,7 @@ function App() {
       <Routes>
         {/* Public route */}
         <Route path="/login" element={<Login onLogin={handleLogin}/>} />
+        <Route path="/login2" element={<Login2 onLogin={handleLogin}/>} />
         <Route path="/register" element={<Register />} />
         <Route path="/register2" element={<Register2 />} />
         {/* Protected routes are here */}

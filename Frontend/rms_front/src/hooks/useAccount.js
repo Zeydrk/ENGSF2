@@ -13,10 +13,17 @@ export function useAccount() {
         return response.data
     }
 
+    async function loginAccount(user){
+        const response = await axios.post(`${BASE_URL}/accounts/login`, user)
+        setAccounts(prev => [...prev, response.data])
+        return response
+    }
+
 
     return{
         accounts,
         createAccount,
+        loginAccount,
     }
 }
 
