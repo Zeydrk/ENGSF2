@@ -11,6 +11,10 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
      // this.belongsTo(models['Admin']);
+     Products.hasMany(models.AdminLogReport, {
+        foreignKey: 'product_Id',
+        as: 'activityLogs'
+      });
     }
   }
   Products.init({
