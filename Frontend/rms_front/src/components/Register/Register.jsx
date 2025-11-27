@@ -52,10 +52,12 @@ export default function Register(){
           toast.error("Passwords do not match. Please try again.", {
             className: "alert alert-error text-white",
           });
+          setIsLoading(false)
         }
         else{
             // Make sure to add the middleware after learning it this friday
             const user = { email, password };
+            
             loginService.createAdmin(user)
             .then(res =>{
               toast.success("Registration Successful", {
@@ -66,11 +68,20 @@ export default function Register(){
                 navigate('/login')
             }, 2000);
             })
-            .catch(res=>{
-              toast.error("Registration failed. Please try again.", {
-                className: "alert alert-error text-white",
+            .catch(error=>{
+                if(error.response.status == 409){
+                    toast.error("Account Already exists", {
+                    className: "alert alert-error text-white",
               });
+
+                }
+                else{
+                    toast.error("Registration failed. Please try again.", {
+                      className: "alert alert-error text-white",
+                    });
+                }
             })
+            setIsLoading(false)
         }
       }
     return (
@@ -222,7 +233,7 @@ export default function Register(){
             <div className="mt-8 text-center">
                 <p className="text-base text-gray-700">
                 Already have an account?{' '}
-                <Link to="/" className="font-bold text-amber-600 hover:text-amber-500 transition-colors duration-200 hover:underline text-lg">
+                <Link to="/login" className="font-bold text-amber-600 hover:text-amber-500 transition-colors duration-200 hover:underline text-lg">
                     Sign in here
                 </Link>
                 </p>

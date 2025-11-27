@@ -2,9 +2,10 @@ const express = require('express');
 const router = express.Router();
 const controller = require('./admins-controller');
 const passport = require('./middleware/admin-middleware.js');
+const registerMiddleware = require("./middleware/register-middleware.js")
 
 // Routes
-router.post('/', controller.createAdmin);
+router.post('/', registerMiddleware ,controller.createAdmin);
 // Changed to post because we are sending username and password in the body
 router.post('/login',passport.authenticate('local'),controller.getAdmins);
 // forgot password emailers

@@ -7,7 +7,7 @@ import {BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 
 // Importing components
 import Login from './components/Login/Login'
-import Register from './components/Register'
+import Register from './components/Register/Register'
 import ProtectedRoute from './components/ProtectedRoute'
 import Home from './components/Home'
 import Navbar from './components/Navbar'  
@@ -18,7 +18,6 @@ import Forgot from './components/Forgot'
 import Reset from './components/Reset'
 import Package from './components/Package'
 import PackagePage from './components/PackagePage'
-import Register2 from './components/Register/Register'
 
 const ProtectedLayout = ({ children, onLogout }) => (
   <>
@@ -59,9 +58,7 @@ function App() {
       <Routes>
         {/* Public route */}
         <Route path="/login" element={<Login onLogin={handleLogin}/>} />
-        
         <Route path="/register" element={<Register />} />
-        <Route path="/register2" element={<Register2 />} />
         {/* Protected routes are here */}
         <Route path="/" element=
           {
