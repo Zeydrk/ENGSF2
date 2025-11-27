@@ -115,7 +115,7 @@ export default function SellerManager() {
               <th>Phone</th>
               <th>Balance</th>
               <th>Actions</th>
-              <th>Claim</th> {/* NEW COLUMN */}
+              <th>Cashout</th> {/* NEW COLUMN */}
             </tr>
           </thead>
           <tbody>
@@ -142,7 +142,7 @@ export default function SellerManager() {
                       className="btn btn-sm btn-warning"
                       onClick={() => handleClaim(s.id)}
                     >
-                      Claim
+                      Cashout
                     </button>
                   </td>
 

@@ -1,9 +1,6 @@
 const models = require("../../models");
-const QRCode = require('qrcode');
 const fs = require('fs');
 const path = require('path');
-
-const UPLOAD_DIR = path.join(__dirname, '..', '..', 'public', 'uploads', 'qrcodes');
 
 async function getPackage(req, res) {
     try {
@@ -40,7 +37,6 @@ async function addPackage(req, res) {
         const seller = await models.Seller.findOne({ where: { seller_Name } });
         if (!seller) return res.status(404).json({ error: "Seller not found" });
 
-        // Create Package
         const newPackage = await models.Package.create({
             seller_Id: seller.id,
             package_Name,
@@ -49,33 +45,11 @@ async function addPackage(req, res) {
             package_Size,
             price,
             handling_Fee,
-            payment_Status,
+            payment_Status: "unpaid", // always start unpaid
             payment_Method,
             package_Status
         });
 
-        // UPDATE SELLER BALANCE
-        seller.balance = parseFloat(seller.balance) + parseFloat(price);
-        await seller.save();
-
-        // Generate QR
-        const baseUrl = process.env.APP_URL || 'http://localhost:5173';
-        const qrValue = `${baseUrl}/packages/${newPackage.id}`;
-        const svgString = await QRCode.toString(qrValue, { type: 'svg', margin: 1 });
-
-        fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-
-        const fileName = `qr_package_${newPackage.id}_${Date.now()}.svg`;
-        const filePath = path.join(UPLOAD_DIR, fileName);
-
-        fs.writeFileSync(filePath, svgString, 'utf8');
-
-        await newPackage.update({
-            package_QrCodeValue: qrValue,
-            package_QrCodePath: `/uploads/qrcodes/${fileName}`
-        });
-
-        // Return full package data
         const fullPackage = await models.Package.findByPk(newPackage.id, {
             include: [{ model: models.Seller, attributes: ['seller_Name'] }]
         });
@@ -91,10 +65,17 @@ async function addPackage(req, res) {
 async function deletePackage(req, res) {
     try {
         const { id } = req.body;
-        const deleted = await models.Package.destroy({ where: { id } });
+        const pkg = await models.Package.findByPk(id);
+        if (!pkg) return res.status(404).json({ message: "Package not found" });
 
-        if (!deleted) return res.status(404).json({ message: "Package not found" });
+        // Deduct balance if package was paid
+        if (pkg.payment_Status.toLowerCase() === "paid") {
+            const seller = await models.Seller.findByPk(pkg.seller_Id);
+            seller.balance = parseFloat(seller.balance) - parseFloat(pkg.price);
+            await seller.save();
+        }
 
+        await pkg.destroy();
         res.status(200).json({ message: "Package deleted successfully" });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -120,10 +101,12 @@ async function updatePackage(req, res) {
         const pkg = await models.Package.findByPk(id);
         if (!pkg) return res.status(404).json({ message: "Package not found" });
 
+        const oldStatus = pkg.payment_Status.toLowerCase();
+        const oldPrice = parseFloat(pkg.price);
+
         if (seller_Name) {
             const seller = await models.Seller.findOne({ where: { seller_Name } });
             if (!seller) return res.status(404).json({ message: "Seller not found" });
-
             pkg.seller_Id = seller.id;
         }
 
@@ -139,6 +122,19 @@ async function updatePackage(req, res) {
 
         await pkg.save();
 
+        // Update seller balance if payment status changed
+        if (payment_Status && oldStatus !== pkg.payment_Status.toLowerCase()) {
+            const seller = await models.Seller.findByPk(pkg.seller_Id);
+            const newPrice = parseFloat(pkg.price);
+
+            if (oldStatus === "unpaid" && pkg.payment_Status.toLowerCase() === "paid") {
+                seller.balance = parseFloat(seller.balance) + newPrice;
+            } else if (oldStatus === "paid" && pkg.payment_Status.toLowerCase() === "unpaid") {
+                seller.balance = parseFloat(seller.balance) - newPrice;
+            }
+            await seller.save();
+        }
+
         const updated = await models.Package.findByPk(id, {
             include: [{ model: models.Seller, attributes: ['seller_Name'] }]
         });
@@ -153,13 +149,11 @@ async function updatePackage(req, res) {
 async function getPackageById(req, res) {
     try {
         const { id } = req.params;
-
         const packageData = await models.Package.findByPk(id, {
             include: [{ model: models.Seller, attributes: ['seller_Name'] }]
         });
 
         if (!packageData) return res.status(404).json({ error: "Not found" });
-
         res.status(200).json(packageData);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -171,7 +165,6 @@ async function getSellers(req, res) {
         const sellers = await models.Seller.findAll({
             attributes: ['id', 'seller_Name']
         });
-
         res.status(200).json(sellers);
     } catch (err) {
         res.status(500).json({ error: err.message });
