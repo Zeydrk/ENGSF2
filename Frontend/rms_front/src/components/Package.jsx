@@ -281,7 +281,6 @@ export default function PackageManager() {
               <th>Actions</th>
             </tr>
           </thead>
-
           <tbody>
             {loading ? (
               <tr><td colSpan="12">Loading...</td></tr>
