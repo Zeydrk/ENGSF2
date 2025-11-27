@@ -18,7 +18,7 @@ import Forgot from './components/Forgot'
 import Reset from './components/Reset'
 import Package from './components/Package'
 import PackagePage from './components/PackagePage'
-import Register2 from './components/Register2'
+import Register2 from './components/Register/Register'
 
 const ProtectedLayout = ({ children, onLogout }) => (
   <>
