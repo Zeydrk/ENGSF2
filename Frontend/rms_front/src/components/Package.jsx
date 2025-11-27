@@ -92,7 +92,6 @@ export default function PackageManager() {
   const packages = packgApi.packages || [];
   const sellers = packgApi.sellers || [];
 
-  // Filter packages based on search input
   const filteredPackages = packages.filter(
     (p) =>
       p.seller_Name.toLowerCase().includes(search.toLowerCase()) ||
@@ -115,7 +114,6 @@ export default function PackageManager() {
         </button>
       </div>
 
-      {/* SEARCH BAR */}
       <div className="mb-4">
         <input
           type="text"
@@ -126,14 +124,12 @@ export default function PackageManager() {
         />
       </div>
 
-      {/* FORM */}
       {showForm && (
         <div className="card bg-base-200 p-4 mb-6">
           <form
             onSubmit={editing ? handleUpdate : handleCreate}
             className="grid grid-cols-1 md:grid-cols-3 gap-4"
           >
-            {/* SELLER DROPDOWN */}
             <select
               className="input input-bordered"
               value={form.seller_Name}
@@ -172,7 +168,6 @@ export default function PackageManager() {
               required
             />
 
-            {/* PACKAGE SIZE */}
             <div className="flex flex-col">
               <label className="mb-1">Package Size</label>
               <div className="flex gap-2">
@@ -207,7 +202,6 @@ export default function PackageManager() {
               required
             />
 
-            {/* PAYMENT METHOD */}
             <div className="flex flex-col">
               <label className="mb-1">Payment Method</label>
               <div className="flex gap-2">
@@ -224,7 +218,6 @@ export default function PackageManager() {
               </div>
             </div>
 
-            {/* EDITING ONLY: PAYMENT STATUS */}
             {editing && (
               <div className="flex flex-col">
                 <label className="mb-1">Payment Status</label>
@@ -243,7 +236,6 @@ export default function PackageManager() {
               </div>
             )}
 
-            {/* EDITING ONLY: PACKAGE STATUS */}
             {editing && (
               <div className="flex flex-col">
                 <label className="mb-1">Package Status</label>
@@ -269,7 +261,6 @@ export default function PackageManager() {
         </div>
       )}
 
-      {/* TABLE */}
       <div className="overflow-x-auto bg-base-100 p-4 rounded-lg shadow">
         <table className="table">
           <thead>
@@ -288,7 +279,6 @@ export default function PackageManager() {
               <th>Actions</th>
             </tr>
           </thead>
-
           <tbody>
             {loading ? (
               <tr><td colSpan="12">Loading...</td></tr>

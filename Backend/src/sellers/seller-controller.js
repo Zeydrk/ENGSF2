@@ -58,4 +58,38 @@ async function updateSeller(req, res) {
     }
 }
 
-module.exports = { getSeller, addSeller, deleteSeller, updateSeller };
+async function claimSeller(req, res) {
+    try {
+        const { id } = req.body;
+
+        // Find seller
+        const seller = await models.Seller.findByPk(id);
+        if (!seller) return res.status(404).json({ message: "Seller not found" });
+
+        // DELETE packages with status "Claimed"
+        const deletedPackages = await models.Package.destroy({
+            where: {
+                seller_Id: id,
+                package_Status: "Claimed"   // <-- change if needed
+            }
+        });
+
+        // RESET BALANCE
+        seller.balance = 0;
+        await seller.save();
+
+        // Return updated sellers
+        const sellers = await models.Seller.findAll();
+
+        res.status(200).json({
+            message: "Claim processed successfully",
+            deletedPackages: deletedPackages,
+            sellers
+        });
+
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+
+module.exports = { getSeller, addSeller, deleteSeller, updateSeller, claimSeller};
