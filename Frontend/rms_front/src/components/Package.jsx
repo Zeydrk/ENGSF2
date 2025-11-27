@@ -92,11 +92,13 @@ export default function PackageManager() {
   const packages = packgApi.packages || [];
   const sellers = packgApi.sellers || [];
 
-  const filteredPackages = packages.filter(
-    (p) =>
-      p.seller_Name.toLowerCase().includes(search.toLowerCase()) ||
-      p.buyer_Name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredPackages = packages.filter((p) => {
+    const seller = p.seller_Name?.toLowerCase() || "";
+    const buyer = p.buyer_Name?.toLowerCase() || "";
+    const term = search.toLowerCase();
+
+    return seller.includes(term) || buyer.includes(term);
+  });
 
   return (
     <div className="p-6">

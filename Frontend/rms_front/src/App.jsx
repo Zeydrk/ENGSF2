@@ -17,7 +17,6 @@ import ProductPage from './components/ProductPage';
 import Forgot from './components/Forgot'
 import Reset from './components/Reset'
 import Package from './components/Package'
-import PackagePage from './components/PackagePage'
 import Register2 from './components/Register2'
 import Login2 from './components/Login2'
 
