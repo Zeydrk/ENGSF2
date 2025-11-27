@@ -25,11 +25,19 @@ export function useSeller() {
     await getAllSellers();
   }
 
+  async function claimSeller(id) {
+    await axios.post(`${BASE_URL}/claim`, { id });
+    await getAllSellers();
+  }
+
+
+
   return {
     sellers,
     getAllSellers,
     createSeller,
     updateSeller,
     deleteSeller,
+    claimSeller,
   };
 }

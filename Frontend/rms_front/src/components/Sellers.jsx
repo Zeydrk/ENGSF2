@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSeller } from "../hooks/useSeller";
 
 export default function SellerManager() {
-  const { sellers, getAllSellers, createSeller, updateSeller, deleteSeller } = useSeller();
+  const { sellers, getAllSellers, createSeller, updateSeller, deleteSeller, claimSeller } = useSeller();
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
@@ -44,6 +44,11 @@ export default function SellerManager() {
   async function handleDelete(id) {
     if (!window.confirm("Delete this seller?")) return;
     await deleteSeller(id);
+  }
+
+  async function handleClaim(id) {
+    if (!window.confirm("Confirm claim? This will reset balance and delete claimed packages.")) return;
+    await claimSeller(id); // <-- NEW
   }
 
   function openEdit(s) {
@@ -110,13 +115,14 @@ export default function SellerManager() {
               <th>Phone</th>
               <th>Balance</th>
               <th>Actions</th>
+              <th>Claim</th> {/* NEW COLUMN */}
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan="6">Loading...</td></tr>
+              <tr><td colSpan="7">Loading...</td></tr>
             ) : sellers.length === 0 ? (
-              <tr><td colSpan="6">No sellers found</td></tr>
+              <tr><td colSpan="7">No sellers found</td></tr>
             ) : (
               sellers.map((s, idx) => (
                 <tr key={s.id}>
@@ -129,6 +135,17 @@ export default function SellerManager() {
                     <button className="btn btn-sm btn-ghost" onClick={() => openEdit(s)}>Edit</button>
                     <button className="btn btn-sm btn-error" onClick={() => handleDelete(s.id)}>Delete</button>
                   </td>
+
+                  {/* NEW CLAIM BUTTON */}
+                  <td>
+                    <button
+                      className="btn btn-sm btn-warning"
+                      onClick={() => handleClaim(s.id)}
+                    >
+                      Claim
+                    </button>
+                  </td>
+
                 </tr>
               ))
             )}
