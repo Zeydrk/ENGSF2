@@ -11,7 +11,7 @@ require('dotenv').config();
 
 async function createAdmin(req, res) {
     const admins = await models['Admin'].create({
-        username: req.body.username,
+        email: req.body.email,
         password: req.body.password
     })
     res.send(admins)
