@@ -18,6 +18,7 @@ async function createAdmin(req, res) {
 }
 
 
+
 async function getAdmins(req, res) {
     if (req.isAuthenticated()){
        res.send({
