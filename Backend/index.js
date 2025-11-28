@@ -16,6 +16,9 @@ const adminsRoutes = require('./src/admin/admins-routes')
 const productRoutes = require('./src/products/product-route')
 const packageRoutes = require('./src/packages/package-route')
 const sellerRoutes = require('./src/sellers/seller-route')
+const logRoutes = require('./src/logreports/adminlog-routes')
+const notificationRoutes = require('./src/services/emailNotif-routes')
+const { startAutoNotifications } = require('./src/services/autoNotifSched')
 // for testing
 const accountsRoutes = require('./src/accounts/accounts-routes')
 
@@ -42,16 +45,16 @@ app.get('/', (req,res) => {
     res.send("Test")
 })
 
-app.use('/admins', require('./src/admin/admins-routes'))
-
+// app.use('/admins', require('./src/admin/admins-routes'))
 app.use('/admins',adminsRoutes);
 app.use('/products', productRoutes);
 app.use('/packages', packageRoutes);
 app.use('/sellers', sellerRoutes);
+app.use('/logs', logRoutes);
+app.use('/email/notifications', notificationRoutes);
 
 
-
-
+startAutoNotifications();
 // Server feedback
 app.listen(3000, () => {
     console.log(`Server has started at http://localhost:3000`)
