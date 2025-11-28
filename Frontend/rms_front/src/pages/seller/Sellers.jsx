@@ -233,7 +233,7 @@ const Sellers = () => {
               placeholder="Search sellers by name, email, or phone..."
               value={searchTerm}
               onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-              className="block w-full pl-10 sm:pl-12 pr-3 py-2 sm:py-3 border border-amber-200 rounded-xl bg-amber-50 placeholder-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base"
+              className="block w-full pl-10 sm:pl-12 pr-3 py-2 sm:py-3 border border-amber-200 rounded-xl bg-amber-50 placeholder-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base text-black"
             />
           </div>
         </div>
@@ -534,7 +534,7 @@ const Sellers = () => {
                     value={formData.seller_Name}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 text-black transition-all duration-200 text-sm sm:text-base"
                     placeholder="Enter seller name"
                   />
                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
@@ -553,7 +553,7 @@ const Sellers = () => {
                     name="seller_Email"
                     value={formData.seller_Email}
                     onChange={handleInputChange}
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 text-black transition-all duration-200 text-sm sm:text-base"
                     placeholder="Enter email address"
                   />
                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
@@ -572,7 +572,7 @@ const Sellers = () => {
                     name="seller_Phone"
                     value={formData.seller_Phone}
                     onChange={handleInputChange}
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 text-black transition-all duration-200 text-sm sm:text-base"
                     placeholder="Enter phone number"
                   />
                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">

@@ -24,7 +24,7 @@ const Navigation = ({ user }) => {
     { path: '/package', label: 'Packages', icon: FiTruck },
   ];
 
-  const onLogout = () => {
+  const handleSignOut = () => {
     // Add your sign out logic here
     console.log('Signing out...');
     navigate('/login');
