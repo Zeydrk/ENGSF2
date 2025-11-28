@@ -726,200 +726,200 @@ const handleBulkUnarchive = async () => {
         </div>
       )}
 
-      {/* Desktop Table View */}
-      <div className="hidden lg:block bg-white rounded-2xl shadow-xl border border-amber-100 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-linear-to-r from-amber-50 to-orange-50 border-b border-amber-100">
-                <th className="px-6 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider">
-                  <input
-                    type="checkbox"
-                    checked={selectedProducts.length === tableData.length && tableData.length > 0}
-                    onChange={toggleSelectAll}
-                    className="rounded border-amber-300 text-amber-600 focus:ring-amber-500"
-                  />
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider">
-                  ID
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider">
-                  Product Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider">
-                  Description
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider">
-                  Retail Price
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider">
-                  Buying Price
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider">
-                  Category
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider">
-                  Stock
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider">
-                  Expiry
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider">
-                  QR Code
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-amber-100">
-              {loading ? (
-                <tr>
-                  <td colSpan="12" className="px-6 py-12 text-center">
-                    <div className="text-amber-500">
-                      <FiPackage className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                      <p className="text-lg font-medium">Loading products...</p>
-                    </div>
-                  </td>
-                </tr>
-              ) : tableData.length > 0 ? (
-                tableData.map((item, idx) => (
-                  <tr 
-                    key={item.id ?? idx}
-                    className="hover:bg-amber-50 transition-colors duration-150"
+     {/* Desktop Table View */}
+<div className="hidden lg:block bg-white rounded-2xl shadow-xl border border-amber-100 overflow-hidden">
+  <div className="overflow-x-auto">
+    <table className="w-full min-w-[1200px]"> {/* Added min-width */}
+      <thead>
+        <tr className="bg-linear-to-r from-amber-50 to-orange-50 border-b border-amber-100">
+          <th className="px-4 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider w-12">
+            <input
+              type="checkbox"
+              checked={selectedProducts.length === tableData.length && tableData.length > 0}
+              onChange={toggleSelectAll}
+              className="rounded border-amber-300 text-amber-600 focus:ring-amber-500"
+            />
+          </th>
+          <th className="px-4 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider w-20">
+            ID
+          </th>
+          <th className="px-4 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider w-48">
+            Product Name
+          </th>
+          <th className="px-4 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider w-64">
+            Description
+          </th>
+          <th className="px-4 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider w-32">
+            Retail Price
+          </th>
+          <th className="px-4 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider w-32">
+            Buying Price
+          </th>
+          <th className="px-4 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider w-40">
+            Category
+          </th>
+          <th className="px-4 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider w-24">
+            Stock
+          </th>
+          <th className="px-4 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider w-32">
+            Status
+          </th>
+          <th className="px-4 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider w-32">
+            Expiry
+          </th>
+          <th className="px-4 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider w-24">
+            QR Code
+          </th>
+          <th className="px-4 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider w-48">
+            Actions
+          </th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-amber-100">
+        {loading ? (
+          <tr>
+            <td colSpan="12" className="px-6 py-12 text-center">
+              <div className="text-amber-500">
+                <FiPackage className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                <p className="text-lg font-medium">Loading products...</p>
+              </div>
+            </td>
+          </tr>
+        ) : tableData.length > 0 ? (
+          tableData.map((item, idx) => (
+            <tr 
+              key={item.id ?? idx}
+              className="hover:bg-amber-50 transition-colors duration-150"
+            >
+              <td className="px-4 py-4 whitespace-nowrap w-12">
+                <input
+                  type="checkbox"
+                  checked={selectedProducts.includes(item.id)}
+                  onChange={() => toggleProductSelection(item.id)}
+                  className="rounded border-amber-300 text-amber-600 focus:ring-amber-500"
+                />
+              </td>
+              <td className="px-4 py-4 whitespace-nowrap w-20">
+                <span className="text-sm font-medium text-gray-900 bg-amber-100 px-2 py-1 rounded-full">
+                  {item.id}
+                </span>
+              </td>
+              <td className="px-4 py-4 whitespace-nowrap w-48">
+                <div className="flex items-center">
+                  <div className="w-8 h-8 bg-linear-to-r from-amber-400 to-orange-500 rounded-full flex items-center justify-center text-white font-semibold text-sm mr-3">
+                    <FiPackage className="w-4 h-4" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-900 truncate">
+                    {item.product_Name}
+                  </span>
+                </div>
+              </td>
+              <td className="px-4 py-4 w-64">
+                <span className="text-sm text-gray-600 line-clamp-2">{item.product_Description}</span>
+              </td>
+              <td className="px-4 py-4 whitespace-nowrap w-32">
+                <span className="text-sm font-semibold text-green-600">
+                  ₱{parseFloat(item.product_RetailPrice || 0).toFixed(2)}
+                </span>
+              </td>
+              <td className="px-4 py-4 whitespace-nowrap w-32">
+                <span className="text-sm font-semibold text-amber-600">
+                  ₱{parseFloat(item.product_BuyingPrice || 0).toFixed(2)}
+                </span>
+              </td>
+              <td className="px-4 py-4 whitespace-nowrap w-40">
+                <span className="text-sm text-gray-600 truncate">{item.product_Category}</span>
+              </td>
+              <td className="px-4 py-4 whitespace-nowrap w-24">
+                <span className="text-sm text-gray-600">{item.product_Stock}</span>
+              </td>
+              <td className="px-4 py-4 whitespace-nowrap w-32">
+                <span className={`text-xs font-semibold px-2 py-1 rounded-full border ${getStatusColor(item.product_Stock)}`}>
+                  {getStatusText(item.product_Stock)}
+                </span>
+              </td>
+              <td className="px-4 py-4 whitespace-nowrap w-32">
+                <span className="text-sm text-gray-600">
+                  {item.product_Expiry ? new Date(item.product_Expiry).toISOString().split("T")[0] : 'N/A'}
+                </span>
+              </td>
+              <td className="px-4 py-4 whitespace-nowrap w-24">
+                <QRCodeSVG
+                  id={`qr-${item.id}`}
+                  value={item.QrCodeValue || `${window.location.origin}/scan/${item.id}`}
+                  size={40}
+                />
+              </td>
+              <td className="px-4 py-4 whitespace-nowrap w-48">
+                <div className="flex items-center space-x-1">
+                  <button
+                    onClick={() => setViewingProduct(item)}
+                    className="p-1.5 text-blue-600 hover:text-blue-500 hover:bg-blue-100 rounded-lg transition-colors duration-200"
+                    title="View Details"
                   >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <input
-                        type="checkbox"
-                        checked={selectedProducts.includes(item.id)}
-                        onChange={() => toggleProductSelection(item.id)}
-                        className="rounded border-amber-300 text-amber-600 focus:ring-amber-500"
-                      />
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm font-medium text-gray-900 bg-amber-100 px-3 py-1 rounded-full">
-                        {item.id}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="w-8 h-8 bg-linear-to-r from-amber-400 to-orange-500 rounded-full flex items-center justify-center text-white font-semibold text-sm mr-3">
-                          <FiPackage className="w-4 h-4" />
-                        </div>
-                        <span className="text-sm font-medium text-gray-900">
-                          {item.product_Name}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-sm text-gray-600">{item.product_Description}</span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm font-semibold text-green-600">
-                        ₱{parseFloat(item.product_RetailPrice || 0).toFixed(2)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm font-semibold text-amber-600">
-                        ₱{parseFloat(item.product_BuyingPrice || 0).toFixed(2)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-600">{item.product_Category}</span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-600">{item.product_Stock}</span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`text-xs font-semibold px-2 py-1 rounded-full border ${getStatusColor(item.product_Stock)}`}>
-                        {getStatusText(item.product_Stock)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-600">
-                        {item.product_Expiry ? new Date(item.product_Expiry).toISOString().split("T")[0] : 'N/A'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <QRCodeSVG
-                        id={`qr-${item.id}`}
-                        value={item.QrCodeValue || `${window.location.origin}/scan/${item.id}`}
-                        size={48}
-                      />
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() => setViewingProduct(item)}
-                          className="p-2 text-blue-600 hover:text-blue-500 hover:bg-blue-100 rounded-lg transition-colors duration-200"
-                          title="View Details"
-                        >
-                          <FiEye className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => openEdit(item)}
-                          className="p-2 text-amber-600 hover:text-amber-500 hover:bg-amber-100 rounded-lg transition-colors duration-200"
-                          title="Edit Product"
-                        >
-                          <FiEdit2 className="w-4 h-4" />
-                        </button>
-                        {mode === "product" ? (
-                          <>
-                            <button
-                              onClick={() => setShowArchiveConfirm(item.id)}
-                              className="p-2 text-amber-600 hover:text-amber-500 hover:bg-amber-100 rounded-lg transition-colors duration-200"
-                              title="Archive Product"
-                            >
-                              <FiArchive className="w-4 h-4" />
-                            </button>
-                            <button
-                              className="p-2 text-red-600 hover:text-red-500 hover:bg-red-100 rounded-lg transition-colors duration-200"
-                              onClick={() => handleDelete(item.id, item.product_Stock)}
-                              title="Delete Product"
-                            >
-                              <FiTrash2 className="w-4 h-4" />
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <button
-                              onClick={() => setShowUnarchiveConfirm(item.id)}
-                              className="p-2 text-green-600 hover:text-green-500 hover:bg-green-100 rounded-lg transition-colors duration-200"
-                              title="Unarchive Product"
-                            >
-                              <FiArchive className="w-4 h-4" />
-                            </button>
-                             <button
-                              className="p-2 text-red-600 hover:text-red-500 hover:bg-red-100 rounded-lg transition-colors duration-200"
-                              onClick={() => handleDelete(item.id, item.product_Stock)}
-                              title="Delete Product"
-                            >
-                              <FiTrash2 className="w-4 h-4" />
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="12" className="px-6 py-12 text-center">
-                    <div className="text-amber-500">
-                      <FiPackage className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                      <p className="text-lg font-medium">No {mode === "product" ? "products" : "archived products"} found</p>
-                      <p className="text-sm">Try adjusting your search terms or filters</p>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                    <FiEye className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => openEdit(item)}
+                    className="p-1.5 text-amber-600 hover:text-amber-500 hover:bg-amber-100 rounded-lg transition-colors duration-200"
+                    title="Edit Product"
+                  >
+                    <FiEdit2 className="w-4 h-4" />
+                  </button>
+                  {mode === "product" ? (
+                    <>
+                      <button
+                        onClick={() => setShowArchiveConfirm(item.id)}
+                        className="p-1.5 text-amber-600 hover:text-amber-500 hover:bg-amber-100 rounded-lg transition-colors duration-200"
+                        title="Archive Product"
+                      >
+                        <FiArchive className="w-4 h-4" />
+                      </button>
+                      <button
+                        className="p-1.5 text-red-600 hover:text-red-500 hover:bg-red-100 rounded-lg transition-colors duration-200"
+                        onClick={() => handleDelete(item.id, item.product_Stock)}
+                        title="Delete Product"
+                      >
+                        <FiTrash2 className="w-4 h-4" />
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => setShowUnarchiveConfirm(item.id)}
+                        className="p-1.5 text-green-600 hover:text-green-500 hover:bg-green-100 rounded-lg transition-colors duration-200"
+                        title="Unarchive Product"
+                      >
+                        <FiArchive className="w-4 h-4" />
+                      </button>
+                      <button
+                        className="p-1.5 text-red-600 hover:text-red-500 hover:bg-red-100 rounded-lg transition-colors duration-200"
+                        onClick={() => handleDelete(item.id, item.product_Stock)}
+                        title="Delete Product"
+                      >
+                        <FiTrash2 className="w-4 h-4" />
+                      </button>
+                    </>
+                  )}
+                </div>
+              </td>
+            </tr>
+          ))
+        ) : (
+          <tr>
+            <td colSpan="12" className="px-6 py-12 text-center">
+              <div className="text-amber-500">
+                <FiPackage className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                <p className="text-lg font-medium">No {mode === "product" ? "products" : "archived products"} found</p>
+                <p className="text-sm">Try adjusting your search terms or filters</p>
+              </div>
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  </div>
+</div>
 
       {/* Mobile Card View - New from design */}
       <div className="lg:hidden space-y-4">
