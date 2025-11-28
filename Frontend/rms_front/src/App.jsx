@@ -15,7 +15,7 @@ import Product from './components/Products'
 import Sellers from "./components/Sellers";
 import ProductPage from './components/ProductPage';
 import Forgot from './components/Login/Forgot'
-import Reset from './components/Reset'
+import Reset from './components/Login/Reset'
 import Package from './components/Package'
 import PackagePage from './components/PackagePage'
 
@@ -63,6 +63,7 @@ function App() {
         <Route path="/" element=
           {
             <ProtectedRoute isAuthenticated={isLoggedIn}>
+              <Navbar/>
               <Home />
             </ProtectedRoute>
           }/>
@@ -71,23 +72,26 @@ function App() {
         <Route
             path="/product"
             element={
-              <ProtectedLayout onLogout={handleLogout}>
+              <ProtectedRoute isAuthenticated={isLoggedIn}>
+                <Navbar/>
                 <Product />
-              </ProtectedLayout>
+              </ProtectedRoute>
             }
           />
         <Route
             path="/scan/:id"
             element={
-              <ProtectedLayout onLogout={handleLogout}>
+              <ProtectedRoute isAuthenticated={isLoggedIn}>
+                <Navbar/>
                 <ProductPage />
-              </ProtectedLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/seller"
             element={
-              <ProtectedLayout onLogout={handleLogout}>
+              <ProtectedLayout isAuthenticated={isLoggedIn}>
+                <Navbar/>
                 <Sellers />
               </ProtectedLayout>
             }

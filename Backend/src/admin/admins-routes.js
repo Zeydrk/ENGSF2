@@ -6,6 +6,19 @@ const registerMiddleware = require("./middleware/register-middleware.js")
 
 // Routes
 router.post('/', registerMiddleware ,controller.createAdmin);
+
+router.get('/test', (req,res) => {
+    console.log(req.session.id)
+    req.sessionStore.get(req.session.id, (err, sessionData)=>{
+        if(err){
+            console.log(err)
+        }
+        console.log(sessionData)
+    })
+
+    res.send("Hi")
+})
+
 // Changed to post because we are sending username and password in the body
 router.post('/login',passport.authenticate('local'),controller.getAdmins);
 // forgot password emailers
