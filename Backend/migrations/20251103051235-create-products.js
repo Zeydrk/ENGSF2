@@ -31,7 +31,7 @@ module.exports = {
       },
       product_Expiry: {
         type: Sequelize.DATE,
-        allowNull: false
+        allowNull: true
       },
       product_Category:{
           type: Sequelize.STRING,

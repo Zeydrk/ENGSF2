@@ -11,12 +11,13 @@ import Register from './components/Register'
 import ProtectedRoute from './components/ProtectedRoute'
 import Home from './components/Home'
 import Navbar from './components/Navbar'  
-import Product from './components/Products'
+import Product from './components/Product/Products'
 import Sellers from "./components/Sellers";
 import ProductPage from './components/ProductPage';
 import Forgot from './components/Forgot'
 import Reset from './components/Reset'
 import Package from './components/Package'
+import PageLayout from './components/Navigation/pagelayout'
 
 
 const ProtectedLayout = ({ children, onLogout }) => (
@@ -63,33 +64,41 @@ function App() {
         <Route path="/" element=
           {
             <ProtectedRoute isAuthenticated={isLoggedIn}>
+                <Navbar />
               <Home />
             </ProtectedRoute>
           }/>
-         <Route path='/package' element={<Package/>}/>
+         <Route path='/package' element={
+                <ProtectedRoute isAuthenticated={isLoggedIn}>
+                <Navbar />
+              <Package />
+            </ProtectedRoute>}/>
         
         <Route
             path="/product"
             element={
-              <ProtectedLayout onLogout={handleLogout}>
-                <Product />
-              </ProtectedLayout>
+               <ProtectedRoute isAuthenticated={isLoggedIn}>
+                <Navbar />
+              <Product />
+            </ProtectedRoute>
             }
           />
         <Route
             path="/scan/:id"
             element={
-              <ProtectedLayout onLogout={handleLogout}>
-                <ProductPage />
-              </ProtectedLayout>
+                  <ProtectedRoute isAuthenticated={isLoggedIn}>
+                <Navbar />
+              <ProductPage />
+            </ProtectedRoute>
             }
           />
           <Route
             path="/seller"
             element={
-              <ProtectedLayout onLogout={handleLogout}>
-                <Sellers />
-              </ProtectedLayout>
+                    <ProtectedRoute isAuthenticated={isLoggedIn}>
+                <Navbar />
+              <Sellers />
+            </ProtectedRoute>
             }
           />
         <Route path="/forgot-password/" element={<Forgot />} />
