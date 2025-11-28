@@ -14,11 +14,10 @@ import Navbar from './components/Navbar'
 import Product from './components/Products'
 import Sellers from "./components/Sellers";
 import ProductPage from './components/ProductPage';
-import Forgot from './components/Forgot'
+import Forgot from './components/Login/Forgot'
 import Reset from './components/Reset'
 import Package from './components/Package'
 import PackagePage from './components/PackagePage'
-import Forgot2 from './components/Login/Forgot'
 
 const ProtectedLayout = ({ children, onLogout }) => (
   <>
@@ -94,7 +93,6 @@ function App() {
             }
           />
         
-        <Route path="/forgot-password2/" element={<Forgot2 />} />
         <Route path="/forgot-password/" element={<Forgot />} />
         <Route path="/reset-password/" element={<Reset />} />
       </Routes>
