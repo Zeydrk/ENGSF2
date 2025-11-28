@@ -31,10 +31,17 @@ app.use(express.text());
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false, 
+<<<<<<< HEAD
     saveUninitialized: false,
     cookie:{
         maxAge: 24 * 60 * 60 * 1000  //supposed to be a day
     }
+=======
+    saveUninitialized: true,
+    // cookie:{
+    //     maxAge: 24 * 60 * 60 * 1000  //supposed to be a day
+    // }
+>>>>>>> parent of 9f16310 (currently doing the session store)
 }))
 app.use(passport.initialize());
 app.use(passport.session());

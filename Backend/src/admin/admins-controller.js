@@ -21,9 +21,12 @@ async function createAdmin(req, res) {
 
 async function getAdmins(req, res) {
     if (req.isAuthenticated()){
+<<<<<<< HEAD
         req.session.visited = true  
         req.session.user = req.user.email
         console.log(req.session)
+=======
+>>>>>>> parent of 9f16310 (currently doing the session store)
        res.send({
             status: 200,
             message: "Successfully logined",
