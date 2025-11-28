@@ -308,18 +308,3 @@
     grid-template-columns: 1fr 1fr;
   }
 }
-
-/* Price input styling */
-.price-input {
-  position: relative;
-}
-
-.price-input::before {
-  content: '₱';
-  position: absolute;
-  left: 0.75rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #000000;
-  font-weight: 500;
-}
