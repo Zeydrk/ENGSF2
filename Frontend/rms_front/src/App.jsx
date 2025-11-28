@@ -18,6 +18,7 @@ import Forgot from './components/Forgot'
 import Reset from './components/Reset'
 import Package from './components/Package'
 import PackagePage from './components/PackagePage'
+import Forgot2 from './components/Login/Forgot'
 
 const ProtectedLayout = ({ children, onLogout }) => (
   <>
@@ -92,6 +93,8 @@ function App() {
               </ProtectedLayout>
             }
           />
+        
+        <Route path="/forgot-password2/" element={<Forgot2 />} />
         <Route path="/forgot-password/" element={<Forgot />} />
         <Route path="/reset-password/" element={<Reset />} />
       </Routes>
