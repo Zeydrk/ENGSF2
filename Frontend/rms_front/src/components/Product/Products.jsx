@@ -22,9 +22,7 @@ import {
   FiDollarSign,
   FiShoppingCart,
   FiRefreshCw,
-  FiTrash2,
-  FiChevronLeft,
-  FiChevronRight
+  FiTrash2
 } from 'react-icons/fi';
 import "react-toastify/dist/ReactToastify.css";
 import './product.css';
@@ -54,14 +52,13 @@ export default function ProductsWithTable() {
   // Pagination & mode
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [limit] = useState(10); // Changed to 10 for better pagination
+  const [limit] = useState(7);
   const [mode, setMode] = useState("product");
 
   // New design states
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [showArchiveConfirm, setShowArchiveConfirm] = useState(null);
   const [showUnarchiveConfirm, setShowUnarchiveConfirm] = useState(null);
-  const [viewingProduct, setViewingProduct] = useState(null); // Added from new design
 
   // Full lists from hook
   const products = productApi.products || [];
@@ -227,7 +224,8 @@ async function handleCreate(e) {
     // Show toast for immediate feedback
     if (validationErrors.product_Name) {
       toast.error(validationErrors.product_Name, {
-        className: "alert alert-error text-white",
+        duration: 4000,
+        position: "top-right",
       });
     }
     return;
@@ -239,12 +237,14 @@ async function handleCreate(e) {
     setShowProductForm(false);
     refresh();
     toast.success("Product created successfully!", {
-      className: "alert alert-success text-white",
+      duration: 4000,
+      position: "top-right",
     });
   } catch (err) {
     const msg = err?.response?.data?.message || "Create failed";
     toast.error(msg, {
-     className: "alert alert-error text-white",
+      duration: 4000,
+      position: "top-right",
     });
     setError(msg);
   }
@@ -253,7 +253,9 @@ async function handleCreate(e) {
   async function handleDelete(id, stock) {
   if (stock > 0) {
     toast.error("Cannot delete a product with stock", {
-       className: "alert alert-error text-white",
+      duration: 4000,
+      position: "top-right",
+      style: { background: "#cf2b2bff", color: "#fff" },
     });
     return;
   }
@@ -295,27 +297,67 @@ async function handleCreate(e) {
   try {
     await productApi.deleteProduct({ id });
     toast.success("Product deleted successfully", {
-     className: "alert alert-success text-white",
+      duration: 3000,
+      position: "top-right",
+      style: { background: "#34d399", color: "#fff" },
     });
     refresh();
   } catch (err) {
     toast.error(err.message || "Delete failed", {
-     className: "alert alert-error text-white",
+      duration: 4000,
+      position: "top-right",
+      style: { background: "#f87171", color: "#fff" },
     });
     setError(err.message || "Delete failed");
   }
 }
 
   async function handleArchive (id) {
+    const confirmArchive = await new Promise((resolve) => {
+    const toastId = toast(
+      (t) => (
+        <div className="flex flex-col gap-2">
+          <span>Archive this product?</span>
+          <div className="flex gap-2 justify-end mt-2">
+            <button
+              className="btn btn-sm btn-error"
+              onClick={() => {
+                resolve(false);
+                toast.dismiss(t.id);
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              className="btn btn-sm btn-success"
+              onClick={() => {
+                resolve(true);
+                toast.dismiss(t.id);
+              }}
+            >
+              Archive
+            </button>
+          </div>
+        </div>
+      ),
+      { duration: Infinity, position: "top-right" }
+    );
+  });
+    if(!confirmArchive) return;
+    
     try {
       await productApi.archiveProduct({ id });
       toast.success("Product archived successfully", {
-      className: "alert alert-success text-white",
+      duration: 3000,
+      position: "top-right",
+      style: { background: "#34d399", color: "#fff" },
     });
       refresh();
     } catch (err) {
       toast.error(err.message || "Archive failed", {
-      className: "alert alert-error text-white",
+      duration: 4000,
+      position: "top-right",
+      style: { background: "#f87171", color: "#fff" },
     });
     setError(err.message || "Archive failed");
     }
@@ -325,12 +367,16 @@ async function handleCreate(e) {
     try {
       await productApi.archiveAddBack({ id });
       toast.success("Product added back successfully", {
-     className: "alert alert-success text-white",
+      duration: 3000,
+      position: "top-right",
+      style: { background: "#34d399", color: "#fff" },
     });
       refresh();
     } catch (err) {
       toast.error(err.message || "Adding back failed", {
-      className: "alert alert-error text-white",
+      duration: 4000,
+      position: "top-right",
+      style: { background: "#f87171", color: "#fff" },
     });
     setError(err.message || "Adding back  failed");
     }
@@ -378,12 +424,16 @@ async function handleCreate(e) {
       setEditing(null);
       resetForm();
        toast.success("Product Updated successfully", {
-      className: "alert alert-success text-white",
+      duration: 3000,
+      position: "top-right",
+      style: { background: "#34d399", color: "#fff" },
     });
      refresh();
     } catch (err) {
       toast.error(err.message || "Update failed", {
-      className: "alert alert-error text-white",
+      duration: 4000,
+      position: "top-right",
+      style: { background: "#f87171", color: "#fff" },
     });
     setError(err.message || "Update failed");
     }
@@ -406,144 +456,48 @@ async function handleCreate(e) {
     }
   };
 
-const handleBulkArchive = async () => {
-  // Show confirmation dialog with the same design as individual archive
-  const confirmBulkArchive = await new Promise((resolve) => {
-    const toastId = toast(
-      (t) => (
-        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all">
-          <div className="p-4 sm:p-6 border-b border-amber-100">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 flex items-center space-x-2">
-              <FiArchive className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500" />
-              <span>Archive Products</span>
-            </h2>
-          </div>
-          <div className="p-4 sm:p-6">
-            <p className="text-gray-600 mb-4 text-sm sm:text-base">
-              Are you sure you want to archive {selectedProducts.length} product(s)? Archived products can be restored later.
-            </p>
-            <div className="flex space-x-2 sm:space-x-3">
-              <button
-                onClick={() => {
-                  resolve(false);
-                  toast.dismiss(t.id);
-                }}
-                className="flex-1 px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors duration-200 text-sm sm:text-base"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  resolve(true);
-                  toast.dismiss(t.id);
-                }}
-                className="flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-linear-to-r from-amber-500 to-orange-600 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-orange-700 transform hover:scale-105 transition-all duration-200 text-sm sm:text-base"
-              >
-                Archive {selectedProducts.length} Products
-              </button>
-            </div>
-          </div>
-        </div>
-      ),
-      { 
-        duration: Infinity, 
-        position: "top-center",
-        className: "!bg-transparent !shadow-none !p-0",
-        bodyClassName: "!p-0",
-        closeButton: false
+  const handleBulkArchive = async () => {
+    try {
+      for (const id of selectedProducts) {
+        await productApi.archiveProduct({ id });
       }
-    );
-  });
-
-  if (!confirmBulkArchive) return;
-
-  try {
-    for (const id of selectedProducts) {
-      await productApi.archiveProduct({ id });
+      toast.success(`${selectedProducts.length} product(s) archived successfully`, {
+        duration: 3000,
+        position: "top-right",
+      });
+      setSelectedProducts([]);
+      refresh();
+    } catch (err) {
+      toast.error("Bulk archive failed", {
+        duration: 4000,
+        position: "top-right",
+      });
     }
-    toast.success(`${selectedProducts.length} product(s) archived successfully`, {
-      className: "alert alert-success text-white",
-    });
-    setSelectedProducts([]);
-    refresh();
-  } catch (err) {
-    toast.error("Bulk archive failed", {
-      className: "alert alert-error text-white",
-    });
-  }
-};
+  };
 
-// Update the handleBulkUnarchive function:
-const handleBulkUnarchive = async () => {
-  // Show confirmation dialog with the same design as individual unarchive
-  const confirmBulkUnarchive = await new Promise((resolve) => {
-    const toastId = toast(
-      (t) => (
-        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all">
-          <div className="p-4 sm:p-6 border-b border-green-100">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 flex items-center space-x-2">
-              <FiArchive className="w-5 h-5 sm:w-6 sm:h-6 text-green-500" />
-              <span>Unarchive Products</span>
-            </h2>
-          </div>
-          <div className="p-4 sm:p-6">
-            <p className="text-gray-600 mb-4 text-sm sm:text-base">
-              Are you sure you want to unarchive {selectedProducts.length} product(s)? They will be moved back to active products.
-            </p>
-            <div className="flex space-x-2 sm:space-x-3">
-              <button
-                onClick={() => {
-                  resolve(false);
-                  toast.dismiss(t.id);
-                }}
-                className="flex-1 px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors duration-200 text-sm sm:text-base"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  resolve(true);
-                  toast.dismiss(t.id);
-                }}
-                className="flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-linear-to-r from-green-500 to-emerald-600 text-white rounded-xl font-semibold hover:from-green-600 hover:to-emerald-700 transform hover:scale-105 transition-all duration-200 text-sm sm:text-base"
-              >
-                Unarchive {selectedProducts.length} Products
-              </button>
-            </div>
-          </div>
-        </div>
-      ),
-      { 
-        duration: Infinity, 
-        position: "top-center",
-        className: "!bg-transparent !shadow-none !p-0",
-        bodyClassName: "!p-0",
-        closeButton: false
+  const handleBulkUnarchive = async () => {
+    try {
+      for (const id of selectedProducts) {
+        await productApi.archiveAddBack({ id });
       }
-    );
-  });
-
-  if (!confirmBulkUnarchive) return;
-
-  try {
-    for (const id of selectedProducts) {
-      await productApi.archiveAddBack({ id });
+      toast.success(`${selectedProducts.length} product(s) unarchived successfully`, {
+        duration: 3000,
+        position: "top-right",
+      });
+      setSelectedProducts([]);
+      refresh();
+    } catch (err) {
+      toast.error("Bulk unarchive failed", {
+        duration: 4000,
+        position: "top-right",
+      });
     }
-    toast.success(`${selectedProducts.length} product(s) unarchived successfully`, {
-      className: "alert alert-success text-white",
-    });
-    setSelectedProducts([]);
-    refresh();
-  } catch (err) {
-    toast.error("Bulk unarchive failed", {
-      className: "alert alert-error text-white",
-    });
-  }
-};
+  };
+
   const getStatusColor = (stock) => {
-    if (stock > 10) return 'text-green-600 bg-green-100 border-green-200';
-    if (stock > 0) return 'text-amber-600 bg-amber-100 border-amber-200';
-    return 'text-red-600 bg-red-100 border-red-200';
+    if (stock > 10) return 'text-green-600 bg-green-100';
+    if (stock > 0) return 'text-amber-600 bg-amber-100';
+    return 'text-red-600 bg-red-100';
   };
 
   const getStatusText = (stock) => {
@@ -552,76 +506,53 @@ const handleBulkUnarchive = async () => {
     return 'Out of Stock';
   };
 
-  // Enhanced pagination functions from new design
-  const getPageNumbers = () => {
-    const pages = [];
-    const maxVisiblePages = 5;
-    
-    if (totalPages <= maxVisiblePages) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      const startPage = Math.max(1, page - 2);
-      const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-      
-      for (let i = startPage; i <= endPage; i++) {
-        pages.push(i);
-      }
-    }
-    
-    return pages;
-  };
-
   // --- Table data ---
   const tableData = filteredResults ?? (mode === "archive" ? archived : products);
   const showPagination = filteredResults === null;
 
   return (
     <div className="min-h-screen bg-linear-to-br from-amber-50 via-orange-50 to-red-50 p-4 sm:p-6 products-container">
-      {/* Header Section */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-        <div className="text-center sm:text-left">
-          <h1 className="text-2xl pb-5 sm:text-4xl font-bold text-transparent bg-clip-text bg-linear-to-r from-amber-700 to-orange-800">
-            Product Management
-          </h1>
-          <p className="text-amber-700 mt-1 sm:mt-2 text-sm sm:text-lg">
-            Manage your inventory and product listings
-          </p>
-        </div>
-        
-        {/* Buttons Container */}
-        <div className="flex flex-col gap-3 w-full sm:w-auto">
-          {/* Add Product Button */}
-          <button
-            onClick={() => setShowProductForm((s) => !s)}
-            className="bg-linear-to-r from-amber-500 to-orange-600 text-white px-3 sm:px-4 py-2 rounded-lg font-semibold flex items-center justify-center space-x-2 hover:from-amber-600 hover:to-orange-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl w-full sm:w-auto"
-          >
-            <FiPlus className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="text-xs sm:text-sm">
-              {showProductForm ? "Close Form" : "Add New Product"}
-            </span>
-          </button>
-          
-          {/* Refresh Button - Icon Only */}
-          <button 
-            className="p-2 border border-amber-300 text-amber-700 hover:bg-amber-50 rounded-lg transition-colors duration-200 flex items-center justify-center w-full sm:w-auto"
-            onClick={() => refresh()}
-            title="Refresh"
-          >
-            <FiRefreshCw className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
+      {/* Header Section - New Design */}
+    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+  <div className="text-center sm:text-left">
+    <h1 className="text-2xl pb-5 sm:text-4xl font-bold text-transparent bg-clip-text bg-linear-to-r from-amber-700 to-orange-800">
+      Product Management
+    </h1>
+    <p className="text-amber-700 mt-1 sm:mt-2 text-sm sm:text-lg">
+      Manage your inventory and product listings
+    </p>
+  </div>
+  
+  {/* Buttons Container */}
+  <div className="flex flex-col gap-3 w-full sm:w-auto">
+    {/* Add Product Button - Made Smaller */}
+    <button
+      onClick={() => setShowProductForm((s) => !s)}
+      className="bg-linear-to-r from-amber-500 to-orange-600 text-white px-3 sm:px-4 py-2 rounded-lg font-semibold flex items-center justify-center space-x-2 hover:from-amber-600 hover:to-orange-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl w-full sm:w-auto"
+    >
+      <FiPlus className="w-3 h-3 sm:w-4 sm:h-4" />
+      <span className="text-xs sm:text-sm">
+        {showProductForm ? "Close Form" : "Add New Product"}
+      </span>
+    </button>
+    {/* Refresh Button - Icon Only */}
+  <button 
+    className="p-2 border border-amber-300 text-amber-700 hover:bg-amber-50 rounded-lg transition-colors duration-200 flex items-center justify-center w-full sm:w-auto"
+    onClick={() => refresh()}
+    title="Refresh"
+  >
+    <FiRefreshCw className="w-4 h-4" />
+  </button>
+  </div>
+</div>
 
-      {/* Tab Navigation */}
+      {/* Tab Navigation - New Design */}
       <div className="bg-white rounded-2xl shadow-lg border border-amber-100 p-4 mb-6">
         <div className="flex space-x-4">
           <button
             onClick={() => {
               setMode("product");
               setSelectedProducts([]);
-              setPage(1);
             }}
             className={`px-4 py-2 rounded-lg font-semibold transition-colors duration-200 ${
               mode === "product"
@@ -635,7 +566,6 @@ const handleBulkUnarchive = async () => {
             onClick={() => {
               setMode("archive");
               setSelectedProducts([]);
-              setPage(1);
             }}
             className={`px-4 py-2 rounded-lg font-semibold transition-colors duration-200 ${
               mode === "archive"
@@ -648,20 +578,20 @@ const handleBulkUnarchive = async () => {
         </div>
       </div>
 
-      {/* Search and Filter Bar */}
+      {/* Search and Filter Bar - Enhanced Design */}
       <div className="bg-white rounded-2xl shadow-lg border border-amber-100 p-4 sm:p-6 mb-4 sm:mb-6">
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-between items-center">
           <div className="relative flex-1 w-full">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <FiSearch className="h-4 w-4 sm:h-5 sm:w-5 text-black" />
             </div>
-            <input
-              type="text"
-              placeholder="Search products by name or code..."
-              value={searchText}
-              onChange={handleSearch}
-              className="block w-full pl-10 sm:pl-12 pr-3 py-2 sm:py-3 border border-amber-200 rounded-xl bg-amber-50 placeholder-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base text-black"
-            />
+           <input
+  type="text"
+  placeholder="Search products by name or code..."
+  value={searchText}
+  onChange={handleSearch}
+  className="block w-full pl-10 sm:pl-12 pr-3 py-2 sm:py-3 border border-amber-200 rounded-xl bg-amber-50 placeholder-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base text-black"
+/>
           </div>
           <div className="flex space-x-2 sm:space-x-3 w-full sm:w-auto">
             <select
@@ -690,7 +620,7 @@ const handleBulkUnarchive = async () => {
         </div>
       </div>
 
-      {/* Bulk Actions */}
+      {/* Bulk Actions - New Feature */}
       {selectedProducts.length > 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-4">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
@@ -726,6 +656,7 @@ const handleBulkUnarchive = async () => {
         </div>
       )}
 
+<<<<<<< HEAD
      {/* Desktop Table View */}
 <div className="hidden lg:block bg-white rounded-2xl shadow-xl border border-amber-100 overflow-hidden">
   <div className="overflow-x-auto">
@@ -921,710 +852,613 @@ const handleBulkUnarchive = async () => {
 
   </div>
 </div>
-
-      {/* Mobile Card View - New from design */}
-      <div className="lg:hidden space-y-4">
-        {loading ? (
-          <div className="bg-white rounded-2xl shadow-lg border border-amber-100 p-8 text-center">
-            <div className="text-amber-500">
-              <FiPackage className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p className="text-lg font-medium">Loading products...</p>
-            </div>
-          </div>
-        ) : tableData.length > 0 ? (
-          tableData.map((item) => (
-            <div 
-              key={item.id}
-              className="bg-white rounded-2xl shadow-lg border border-amber-100 p-4 hover:shadow-xl transition-all duration-200"
-            >
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-linear-to-r from-amber-400 to-orange-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                    <FiPackage className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-800 text-sm">{item.product_Name}</h3>
-                    <span className="text-xs text-amber-600 bg-amber-100 px-2 py-1 rounded-full">
-                      #{item.id}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-1">
+=======
+      {/* Products Table - Enhanced Design */}
+      <div className="bg-white rounded-2xl shadow-xl border border-amber-100 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-linear-to-r from-amber-50 to-orange-50 border-b border-amber-100">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider">
                   <input
                     type="checkbox"
-                    checked={selectedProducts.includes(item.id)}
-                    onChange={() => toggleProductSelection(item.id)}
+                    checked={selectedProducts.length === tableData.length && tableData.length > 0}
+                    onChange={toggleSelectAll}
                     className="rounded border-amber-300 text-amber-600 focus:ring-amber-500"
                   />
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-3 text-sm mb-3">
-                <div>
-                  <p className="text-gray-500 text-xs">Category</p>
-                  <p className="font-medium">{item.product_Category}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-xs">Retail Price</p>
-                  <p className="font-semibold text-green-600">₱{parseFloat(item.product_RetailPrice || 0).toFixed(2)}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-xs">Stock</p>
-                  <p className="font-medium">{item.product_Stock} units</p>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-xs">Status</p>
-                  <span className={`text-xs font-semibold px-2 py-1 rounded-full border ${getStatusColor(item.product_Stock)}`}>
-                    {getStatusText(item.product_Stock)}
-                  </span>
-                </div>
-              </div>
+                </th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider">
+                  ID
+                </th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider">
+                  Product Name
+                </th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider">
+                  Description
+                </th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider">
+                  Retail Price
+                </th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider">
+                  Buying Price
+                </th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider">
+                  Category
+                </th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider">
+                  Stock
+                </th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider">
+                  Expiry
+                </th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider">
+                  QR Code
+                </th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-amber-100">
+              {loading ? (
+                <tr>
+                  <td colSpan="12" className="px-6 py-8 sm:py-12 text-center">
+                    <div className="text-amber-500">
+                      <FiPackage className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 opacity-50" />
+                      <p className="text-base sm:text-lg font-medium">Loading products...</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : tableData.length > 0 ? (
+                tableData.map((item, idx) => (
+                  <tr 
+                    key={item.id ?? idx}
+                    className="hover:bg-amber-50 transition-colors duration-150"
+                  >
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                      <input
+                        type="checkbox"
+                        checked={selectedProducts.includes(item.id)}
+                        onChange={() => toggleProductSelection(item.id)}
+                        className="rounded border-amber-300 text-amber-600 focus:ring-amber-500"
+                      />
+                    </td>
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                      <span className="text-xs sm:text-sm font-medium text-gray-900 bg-amber-100 px-2 sm:px-3 py-1 rounded-full">
+                        {item.id}
+                      </span>
+                    </td>
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="w-6 h-6 sm:w-8 sm:h-8 bg-linear-to-r from-amber-400 to-orange-500 rounded-full flex items-center justify-center text-white font-semibold text-xs sm:text-sm mr-2 sm:mr-3">
+                          <FiPackage className="w-3 h-3 sm:w-4 sm:h-4" />
+                        </div>
+                        <span className="text-xs sm:text-sm font-medium text-gray-900">
+                          {item.product_Name}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-3 sm:px-6 py-3 sm:py-4">
+                      <span className="text-xs sm:text-sm text-gray-600">{item.product_Description}</span>
+                    </td>
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                      <span className="text-xs sm:text-sm font-semibold text-green-600">
+                        ₱{parseFloat(item.product_RetailPrice || 0).toFixed(2)}
+                      </span>
+                    </td>
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                      <span className="text-xs sm:text-sm font-semibold text-amber-600">
+                        ₱{parseFloat(item.product_BuyingPrice || 0).toFixed(2)}
+                      </span>
+                    </td>
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                      <span className="text-xs sm:text-sm text-gray-600">{item.product_Category}</span>
+                    </td>
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                      <span className="text-xs sm:text-sm text-gray-600">{item.product_Stock}</span>
+                    </td>
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                      <span className={`text-xs font-semibold px-2 py-1 rounded-full ${getStatusColor(item.product_Stock)}`}>
+                        {getStatusText(item.product_Stock)}
+                      </span>
+                    </td>
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                      <span className="text-xs sm:text-sm text-gray-600">
+                        {item.product_Expiry ? new Date(item.product_Expiry).toISOString().split("T")[0] : 'N/A'}
+                      </span>
+                    </td>
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                      <QRCodeSVG
+                        id={`qr-${item.id}`}
+                        value={item.QrCodeValue || `${window.location.origin}/scan/${item.id}`}
+                        size={48}
+                      />
+                    </td>
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                      <div className="flex items-center space-x-1 sm:space-x-2">
+                        <button
+                          onClick={() => openEdit(item)}
+                          className="p-1 sm:p-2 text-amber-600 hover:text-amber-500 hover:bg-amber-100 rounded-lg transition-colors duration-200"
+                          title="Edit Product"
+                        >
+                          <FiEdit2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                        </button>
+                        {mode === "product" ? (
+                          <>
+                            <button
+                              onClick={() => setShowArchiveConfirm(item.id)}
+                              className="p-1 sm:p-2 text-amber-600 hover:text-amber-500 hover:bg-amber-100 rounded-lg transition-colors duration-200"
+                              title="Archive Product"
+                            >
+                              <FiArchive className="w-3 h-3 sm:w-4 sm:h-4" />
+                            </button>
+                           <button
+  className="p-1 sm:p-2 text-red-600 hover:text-red-500 hover:bg-red-100 rounded-lg transition-colors duration-200"
+  onClick={() => handleDelete(item.id, item.product_Stock)}
+  title="Delete Product"
+>
+  <FiTrash2 className="w-3 h-3 sm:w-4 sm:h-4" />
+</button>
 
-              <div className="flex items-center justify-between pt-3 border-t border-amber-100">
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => setViewingProduct(item)}
-                    className="p-1 text-blue-600 hover:text-blue-500 hover:bg-blue-100 rounded-lg transition-colors duration-200"
-                    title="View Details"
-                  >
-                    <FiEye className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => openEdit(item)}
-                    className="p-1 text-amber-600 hover:text-amber-500 hover:bg-amber-100 rounded-lg transition-colors duration-200"
-                    title="Edit Product"
-                  >
-                    <FiEdit2 className="w-4 h-4" />
-                  </button>
-                </div>
-                {mode === "product" ? (
-                  <button
-                    onClick={() => setShowArchiveConfirm(item.id)}
-                    className="p-1 text-amber-600 hover:text-amber-500 hover:bg-amber-100 rounded-lg transition-colors duration-200"
-                    title="Archive Product"
-                  >
-                    <FiArchive className="w-4 h-4" />
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => setShowUnarchiveConfirm(item.id)}
-                    className="p-1 text-green-600 hover:text-green-500 hover:bg-green-100 rounded-lg transition-colors duration-200"
-                    title="Unarchive Product"
-                  >
-                    <FiArchive className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-            </div>
-          ))
-        ) : (
-          <div className="bg-white rounded-2xl shadow-lg border border-amber-100 p-8 text-center">
-            <div className="text-amber-500">
-              <FiPackage className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p className="text-lg font-medium">No {mode === "product" ? "products" : "archived products"} found</p>
-              <p className="text-sm">Try adjusting your search terms or filters</p>
-            </div>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => setShowUnarchiveConfirm(item.id)}
+                              className="p-1 sm:p-2 text-green-600 hover:text-green-500 hover:bg-green-100 rounded-lg transition-colors duration-200"
+                              title="Unarchive Product"
+                            >
+                              <FiArchive className="w-3 h-3 sm:w-4 sm:h-4" />
+                            </button>
+                            <button className="btn btn-sm btn-success" onClick={() => handleAddBack(item.id)}>
+                              Add Back
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="12" className="px-6 py-8 sm:py-12 text-center">
+                    <div className="text-amber-500">
+                      <FiPackage className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-3 opacity-50" />
+                      <p className="text-base sm:text-lg font-medium">No {mode === "product" ? "products" : "archived products"} found</p>
+                      <p className="text-xs sm:text-sm">Try adjusting your search terms or filters</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+>>>>>>> parent of fadfe3c (Design)
+
+        {/* Pagination */}
+        {showPagination && (
+          <div className="flex justify-center items-center gap-4 mt-4 p-4 border-t border-amber-100">
+            <button
+              className="btn btn-sm"
+              onClick={() => {
+                setPage((p) => Math.max(1, p - 1));
+                refresh(Math.max(1, page - 1));
+              }}
+              disabled={page === 1}
+            >
+              Prev
+            </button>
+            <span className="text-sm text-amber-700">
+              Page <strong>{page}</strong> of {totalPages}
+            </span>
+            <button
+              className="btn btn-sm"
+              onClick={() => {
+                setPage((p) => Math.min(totalPages, p + 1));
+                refresh(Math.min(totalPages, page + 1));
+              }}
+              disabled={page === totalPages}
+            >
+              Next
+            </button>
           </div>
         )}
       </div>
 
-      {/* Enhanced Pagination */}
-      {showPagination && tableData.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-lg border border-amber-100 p-4 sm:p-6 mt-4 sm:mt-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
-            <div className="text-sm text-gray-600">
-              Showing {((page - 1) * limit) + 1} to {Math.min(page * limit, tableData.length)} of {tableData.length} products
-            </div>
-            
-            <div className="flex items-center space-x-1">
-              {/* Previous Button */}
-              <button
-                onClick={() => {
-                  setPage((p) => Math.max(1, p - 1));
-                  refresh(Math.max(1, page - 1));
-                }}
-                disabled={page === 1}
-                className={`p-2 rounded-lg transition-colors duration-200 ${
-                  page === 1 
-                    ? 'text-gray-400 cursor-not-allowed' 
-                    : 'text-gray-600 hover:bg-amber-50 hover:text-amber-600'
-                }`}
-              >
-                <FiChevronLeft className="w-5 h-5" />
-              </button>
+{/* Product Form - Modal Popup */}
+{showProductForm && !editing && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+      <div className="p-6 border-b border-amber-100 sticky top-0 bg-white">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-linear-to-r from-amber-700 to-orange-800">
+            Add New Product
+          </h2>
+          <button
+            onClick={() => setShowProductForm(false)}
+            className="p-2 hover:bg-amber-100 rounded-lg transition-colors duration-200"
+          >
+            <FiX className="w-5 h-5 text-gray-500" />
+          </button>
+        </div>
+      </div>
 
-              {/* Page Numbers */}
-              {getPageNumbers().map((pageNum) => (
-                <button
-                  key={pageNum}
-                  onClick={() => {
-                    setPage(pageNum);
-                    refresh(pageNum);
-                  }}
-                  className={`w-10 h-10 rounded-lg transition-all duration-200 font-medium ${
-                    page === pageNum
-                      ? 'bg-amber-500 text-white shadow-lg'
-                      : 'text-gray-600 hover:bg-amber-50 hover:text-amber-600'
-                  }`}
-                >
-                  {pageNum}
-                </button>
+      <form onSubmit={handleCreate} className="p-6 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Product Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Product Name *
+            </label>
+            <input
+              type="text"
+              placeholder="Enter product name"
+              value={form.p_Name}
+              onChange={(e) => setForm((f) => ({ ...f, p_Name: e.target.value }))}
+              className="w-full px-4 py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white text-black placeholder-gray-500"
+              required
+            />
+            {errors.product_Name && (
+              <p className="text-red-500 text-sm mt-2">{errors.product_Name}</p>
+            )}
+          </div>
+
+          {/* Description */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Description *
+            </label>
+            <input
+              type="text"
+              placeholder="Enter product description"
+              value={form.p_Desc}
+              onChange={(e) => setForm((f) => ({ ...f, p_Desc: e.target.value }))}
+              className="w-full px-4 py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white text-black placeholder-gray-500"
+              required
+            />
+            {errors.product_Description && (
+              <p className="text-red-500 text-sm mt-2">{errors.product_Description}</p>
+            )}
+          </div>
+
+          {/* Retail Price */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Retail Price *
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₱</span>
+              <input
+                type="number"
+                placeholder="0.00"
+                value={form.p_Retail}
+                onChange={(e) => setForm((f) => ({ ...f, p_Retail: e.target.value }))}
+                className="w-full pl-10 pr-4 py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white text-black placeholder-gray-500"
+                required
+                step="0.01"
+              />
+            </div>
+            {errors.product_RetailPrice && (
+              <p className="text-red-500 text-sm mt-2">{errors.product_RetailPrice}</p>
+            )}
+          </div>
+
+          {/* Buying Price */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Buying Price *
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₱</span>
+              <input
+                type="number"
+                placeholder="0.00"
+                value={form.p_Buying}
+                onChange={(e) => setForm((f) => ({ ...f, p_Buying: e.target.value }))}
+                className="w-full pl-10 pr-4 py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white text-black placeholder-gray-500"
+                required
+                step="0.01"
+              />
+            </div>
+            {errors.product_BuyingPrice && (
+              <p className="text-red-500 text-sm mt-2">{errors.product_BuyingPrice}</p>
+            )}
+          </div>
+
+          {/* Stock */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Stock Quantity *
+            </label>
+            <input
+              type="number"
+              placeholder="Enter stock quantity"
+              value={form.p_Stock}
+              onChange={(e) => setForm((f) => ({ ...f, p_Stock: e.target.value }))}
+              className="w-full px-4 py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white text-black placeholder-gray-500"
+              required
+            />
+            {errors.product_Stock && (
+              <p className="text-red-500 text-sm mt-2">{errors.product_Stock}</p>
+            )}
+          </div>
+
+          {/* Category */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Category *
+            </label>
+            <select
+              value={form.p_Cat}
+              onChange={(e) => setForm((f) => ({ ...f, p_Cat: e.target.value }))}
+              className="w-full px-4 py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white text-black"
+              required
+            >
+              <option value="">Select Category</option>
+              {[
+                "Beverages",
+                "Snacks",
+                "Dairy",
+                "Fruits & Vegetables",
+                "Grains & Cereals",
+                "Frozen Food",
+                "Condiments & Sauces",
+                "Cleaning Supplies",
+                "Personal Care",
+                "Household Essentials",
+                "Others",
+              ].map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
               ))}
+            </select>
+            {errors.product_Category && (
+              <p className="text-red-500 text-sm mt-2">{errors.product_Category}</p>
+            )}
+          </div>
 
-              {/* Next Button */}
-              <button
-                onClick={() => {
-                  setPage((p) => Math.min(totalPages, p + 1));
-                  refresh(Math.min(totalPages, page + 1));
-                }}
-                disabled={page === totalPages}
-                className={`p-2 rounded-lg transition-colors duration-200 ${
-                  page === totalPages 
-                    ? 'text-gray-400 cursor-not-allowed' 
-                    : 'text-gray-600 hover:bg-amber-50 hover:text-amber-600'
-                }`}
-              >
-                <FiChevronRight className="w-5 h-5" />
-              </button>
-            </div>
+          {/* Expiry Date - Calendar with Black Text */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Expiry Date *
+            </label>
+            <input
+              type="date"
+              value={form.p_Expiry}
+              onChange={(e) => setForm((f) => ({ ...f, p_Expiry: e.target.value }))}
+              className="w-full px-4 py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white text-black [color-scheme:light]"
+              required
+            />
+            {errors.product_Expiry && (
+              <p className="text-red-500 text-sm mt-2">{errors.product_Expiry}</p>
+            )}
           </div>
         </div>
-      )}
 
-      {/* Product Form Modal */}
-      {showProductForm && !editing && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-amber-100 sticky top-0 bg-white">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-linear-to-r from-amber-700 to-orange-800">
-                  Add New Product
-                </h2>
-                <button
-                  onClick={() => setShowProductForm(false)}
-                  className="p-2 hover:bg-amber-100 rounded-lg transition-colors duration-200"
-                >
-                  <FiX className="w-5 h-5 text-gray-500" />
-                </button>
-              </div>
+        {/* Form Actions */}
+        <div className="flex space-x-3 pt-4 border-t border-amber-100">
+          <button
+            type="button"
+            onClick={() => setShowProductForm(false)}
+            className="flex-1 px-6 py-3 border border-amber-300 text-amber-700 rounded-xl font-semibold hover:bg-amber-50 transition-colors duration-200"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="flex-1 px-6 py-3 bg-linear-to-r from-amber-500 to-orange-600 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-orange-700 transform hover:scale-105 transition-all duration-200 flex items-center justify-center space-x-2"
+          >
+            <FiSave className="w-4 h-4" />
+            <span>Create Product</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+)}
+
+{/* Edit Form - Modal Popup */}
+{editing && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+      <div className="p-6 border-b border-amber-100 sticky top-0 bg-white">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-linear-to-r from-amber-700 to-orange-800">
+            Edit Product
+          </h2>
+          <button
+            onClick={() => {
+              setEditing(null);
+              resetForm();
+            }}
+            className="p-2 hover:bg-amber-100 rounded-lg transition-colors duration-200"
+          >
+            <FiX className="w-5 h-5 text-gray-500" />
+          </button>
+        </div>
+      </div>
+
+      <form onSubmit={handleUpdate} className="p-6 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Product Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Product Name *
+            </label>
+            <input
+              type="text"
+              placeholder="Enter product name"
+              value={form.p_Name}
+              onChange={(e) => setForm((f) => ({ ...f, p_Name: e.target.value }))}
+              className="w-full px-4 py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white text-black placeholder-gray-500"
+              required
+            />
+            {errors.product_Name && (
+              <p className="text-red-500 text-sm mt-2">{errors.product_Name}</p>
+            )}
+          </div>
+
+          {/* Description */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Description *
+            </label>
+            <input
+              type="text"
+              placeholder="Enter product description"
+              value={form.p_Desc}
+              onChange={(e) => setForm((f) => ({ ...f, p_Desc: e.target.value }))}
+              className="w-full px-4 py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white text-black placeholder-gray-500"
+              required
+            />
+            {errors.product_Description && (
+              <p className="text-red-500 text-sm mt-2">{errors.product_Description}</p>
+            )}
+          </div>
+
+          {/* Retail Price */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Retail Price *
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₱</span>
+              <input
+                type="number"
+                placeholder="0.00"
+                value={form.p_Retail}
+                onChange={(e) => setForm((f) => ({ ...f, p_Retail: e.target.value }))}
+                className="w-full pl-10 pr-4 py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white text-black placeholder-gray-500"
+                required
+                step="0.01"
+              />
             </div>
+            {errors.product_RetailPrice && (
+              <p className="text-red-500 text-sm mt-2">{errors.product_RetailPrice}</p>
+            )}
+          </div>
 
-            <form onSubmit={handleCreate} className="p-6 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Product Name */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Product Name *
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter product name"
-                    value={form.p_Name}
-                    onChange={(e) => setForm((f) => ({ ...f, p_Name: e.target.value }))}
-                    className="w-full px-4 py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white text-black placeholder-gray-500"
-                    required
-                  />
-                  {errors.product_Name && (
-                    <p className="text-red-500 text-sm mt-2">{errors.product_Name}</p>
-                  )}
-                </div>
+          {/* Buying Price */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Buying Price *
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₱</span>
+              <input
+                type="number"
+                placeholder="0.00"
+                value={form.p_Buying}
+                onChange={(e) => setForm((f) => ({ ...f, p_Buying: e.target.value }))}
+                className="w-full pl-10 pr-4 py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white text-black placeholder-gray-500"
+                required
+                step="0.01"
+              />
+            </div>
+            {errors.product_BuyingPrice && (
+              <p className="text-red-500 text-sm mt-2">{errors.product_BuyingPrice}</p>
+            )}
+          </div>
 
-                {/* Description */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Description *
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter product description"
-                    value={form.p_Desc}
-                    onChange={(e) => setForm((f) => ({ ...f, p_Desc: e.target.value }))}
-                    className="w-full px-4 py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white text-black placeholder-gray-500"
-                    required
-                  />
-                  {errors.product_Description && (
-                    <p className="text-red-500 text-sm mt-2">{errors.product_Description}</p>
-                  )}
-                </div>
+          {/* Stock */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Stock Quantity *
+            </label>
+            <input
+              type="number"
+              placeholder="Enter stock quantity"
+              value={form.p_Stock}
+              onChange={(e) => setForm((f) => ({ ...f, p_Stock: e.target.value }))}
+              className="w-full px-4 py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white text-black placeholder-gray-500"
+              required
+            />
+            {errors.product_Stock && (
+              <p className="text-red-500 text-sm mt-2">{errors.product_Stock}</p>
+            )}
+          </div>
 
-                {/* Retail Price */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Retail Price *
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₱</span>
-                    <input
-                      type="number"
-                      placeholder="0.00"
-                      value={form.p_Retail}
-                      onChange={(e) => setForm((f) => ({ ...f, p_Retail: e.target.value }))}
-                      className="w-full pl-10 pr-4 py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white text-black placeholder-gray-500"
-                      required
-                      step="0.01"
-                    />
-                  </div>
-                  {errors.product_RetailPrice && (
-                    <p className="text-red-500 text-sm mt-2">{errors.product_RetailPrice}</p>
-                  )}
-                </div>
+          {/* Category */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Category *
+            </label>
+            <select
+              value={form.p_Cat}
+              onChange={(e) => setForm((f) => ({ ...f, p_Cat: e.target.value }))}
+              className="w-full px-4 py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white text-black"
+              required
+            >
+              <option value="">Select Category</option>
+              {[
+                "Beverages",
+                "Snacks",
+                "Dairy",
+                "Fruits & Vegetables",
+                "Grains & Cereals",
+                "Frozen Food",
+                "Condiments & Sauces",
+                "Cleaning Supplies",
+                "Personal Care",
+                "Household Essentials",
+                "Others",
+              ].map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+            {errors.product_Category && (
+              <p className="text-red-500 text-sm mt-2">{errors.product_Category}</p>
+            )}
+          </div>
 
-                {/* Buying Price */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Buying Price *
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₱</span>
-                    <input
-                      type="number"
-                      placeholder="0.00"
-                      value={form.p_Buying}
-                      onChange={(e) => setForm((f) => ({ ...f, p_Buying: e.target.value }))}
-                      className="w-full pl-10 pr-4 py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white text-black placeholder-gray-500"
-                      required
-                      step="0.01"
-                    />
-                  </div>
-                  {errors.product_BuyingPrice && (
-                    <p className="text-red-500 text-sm mt-2">{errors.product_BuyingPrice}</p>
-                  )}
-                </div>
-
-                {/* Stock */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Stock Quantity *
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="Enter stock quantity"
-                    value={form.p_Stock}
-                    onChange={(e) => setForm((f) => ({ ...f, p_Stock: e.target.value }))}
-                    className="w-full px-4 py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white text-black placeholder-gray-500"
-                    required
-                  />
-                  {errors.product_Stock && (
-                    <p className="text-red-500 text-sm mt-2">{errors.product_Stock}</p>
-                  )}
-                </div>
-
-                {/* Category */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Category *
-                  </label>
-                  <select
-                    value={form.p_Cat}
-                    onChange={(e) => setForm((f) => ({ ...f, p_Cat: e.target.value }))}
-                    className="w-full px-4 py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white text-black"
-                    required
-                  >
-                    <option value="">Select Category</option>
-                    {[
-                      "Beverages",
-                      "Snacks",
-                      "Dairy",
-                      "Fruits & Vegetables",
-                      "Grains & Cereals",
-                      "Frozen Food",
-                      "Condiments & Sauces",
-                      "Cleaning Supplies",
-                      "Personal Care",
-                      "Household Essentials",
-                      "Others",
-                    ].map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.product_Category && (
-                    <p className="text-red-500 text-sm mt-2">{errors.product_Category}</p>
-                  )}
-                </div>
-
-                {/* Expiry Date */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Expiry Date *
-                  </label>
-                  <input
-                    type="date"
-                    value={form.p_Expiry}
-                    onChange={(e) => setForm((f) => ({ ...f, p_Expiry: e.target.value }))}
-                    className="w-full px-4 py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white text-black [color-scheme:light]"
-                    required
-                  />
-                  {errors.product_Expiry && (
-                    <p className="text-red-500 text-sm mt-2">{errors.product_Expiry}</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Form Actions */}
-              <div className="flex space-x-3 pt-4 border-t border-amber-100">
-                <button
-                  type="button"
-                  onClick={() => setShowProductForm(false)}
-                  className="flex-1 px-6 py-3 border border-amber-300 text-amber-700 rounded-xl font-semibold hover:bg-amber-50 transition-colors duration-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 px-6 py-3 bg-linear-to-r from-amber-500 to-orange-600 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-orange-700 transform hover:scale-105 transition-all duration-200 flex items-center justify-center space-x-2"
-                >
-                  <FiSave className="w-4 h-4" />
-                  <span>Create Product</span>
-                </button>
-              </div>
-            </form>
+          {/* Expiry Date - Calendar with Black Text */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Expiry Date *
+            </label>
+            <input
+              type="date"
+              value={form.p_Expiry}
+              onChange={(e) => setForm((f) => ({ ...f, p_Expiry: e.target.value }))}
+              className="w-full px-4 py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white text-black [color-scheme:light]"
+              required
+            />
+            {errors.product_Expiry && (
+              <p className="text-red-500 text-sm mt-2">{errors.product_Expiry}</p>
+            )}
           </div>
         </div>
-      )}
 
-      {/* Edit Form Modal */}
-      {editing && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-amber-100 sticky top-0 bg-white">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-linear-to-r from-amber-700 to-orange-800">
-                  Edit Product
-                </h2>
-                <button
-                  onClick={() => {
-                    setEditing(null);
-                    resetForm();
-                  }}
-                  className="p-2 hover:bg-amber-100 rounded-lg transition-colors duration-200"
-                >
-                  <FiX className="w-5 h-5 text-gray-500" />
-                </button>
-              </div>
-            </div>
-
-            <form onSubmit={handleUpdate} className="p-6 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Product Name */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Product Name *
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter product name"
-                    value={form.p_Name}
-                    onChange={(e) => setForm((f) => ({ ...f, p_Name: e.target.value }))}
-                    className="w-full px-4 py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white text-black placeholder-gray-500"
-                    required
-                  />
-                  {errors.product_Name && (
-                    <p className="text-red-500 text-sm mt-2">{errors.product_Name}</p>
-                  )}
-                </div>
-
-                {/* Description */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Description *
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter product description"
-                    value={form.p_Desc}
-                    onChange={(e) => setForm((f) => ({ ...f, p_Desc: e.target.value }))}
-                    className="w-full px-4 py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white text-black placeholder-gray-500"
-                    required
-                  />
-                  {errors.product_Description && (
-                    <p className="text-red-500 text-sm mt-2">{errors.product_Description}</p>
-                  )}
-                </div>
-
-                {/* Retail Price */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Retail Price *
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₱</span>
-                    <input
-                      type="number"
-                      placeholder="0.00"
-                      value={form.p_Retail}
-                      onChange={(e) => setForm((f) => ({ ...f, p_Retail: e.target.value }))}
-                      className="w-full pl-10 pr-4 py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white text-black placeholder-gray-500"
-                      required
-                      step="0.01"
-                    />
-                  </div>
-                  {errors.product_RetailPrice && (
-                    <p className="text-red-500 text-sm mt-2">{errors.product_RetailPrice}</p>
-                  )}
-                </div>
-
-                {/* Buying Price */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Buying Price *
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₱</span>
-                    <input
-                      type="number"
-                      placeholder="0.00"
-                      value={form.p_Buying}
-                      onChange={(e) => setForm((f) => ({ ...f, p_Buying: e.target.value }))}
-                      className="w-full pl-10 pr-4 py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white text-black placeholder-gray-500"
-                      required
-                      step="0.01"
-                    />
-                  </div>
-                  {errors.product_BuyingPrice && (
-                    <p className="text-red-500 text-sm mt-2">{errors.product_BuyingPrice}</p>
-                  )}
-                </div>
-
-                {/* Stock */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Stock Quantity *
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="Enter stock quantity"
-                    value={form.p_Stock}
-                    onChange={(e) => setForm((f) => ({ ...f, p_Stock: e.target.value }))}
-                    className="w-full px-4 py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white text-black placeholder-gray-500"
-                    required
-                  />
-                  {errors.product_Stock && (
-                    <p className="text-red-500 text-sm mt-2">{errors.product_Stock}</p>
-                  )}
-                </div>
-
-                {/* Category */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Category *
-                  </label>
-                  <select
-                    value={form.p_Cat}
-                    onChange={(e) => setForm((f) => ({ ...f, p_Cat: e.target.value }))}
-                    className="w-full px-4 py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white text-black"
-                    required
-                  >
-                    <option value="">Select Category</option>
-                    {[
-                      "Beverages",
-                      "Snacks",
-                      "Dairy",
-                      "Fruits & Vegetables",
-                      "Grains & Cereals",
-                      "Frozen Food",
-                      "Condiments & Sauces",
-                      "Cleaning Supplies",
-                      "Personal Care",
-                      "Household Essentials",
-                      "Others",
-                    ].map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.product_Category && (
-                    <p className="text-red-500 text-sm mt-2">{errors.product_Category}</p>
-                  )}
-                </div>
-
-                {/* Expiry Date */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Expiry Date *
-                  </label>
-                  <input
-                    type="date"
-                    value={form.p_Expiry}
-                    onChange={(e) => setForm((f) => ({ ...f, p_Expiry: e.target.value }))}
-                    className="w-full px-4 py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white text-black [color-scheme:light]"
-                    required
-                  />
-                  {errors.product_Expiry && (
-                    <p className="text-red-500 text-sm mt-2">{errors.product_Expiry}</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Form Actions */}
-              <div className="flex space-x-3 pt-4 border-t border-amber-100">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditing(null);
-                    resetForm();
-                  }}
-                  className="flex-1 px-6 py-3 border border-amber-300 text-amber-700 rounded-xl font-semibold hover:bg-amber-50 transition-colors duration-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 px-6 py-3 bg-linear-to-r from-amber-500 to-orange-600 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-orange-700 transform hover:scale-105 transition-all duration-200 flex items-center justify-center space-x-2"
-                >
-                  <FiSave className="w-4 h-4" />
-                  <span>Update Product</span>
-                </button>
-              </div>
-            </form>
-          </div>
+        {/* Form Actions */}
+        <div className="flex space-x-3 pt-4 border-t border-amber-100">
+          <button
+            type="button"
+            onClick={() => {
+              setEditing(null);
+              resetForm();
+            }}
+            className="flex-1 px-6 py-3 border border-amber-300 text-amber-700 rounded-xl font-semibold hover:bg-amber-50 transition-colors duration-200"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="flex-1 px-6 py-3 bg-linear-to-r from-amber-500 to-orange-600 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-orange-700 transform hover:scale-105 transition-all duration-200 flex items-center justify-center space-x-2"
+          >
+            <FiSave className="w-4 h-4" />
+            <span>Update Product</span>
+          </button>
         </div>
-      )}
-
-      {/* View Product Details Modal - New from design */}
-      {viewingProduct && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all">
-            <div className="p-4 sm:p-6 border-b border-amber-100">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Product Details</h2>
-                <button
-                  onClick={() => setViewingProduct(null)}
-                  className="p-1 sm:p-2 hover:bg-amber-100 rounded-lg transition-colors duration-200"
-                >
-                  <FiX className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
-                </button>
-              </div>
-            </div>
-
-            <div className="p-4 sm:p-6 space-y-4">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-linear-to-r from-amber-400 to-orange-500 rounded-full flex items-center justify-center text-white font-semibold">
-                  <FiPackage className="w-6 h-6" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-gray-800">{viewingProduct.product_Name}</h3>
-                  <p className="text-amber-600 font-medium">#{viewingProduct.id}</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="text-gray-500">Category</p>
-                  <p className="font-semibold text-black">{viewingProduct.product_Category}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500">Status</p>
-                  <span className={`text-xs font-semibold px-2 py-1 rounded-full ${getStatusColor(viewingProduct.product_Stock)}`}>
-                    {getStatusText(viewingProduct.product_Stock)}
-                  </span>
-                </div>
-                <div>
-                  <p className="text-gray-500">Retail Price</p>
-                  <p className="font-semibold text-green-600">₱{parseFloat(viewingProduct.product_RetailPrice || 0).toFixed(2)}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500">Buying Price</p>
-                  <p className="font-semibold text-amber-600">₱{parseFloat(viewingProduct.product_BuyingPrice || 0).toFixed(2)}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500">Stock</p>
-                  <p className="font-semibold text-black">{viewingProduct.product_Stock} units</p>
-                </div>
-                {viewingProduct.product_Expiry && (
-                  <div>
-                    <p className="text-gray-500">Expiry Date</p>
-                    <p className="font-semibold text-black">{new Date(viewingProduct.product_Expiry).toISOString().split("T")[0]}</p>
-                  </div>
-                )}
-              </div>
-
-              {viewingProduct.product_Description && (
-                <div>
-                  <p className="text-gray-500 mb-2">Description</p>
-                  <p className="text-sm text-gray-700 bg-amber-50 p-3 rounded-lg">{viewingProduct.product_Description}</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Archive Confirmation Modal */}
-      {showArchiveConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all">
-            <div className="p-4 sm:p-6 border-b border-amber-100">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 flex items-center space-x-2">
-                <FiArchive className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500" />
-                <span>Archive Product</span>
-              </h2>
-            </div>
-
-            <div className="p-4 sm:p-6">
-              <p className="text-gray-600 mb-4 text-sm sm:text-base">
-                Are you sure you want to archive this product? Archived products can be restored later.
-              </p>
-              <div className="flex space-x-2 sm:space-x-3">
-                <button
-                  onClick={() => setShowArchiveConfirm(null)}
-                  className="flex-1 px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors duration-200 text-sm sm:text-base"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => {
-                    handleArchive(showArchiveConfirm);
-                    setShowArchiveConfirm(null);
-                  }}
-                  className="flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-linear-to-r from-amber-500 to-orange-600 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-orange-700 transform hover:scale-105 transition-all duration-200 text-sm sm:text-base"
-                >
-                  Archive
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Unarchive Confirmation Modal */}
-      {showUnarchiveConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all">
-            <div className="p-4 sm:p-6 border-b border-green-100">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 flex items-center space-x-2">
-                <FiArchive className="w-5 h-5 sm:w-6 sm:h-6 text-green-500" />
-                <span>Unarchive Product</span>
-              </h2>
-            </div>
-
-            <div className="p-4 sm:p-6">
-              <p className="text-gray-600 mb-4 text-sm sm:text-base">
-                Are you sure you want to unarchive this product? It will be moved back to active products.
-              </p>
-              <div className="flex space-x-2 sm:space-x-3">
-                <button
-                  onClick={() => setShowUnarchiveConfirm(null)}
-                  className="flex-1 px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors duration-200 text-sm sm:text-base"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => {
-                    handleAddBack(showUnarchiveConfirm);
-                    setShowUnarchiveConfirm(null);
-                  }}
-                  className="flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-linear-to-r from-green-500 to-emerald-600 text-white rounded-xl font-semibold hover:from-green-600 hover:to-emerald-700 transform hover:scale-105 transition-all duration-200 text-sm sm:text-base"
-                >
-                  Unarchive
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      </form>
+    </div>
+  </div>
+)}
     </div>
   );
 }
