@@ -11,7 +11,7 @@ import Register from './components/Register'
 import ProtectedRoute from './components/ProtectedRoute'
 import Home from './components/Home'
 import Navbar from './components/Navbar'  
-import Product from './components/Products'
+import Product from './components/Product/Products'
 import Sellers from "./components/Sellers";
 import ProductPage from './components/ProductPage';
 import Forgot from './components/Forgot'

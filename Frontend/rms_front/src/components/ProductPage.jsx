@@ -7,7 +7,7 @@ export default function ScanPage() {
   const navigate = useNavigate();
   const hasRun = useRef(false);
 useEffect(() => {
-  if (hasRun.current) return;  // ⛔ prevent second run
+  if (hasRun.current) return;  
   hasRun.current = true;
 
   fetch(`http://localhost:3000/products/scan/${id}`)
