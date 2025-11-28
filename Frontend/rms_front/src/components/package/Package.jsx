@@ -14,7 +14,6 @@ import {
   FiChevronRight
 } from 'react-icons/fi';
 import { usePackage } from '../../hooks/usePackage';
-import PageLayout from '../components/pageLayout';
 
 const Packages = () => {
   const packgApi = usePackage();
@@ -47,12 +46,6 @@ const Packages = () => {
   const statusOptions = ['All', 'claimed', 'unclaimed'];
   const sizeOptions = ['All', 'S', 'M', 'L'];
   const paymentMethods = ['cash', 'gcash'];
-
-  // Mock user data - replace with actual user data from your auth system
-  const user = {
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-  };
 
   // Load packages and sellers on component mount
   useEffect(() => {
@@ -247,7 +240,7 @@ const Packages = () => {
   };
 
   return (
-    <PageLayout user={user}>
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
       {/* Header Section */}
       <div className="mb-6 sm:mb-8">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
@@ -948,7 +941,7 @@ const Packages = () => {
           </div>
         </div>
       )}
-    </PageLayout>
+    </div>
   );
 };
 

@@ -33,6 +33,7 @@ async function getProducts(req, res) {
       products: rows,
     })
   } catch (err) {
+    
     res.status(500).json({ error: err.message });
   }
 }
