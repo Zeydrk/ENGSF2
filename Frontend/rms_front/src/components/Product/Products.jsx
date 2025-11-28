@@ -20,7 +20,9 @@ import {
   FiShoppingBag,
   FiCalendar,
   FiDollarSign,
-  FiShoppingCart
+  FiShoppingCart,
+  FiRefreshCw,
+  FiTrash2
 } from 'react-icons/fi';
 import "react-toastify/dist/ReactToastify.css";
 import './product.css';
@@ -533,14 +535,14 @@ async function handleCreate(e) {
         {showProductForm ? "Close Form" : "Add New Product"}
       </span>
     </button>
-    
-    {/* Refresh Button - Moved Below */}
-    <button 
-      className="btn btn-sm border border-amber-300 text-white hover:bg-amber-50 w-full sm:w-auto"
-      onClick={() => refresh()}
-    >
-      Refresh
-    </button>
+    {/* Refresh Button - Icon Only */}
+  <button 
+    className="p-2 border border-amber-300 text-amber-700 hover:bg-amber-50 rounded-lg transition-colors duration-200 flex items-center justify-center w-full sm:w-auto"
+    onClick={() => refresh()}
+    title="Refresh"
+  >
+    <FiRefreshCw className="w-4 h-4" />
+  </button>
   </div>
 </div>
 
@@ -796,13 +798,14 @@ async function handleCreate(e) {
                             >
                               <FiArchive className="w-3 h-3 sm:w-4 sm:h-4" />
                             </button>
-                            <button
-                              className="btn btn-sm btn-error"
-                              onClick={() => handleDelete(item.id, item.product_Stock)}
-                              title="Delete Product"
-                            >
-                              Delete
-                            </button>
+                           <button
+  className="p-1 sm:p-2 text-red-600 hover:text-red-500 hover:bg-red-100 rounded-lg transition-colors duration-200"
+  onClick={() => handleDelete(item.id, item.product_Stock)}
+  title="Delete Product"
+>
+  <FiTrash2 className="w-3 h-3 sm:w-4 sm:h-4" />
+</button>
+
                           </>
                         ) : (
                           <>
