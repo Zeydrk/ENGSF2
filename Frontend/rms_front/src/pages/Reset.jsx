@@ -75,7 +75,7 @@ const searchParams = new URLSearchParams(window.location.search)
       {isLoading && (
         <div className="fixed inset-0 flex flex-col items-center justify-center bg-black/70 z-50">
           <span className="loading loading-spinner loading-xl text-white"></span>
-          <p className="text-white mt-4 text-lg">Logging in...</p>
+          <p className="text-white mt-4 text-lg">Resetting Password...</p>
         </div>
       )}
       {/* Autumn decorative elements */}

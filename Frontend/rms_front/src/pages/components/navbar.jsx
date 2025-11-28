@@ -18,10 +18,10 @@ const Navigation = ({ user }) => {
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
 
   const navItems = [
-    { path: '/home', label: 'Dashboard', icon: FiHome },
-    { path: '/products', label: 'Products', icon: FiPackage },
-    { path: '/sellers', label: 'Sellers', icon: FiUsers },
-    { path: '/packages', label: 'Packages', icon: FiTruck },
+    { path: '/', label: 'Dashboard', icon: FiHome },
+    { path: '/product', label: 'Products', icon: FiPackage },
+    { path: '/seller', label: 'Sellers', icon: FiUsers },
+    { path: '/package', label: 'Packages', icon: FiTruck },
   ];
 
   
@@ -60,7 +60,7 @@ const Navigation = ({ user }) => {
           {/* Logo/Brand - Centered on mobile */}
           <div className="flex items-center absolute left-1/2 transform -translate-x-1/2 md:relative md:left-0 md:transform-none">
             <Link 
-              to="/home" 
+              to="/" 
               className="text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-linear-to-r from-amber-600 to-orange-700"
               onClick={closeAllMenus}
             >
