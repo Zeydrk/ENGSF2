@@ -1,22 +1,22 @@
 // import react library/components
 import { useEffect, useState } from 'react'
 import './App.css'
-import Toasters from './components/Toasters'
+import Toasters from './pages/Toasters'
 import {BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 
 
 // Importing components
-import Login from './components/Login'
-import Register from './components/Register'
-import ProtectedRoute from './components/ProtectedRoute'
-import Home from './components/Home'
-import Navbar from './components/Navbar'  
-import Product from './components/Products'
-import Sellers from "./components/Sellers";
-import ProductPage from './components/ProductPage';
-import Forgot from './components/Forgot'
-import Reset from './components/Reset'
-import Package from './components/Package'
+import Login from './pages/Login'
+import Register from './pages/Register'
+import ProtectedRoute from './pages/ProtectedRoute'
+import Home from './pages/Home'
+import Navbar from './pages/components/navbar'  
+import Product from './pages/Products'
+import Sellers from "./pages/seller/Sellers";
+import ProductPage from './pages/ProductPage';
+import Forgot from './pages/Forgot'
+import Reset from './pages/Reset'
+import Package from './pages/package/Package'
 
 
 const ProtectedLayout = ({ children, onLogout }) => (
@@ -87,9 +87,9 @@ function App() {
           <Route
             path="/seller"
             element={
-              <ProtectedLayout onLogout={handleLogout}>
+              <ProtectedRoute isAuthenticated={isLoggedIn}>
                 <Sellers />
-              </ProtectedLayout>
+              </ProtectedRoute>
             }
           />
         <Route path="/forgot-password/" element={<Forgot />} />

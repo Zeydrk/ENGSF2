@@ -1,4 +1,4 @@
-import Navbar from "./Navbar";
+import Navbar from "./components/navbar";
 import React, { useEffect, useState } from "react";
 import {
   Chart as ChartJS,
