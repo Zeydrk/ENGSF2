@@ -14,6 +14,10 @@ module.exports = (sequelize, DataTypes) => {
       // Admin.belongsTo(models.Account,{
       //   foreignKey: 'account_Id',
       // })
+      Admin.hasMany(models.AdminLogActivity, {
+        foreignKey: 'adminId',
+        as: 'activities'
+      });
     }
   }
   Admin.init({

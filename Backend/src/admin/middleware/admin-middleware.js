@@ -9,7 +9,7 @@
 
   // Serializing za user
   passport.serializeUser((user, done) =>{
-    done(null,user.email, user.role)
+    done(null,user.email)
   })
 
   // deserializing za user
