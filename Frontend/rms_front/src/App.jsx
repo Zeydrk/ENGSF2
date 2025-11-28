@@ -17,6 +17,7 @@ import ProductPage from './components/ProductPage';
 import Forgot from './components/Forgot'
 import Reset from './components/Reset'
 import Package from './components/Package'
+import PageLayout from './components/Navigation/pagelayout'
 
 
 const ProtectedLayout = ({ children, onLogout }) => (
@@ -63,6 +64,7 @@ function App() {
         <Route path="/" element=
           {
             <ProtectedRoute isAuthenticated={isLoggedIn}>
+                <Navbar />
               <Home />
             </ProtectedRoute>
           }/>

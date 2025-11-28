@@ -134,7 +134,7 @@ const Navigation = ({ user }) => {
                 to="/login"
                 className="bg-linear-to-r from-amber-500 to-orange-600 text-white px-4 py-2 rounded-xl font-semibold hover:from-amber-600 hover:to-orange-700 transition-all duration-200"
               >
-                Sign In
+                Logout
               </Link>
             )}
           </div>

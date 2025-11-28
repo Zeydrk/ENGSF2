@@ -18,17 +18,17 @@ const Navigation = ({ user }) => {
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
 
   const navItems = [
-    { path: '/', label: 'Dashboard', icon: FiHome },
-    { path: '/product', label: 'Products', icon: FiPackage },
-    { path: '/seller', label: 'Sellers', icon: FiUsers },
-    { path: '/package', label: 'Packages', icon: FiTruck },
+    { path: '/home', label: 'Dashboard', icon: FiHome },
+    { path: '/products', label: 'Products', icon: FiPackage },
+    { path: '/sellers', label: 'Sellers', icon: FiUsers },
+    { path: '/packages', label: 'Packages', icon: FiTruck },
   ];
 
-  const handleSignOut = () => {
-    // Add your sign out logic here
-    console.log('Signing out...');
-    navigate('/login');
-  };
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+    localStorage.setItem('isLoggedIn', 'true');
+  }
+
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -132,9 +132,10 @@ const Navigation = ({ user }) => {
             ) : (
               <Link
                 to="/login"
+                    onClick={handleLogin}
                 className="bg-linear-to-r from-amber-500 to-orange-600 text-white px-4 py-2 rounded-xl font-semibold hover:from-amber-600 hover:to-orange-700 transition-all duration-200"
               >
-                Sign In
+                Logout
               </Link>
             )}
           </div>
