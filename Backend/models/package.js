@@ -1,14 +1,8 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
+const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
   class Package extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
     static associate(models) {
       Package.belongsTo(models.Seller, {
         foreignKey: 'seller_Id',
@@ -18,18 +12,55 @@ module.exports = (sequelize, DataTypes) => {
   Package.init({
     seller_Id: {
       type: DataTypes.INTEGER,
+      allowNull: false,
       references: {
-        model: "Seller", 
+        model: "Sellers",
         key: "id"
-      }},
-    package_Name: DataTypes.STRING,
-    recipient_Name: DataTypes.STRING,
-    descrtion: DataTypes.STRING
+      }
+    },
+    package_Name: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    buyer_Name: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    dropOff_Date: {
+      type: DataTypes.DATEONLY,
+      allowNull: false
+    },
+    package_Size: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    price: {
+      type: DataTypes.DECIMAL(10,2),
+      allowNull: false
+    },
+    handling_Fee: {
+      type: DataTypes.DECIMAL(10,2),
+      allowNull: false
+    },
+    payment_Status: {
+      type: DataTypes.STRING,       // paid / unpaid
+      allowNull: false
+    },
+
+    payment_Method: {
+      type: DataTypes.STRING,       // cash / gcash
+      allowNull: false
+    },
+    package_Status: {
+      type: DataTypes.STRING,       // claimed / unclaimed
+      allowNull: false
+    },
   }, {
     sequelize,
     modelName: 'Package',
-    updatedAt:false,
-    createdAt:false
+    updatedAt: false,
+    createdAt: false
   });
+
   return Package;
 };
