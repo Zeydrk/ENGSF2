@@ -14,7 +14,6 @@ import {
   FiDollarSign
 } from 'react-icons/fi';
 import { useSeller } from '../../hooks/useSeller';
-import PageLayout from '../components/pageLayout';
 
 const Sellers = () => {
   const { 
@@ -42,12 +41,6 @@ const Sellers = () => {
     seller_Email: "",
     seller_Phone: "",
   });
-
-  // Mock user data - replace with actual user data from your auth system
-  const user = {
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-  };
 
   // Load sellers on component mount
   useEffect(() => {
@@ -197,12 +190,12 @@ const Sellers = () => {
   };
 
   return (
-    <PageLayout user={user}>
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
       {/* Header Section */}
       <div className="mb-6 sm:mb-8">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div className="text-center sm:text-left">
-            <h1 className="text-2xl sm:text-4xl font-bold text-transparent bg-clip-text bg-linear-to-r pb-5 from-amber-700 to-orange-800">
+            <h1 className="text-2xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r pb-5 from-amber-700 to-orange-800">
               Seller Management
             </h1>
             <p className="text-amber-700 mt-1 sm:mt-2 text-sm sm:text-lg">
@@ -213,7 +206,7 @@ const Sellers = () => {
           {/* Add Seller Button */}
           <button
             onClick={handleAddSeller}
-            className="bg-linear-to-r from-amber-500 to-orange-600 text-white px-4 sm:px-6 py-3 rounded-xl font-semibold flex items-center justify-center space-x-2 hover:from-amber-600 hover:to-orange-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl w-full sm:w-auto"
+            className="bg-gradient-to-r from-amber-500 to-orange-600 text-white px-4 sm:px-6 py-3 rounded-xl font-semibold flex items-center justify-center space-x-2 hover:from-amber-600 hover:to-orange-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl w-full sm:w-auto"
           >
             <FiPlus className="w-4 h-4 sm:w-5 sm:h-5" />
             <span className="text-sm sm:text-base">Add Seller</span>
@@ -244,7 +237,7 @@ const Sellers = () => {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-linear-to-r from-amber-50 to-orange-50 border-b border-amber-100">
+              <tr className="bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100">
                 <th className="px-6 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider">
                   Seller ID
                 </th>
@@ -291,7 +284,7 @@ const Sellers = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="w-8 h-8 bg-linear-to-r from-amber-400 to-orange-500 rounded-full flex items-center justify-center text-white font-semibold text-sm mr-3">
+                        <div className="w-8 h-8 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full flex items-center justify-center text-white font-semibold text-sm mr-3">
                           {seller.seller_Name?.charAt(0) || 'S'}
                         </div>
                         <div>
@@ -385,7 +378,7 @@ const Sellers = () => {
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-linear-to-r from-amber-400 to-orange-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                  <div className="w-10 h-10 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
                     {seller.seller_Name?.charAt(0) || 'S'}
                   </div>
                   <div>
@@ -591,7 +584,7 @@ const Sellers = () => {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-linear-to-r from-amber-500 to-orange-600 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-orange-700 transform hover:scale-105 transition-all duration-200 flex items-center justify-center space-x-2 text-sm sm:text-base"
+                  className="flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-orange-700 transform hover:scale-105 transition-all duration-200 flex items-center justify-center space-x-2 text-sm sm:text-base"
                 >
                   <FiSave className="w-3 h-3 sm:w-4 sm:h-4" />
                   <span>{editingSeller ? 'Update' : 'Save'}</span>
@@ -626,7 +619,7 @@ const Sellers = () => {
                 </button>
                 <button
                   onClick={() => handleDeleteSeller(showDeleteConfirm)}
-                  className="flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-linear-to-r from-red-500 to-pink-600 text-white rounded-xl font-semibold hover:from-red-600 hover:to-pink-700 transform hover:scale-105 transition-all duration-200 text-sm sm:text-base"
+                  className="flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-xl font-semibold hover:from-red-600 hover:to-pink-700 transform hover:scale-105 transition-all duration-200 text-sm sm:text-base"
                 >
                   Delete Seller
                 </button>
@@ -660,7 +653,7 @@ const Sellers = () => {
                 </button>
                 <button
                   onClick={() => handleClaimSeller(showClaimConfirm)}
-                  className="flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-linear-to-r from-amber-500 to-orange-600 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-orange-700 transform hover:scale-105 transition-all duration-200 text-sm sm:text-base"
+                  className="flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-orange-700 transform hover:scale-105 transition-all duration-200 text-sm sm:text-base"
                 >
                   Confirm Cashout
                 </button>
@@ -669,7 +662,7 @@ const Sellers = () => {
           </div>
         </div>
       )}
-    </PageLayout>
+    </div>
   );
 };
 

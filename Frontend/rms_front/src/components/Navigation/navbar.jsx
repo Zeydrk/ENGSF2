@@ -24,6 +24,11 @@ const Navigation = ({ user }) => {
     { path: '/package', label: 'Packages', icon: FiTruck },
   ];
 
+    const handleLogin = () => {
+    setIsLoggedIn(true);
+    localStorage.setItem('isLoggedIn', 'true');
+  }
+
   const handleSignOut = () => {
     // Add your sign out logic here
     console.log('Signing out...');
@@ -132,6 +137,7 @@ const Navigation = ({ user }) => {
             ) : (
               <Link
                 to="/login"
+                onClick={handleLogin}
                 className="bg-linear-to-r from-amber-500 to-orange-600 text-white px-4 py-2 rounded-xl font-semibold hover:from-amber-600 hover:to-orange-700 transition-all duration-200"
               >
                 Logout

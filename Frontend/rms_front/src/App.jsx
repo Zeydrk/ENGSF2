@@ -1,26 +1,27 @@
 // import react library/components
 import { useEffect, useState } from 'react'
 import './App.css'
-import Toasters from './pages/Toasters'
+import Toasters from './components/Toasters'
 import {BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 
 
 // Importing components
 import Login from './components/Login/Login'
 import Register from './components/Register/Register'
-import ProtectedRoute from './pages/ProtectedRoute'
-import Home from './pages/Home'
-import Navbar from './components/Navigation/navbar'  
+import ProtectedRoute from './components/ProtectedRoute'
+import Home from './components/Home'
+import Navigation from './components/Navigation/navbar'
 import Product from './components/Product/Products'
-import Sellers from "./pages/seller/Sellers";
-import ProductPage from './pages/ProductPage';
-import Forgot from './components/Login/Forgot'
-import Reset from './pages/Reset'
-import Package from './pages/package/Package'
+import Sellers from "./components/seller/Sellers";
+import ProductPage from './components/ProductPage';
+import Forgot from './components/Forgot'
+import Reset from './components/Reset'
+import Package from './components/package/Package'
+
 
 const ProtectedLayout = ({ children, onLogout }) => (
   <>
-    <Navbar onLogout={onLogout} />
+    <Navigation onLogout={onLogout} />
     {children}
   </>
 );
@@ -62,13 +63,13 @@ function App() {
         <Route path="/" element=
           {
             <ProtectedRoute isAuthenticated={isLoggedIn}>
-                <Navbar />
+              <Navigation />
               <Home />
             </ProtectedRoute>
           }/>
          <Route path='/package' element={
                 <ProtectedRoute isAuthenticated={isLoggedIn}>
-                <Navbar />
+                <Navigation />
               <Package />
             </ProtectedRoute>}/>
         
@@ -76,7 +77,7 @@ function App() {
             path="/product"
             element={
                <ProtectedRoute isAuthenticated={isLoggedIn}>
-                <Navbar />
+                <Navigation />
               <Product />
             </ProtectedRoute>
             }
@@ -85,7 +86,7 @@ function App() {
             path="/scan/:id"
             element={
                   <ProtectedRoute isAuthenticated={isLoggedIn}>
-                <Navbar />
+                <Navigation />
               <ProductPage />
             </ProtectedRoute>
             }
@@ -93,9 +94,10 @@ function App() {
           <Route
             path="/seller"
             element={
-              <ProtectedRoute isAuthenticated={isLoggedIn}>
-                <Sellers />
-              </ProtectedRoute>
+                    <ProtectedRoute isAuthenticated={isLoggedIn}>
+                <Navigation />
+              <Sellers />
+            </ProtectedRoute>
             }
           />
         

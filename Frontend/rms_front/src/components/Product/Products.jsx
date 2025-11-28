@@ -227,7 +227,8 @@ async function handleCreate(e) {
     // Show toast for immediate feedback
     if (validationErrors.product_Name) {
       toast.error(validationErrors.product_Name, {
-        className: "alert alert-error text-white",
+        duration: 4000,
+        position: "top-right",
       });
     }
     return;
@@ -239,12 +240,14 @@ async function handleCreate(e) {
     setShowProductForm(false);
     refresh();
     toast.success("Product created successfully!", {
-      className: "alert alert-success text-white",
+      duration: 4000,
+      position: "top-right",
     });
   } catch (err) {
     const msg = err?.response?.data?.message || "Create failed";
     toast.error(msg, {
-     className: "alert alert-error text-white",
+      duration: 4000,
+      position: "top-right",
     });
     setError(msg);
   }
@@ -253,7 +256,9 @@ async function handleCreate(e) {
   async function handleDelete(id, stock) {
   if (stock > 0) {
     toast.error("Cannot delete a product with stock", {
-       className: "alert alert-error text-white",
+      duration: 4000,
+      position: "top-right",
+      style: { background: "#cf2b2bff", color: "#fff" },
     });
     return;
   }
@@ -295,27 +300,67 @@ async function handleCreate(e) {
   try {
     await productApi.deleteProduct({ id });
     toast.success("Product deleted successfully", {
-     className: "alert alert-success text-white",
+      duration: 3000,
+      position: "top-right",
+      style: { background: "#34d399", color: "#fff" },
     });
     refresh();
   } catch (err) {
     toast.error(err.message || "Delete failed", {
-     className: "alert alert-error text-white",
+      duration: 4000,
+      position: "top-right",
+      style: { background: "#f87171", color: "#fff" },
     });
     setError(err.message || "Delete failed");
   }
 }
 
   async function handleArchive (id) {
+    const confirmArchive = await new Promise((resolve) => {
+    const toastId = toast(
+      (t) => (
+        <div className="flex flex-col gap-2">
+          <span>Archive this product?</span>
+          <div className="flex gap-2 justify-end mt-2">
+            <button
+              className="btn btn-sm btn-error"
+              onClick={() => {
+                resolve(false);
+                toast.dismiss(t.id);
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              className="btn btn-sm btn-success"
+              onClick={() => {
+                resolve(true);
+                toast.dismiss(t.id);
+              }}
+            >
+              Archive
+            </button>
+          </div>
+        </div>
+      ),
+      { duration: Infinity, position: "top-right" }
+    );
+  });
+    if(!confirmArchive) return;
+    
     try {
       await productApi.archiveProduct({ id });
       toast.success("Product archived successfully", {
-      className: "alert alert-success text-white",
+      duration: 3000,
+      position: "top-right",
+      style: { background: "#34d399", color: "#fff" },
     });
       refresh();
     } catch (err) {
       toast.error(err.message || "Archive failed", {
-      className: "alert alert-error text-white",
+      duration: 4000,
+      position: "top-right",
+      style: { background: "#f87171", color: "#fff" },
     });
     setError(err.message || "Archive failed");
     }
@@ -325,12 +370,16 @@ async function handleCreate(e) {
     try {
       await productApi.archiveAddBack({ id });
       toast.success("Product added back successfully", {
-     className: "alert alert-success text-white",
+      duration: 3000,
+      position: "top-right",
+      style: { background: "#34d399", color: "#fff" },
     });
       refresh();
     } catch (err) {
       toast.error(err.message || "Adding back failed", {
-      className: "alert alert-error text-white",
+      duration: 4000,
+      position: "top-right",
+      style: { background: "#f87171", color: "#fff" },
     });
     setError(err.message || "Adding back  failed");
     }
@@ -378,12 +427,16 @@ async function handleCreate(e) {
       setEditing(null);
       resetForm();
        toast.success("Product Updated successfully", {
-      className: "alert alert-success text-white",
+      duration: 3000,
+      position: "top-right",
+      style: { background: "#34d399", color: "#fff" },
     });
      refresh();
     } catch (err) {
       toast.error(err.message || "Update failed", {
-      className: "alert alert-error text-white",
+      duration: 4000,
+      position: "top-right",
+      style: { background: "#f87171", color: "#fff" },
     });
     setError(err.message || "Update failed");
     }
@@ -406,6 +459,7 @@ async function handleCreate(e) {
     }
   };
 
+// Update the handleBulkArchive function:
 const handleBulkArchive = async () => {
   // Show confirmation dialog with the same design as individual archive
   const confirmBulkArchive = await new Promise((resolve) => {
@@ -540,6 +594,7 @@ const handleBulkUnarchive = async () => {
     });
   }
 };
+
   const getStatusColor = (stock) => {
     if (stock > 10) return 'text-green-600 bg-green-100 border-green-200';
     if (stock > 0) return 'text-amber-600 bg-amber-100 border-amber-200';
@@ -726,10 +781,10 @@ const handleBulkUnarchive = async () => {
         </div>
       )}
 
-     {/* Desktop Table View */}
-<div className="hidden lg:block bg-white rounded-2xl shadow-xl border border-amber-100 overflow-hidden">
-  <div className="overflow-x-auto">
-    <table className="w-full min-w-[1200px]">
+      {/* Desktop Table View */}
+      <div className="hidden lg:block bg-white rounded-2xl shadow-xl border border-amber-100 overflow-hidden">
+        <div className="overflow-x-auto">
+         <table className="w-full min-w-[1200px]">
   <thead>
     <tr className="bg-linear-to-r from-amber-50 to-orange-50 border-b border-amber-100">
       <th className="px-4 py-3 text-left text-xs font-semibold text-amber-800 uppercase tracking-wider w-12">
@@ -919,8 +974,8 @@ const handleBulkUnarchive = async () => {
   </tbody>
 </table>
 
-  </div>
-</div>
+        </div>
+      </div>
 
       {/* Mobile Card View - New from design */}
       <div className="lg:hidden space-y-4">
@@ -1513,7 +1568,7 @@ const handleBulkUnarchive = async () => {
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <p className="text-gray-500">Category</p>
-                  <p className="font-semibold text-black">{viewingProduct.product_Category}</p>
+                  <p className="font-semibold">{viewingProduct.product_Category}</p>
                 </div>
                 <div>
                   <p className="text-gray-500">Status</p>
@@ -1531,12 +1586,12 @@ const handleBulkUnarchive = async () => {
                 </div>
                 <div>
                   <p className="text-gray-500">Stock</p>
-                  <p className="font-semibold text-black">{viewingProduct.product_Stock} units</p>
+                  <p className="font-semibold">{viewingProduct.product_Stock} units</p>
                 </div>
                 {viewingProduct.product_Expiry && (
                   <div>
                     <p className="text-gray-500">Expiry Date</p>
-                    <p className="font-semibold text-black">{new Date(viewingProduct.product_Expiry).toISOString().split("T")[0]}</p>
+                    <p className="font-semibold">{new Date(viewingProduct.product_Expiry).toISOString().split("T")[0]}</p>
                   </div>
                 )}
               </div>

@@ -2,7 +2,7 @@ const models = require('../../models');
 
 async function getSeller(req, res) {
     try {
-        const sellers = await models.Seller.findAll();
+        const sellers = await models['Seller'].findAll();
         res.status(200).json(sellers);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -13,7 +13,7 @@ async function addSeller(req, res) {
     try {
         const { seller_Name, seller_Phone, seller_Email } = req.body;
 
-        const newSeller = await models.Seller.create({
+        const newSeller = await models['Seller'].create({
             seller_Name,
             seller_Phone,
             seller_Email,
@@ -29,7 +29,7 @@ async function addSeller(req, res) {
 async function deleteSeller(req, res) {
     try {
         const { id } = req.body;
-        const deleted = await models.Seller.destroy({ where: { id } });
+        const deleted = await models['Seller'].destroy({ where: { id } });
 
         if (!deleted) return res.status(404).json({ message: "Seller not found" });
 
@@ -43,7 +43,7 @@ async function updateSeller(req, res) {
     try {
         const { id, seller_Name, seller_Phone, seller_Email } = req.body;
 
-        const seller = await models.Seller.findByPk(id);
+        const seller = await models['Seller'].findByPk(id);
         if (!seller) return res.status(404).json({ message: "Seller not found" });
 
         seller.seller_Name = seller_Name ?? seller.seller_Name;
@@ -63,23 +63,16 @@ async function claimSeller(req, res) {
         const { id } = req.body;
 
         // Find seller
-        const seller = await models.Seller.findByPk(id);
+        const seller = await models['Seller'].findByPk(id);
         if (!seller) return res.status(404).json({ message: "Seller not found" });
 
-        // DELETE packages with status "Claimed"
-        const deletedPackages = await models.Package.destroy({
-            where: {
-                seller_Id: id,
-                package_Status: "Claimed"   // <-- change if needed
-            }
-        });
 
         // RESET BALANCE
         seller.balance = 0;
         await seller.save();
 
         // Return updated sellers
-        const sellers = await models.Seller.findAll();
+        const sellers = await models['Seller'].findAll();
 
         res.status(200).json({
             message: "Claim processed successfully",
