@@ -66,30 +66,37 @@ function App() {
               <Home />
             </ProtectedRoute>
           }/>
-         <Route path='/package' element={<Package/>}/>
+         <Route path='/package' element={
+                <ProtectedRoute isAuthenticated={isLoggedIn}>
+                <Navbar />
+              <Package />
+            </ProtectedRoute>}/>
         
         <Route
             path="/product"
             element={
-              <ProtectedLayout onLogout={handleLogout}>
-                <Product />
-              </ProtectedLayout>
+               <ProtectedRoute isAuthenticated={isLoggedIn}>
+                <Navbar />
+              <Product />
+            </ProtectedRoute>
             }
           />
         <Route
             path="/scan/:id"
             element={
-              <ProtectedLayout onLogout={handleLogout}>
-                <ProductPage />
-              </ProtectedLayout>
+                  <ProtectedRoute isAuthenticated={isLoggedIn}>
+                <Navbar />
+              <ProductPage />
+            </ProtectedRoute>
             }
           />
           <Route
             path="/seller"
             element={
-              <ProtectedLayout onLogout={handleLogout}>
-                <Sellers />
-              </ProtectedLayout>
+                    <ProtectedRoute isAuthenticated={isLoggedIn}>
+                <Navbar />
+              <Sellers />
+            </ProtectedRoute>
             }
           />
         <Route path="/forgot-password/" element={<Forgot />} />

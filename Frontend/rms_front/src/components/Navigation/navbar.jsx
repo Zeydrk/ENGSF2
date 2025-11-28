@@ -18,10 +18,10 @@ const Navigation = ({ user }) => {
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
 
   const navItems = [
-    { path: '/', label: 'Dashboard', icon: FiHome },
-    { path: '/product', label: 'Products', icon: FiPackage },
-    { path: '/seller', label: 'Sellers', icon: FiUsers },
-    { path: '/package', label: 'Packages', icon: FiTruck },
+    { path: '/home', label: 'Dashboard', icon: FiHome },
+    { path: '/products', label: 'Products', icon: FiPackage },
+    { path: '/sellers', label: 'Sellers', icon: FiUsers },
+    { path: '/packages', label: 'Packages', icon: FiTruck },
   ];
 
   const handleSignOut = () => {
