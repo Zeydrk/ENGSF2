@@ -145,27 +145,25 @@ export function useProduct() {
   };
 
   // UPDATED: Search product WITH ADMIN HEADER
-  const searchProduct = useCallback(
-    debounce(async (query) => {
-      if (!query.trim()) {
-        setProducts([]);
-        return;
-      }
-      try {
-        const res = await axios.get(`${BASE_URL}/products/search`, { 
-          params: { query },
+const searchProduct = useCallback(
+  debounce(async (search, category) => {
+
+    const res = await axios.get(`${BASE_URL}/products/search`, {
+      
+          params: {
+        search: search || "",
+        category: category || "",
+      },
           headers: {
             'X-Admin-ID': getCurrentAdminId() // ADD ADMIN HEADER
           }
         });
-        setProducts(res.data || []);
-        setError("");
-      } catch (err) {
-        handleError(err);
-      }
-    }, 300),
-    []
-  );
+
+    setProducts(res.data || []);
+  }, 300),
+  []
+);
+
 
   // UPDATED: Search archived product WITH ADMIN HEADER
   const searchArchivedProduct = useCallback(
@@ -175,12 +173,7 @@ export function useProduct() {
         return;
       }
       try {
-        const res = await axios.get(`${BASE_URL}/products/searchArchive`, { 
-          params: { query },
-          headers: {
-            'X-Admin-ID': getCurrentAdminId() //ADD ADMIN HEADER
-          }
-        });
+        const res = await axios.get(`${BASE_URL}/products/searchArchive`, { params: { query } });
         setArchived(res.data || []);
         setError("");
       } catch (err) {
@@ -237,7 +230,7 @@ export function useProduct() {
     archiveAddBack,
     searchProduct,
     searchArchivedProduct,
-    categorySort,
-    categoryArchiveSort,
+    //categorySort,
+    //categoryArchiveSort,
   };
 }
