@@ -24,11 +24,7 @@ const Navigation = ({ user }) => {
     { path: '/packages', label: 'Packages', icon: FiTruck },
   ];
 
-  const handleSignOut = () => {
-    // Add your sign out logic here
-    console.log('Signing out...');
-    navigate('/login');
-  };
+  
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
