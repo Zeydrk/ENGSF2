@@ -10,11 +10,6 @@ function debounce(cb, delay = 300) {
   };
 }
 
-// ✅ HELPER FUNCTION TO GET ADMIN ID
-const getCurrentAdminId = () => {
-  return localStorage.getItem('currentAdminId') || '1'; // Fallback to admin 1
-};
-
 export function useProduct() {
   const BASE_URL = "http://localhost:3000";
 
@@ -30,15 +25,11 @@ export function useProduct() {
     setError(err?.message || "Something went wrong");
   };
 
-  // ✅ UPDATED: Fetch all active products WITH ADMIN HEADER
+  // --- Fetch all active products ---
   const getAllProducts = useCallback(async (page = 1, limit = 7) => {
     setLoading(true);
     try {
-      const res = await fetch(`${BASE_URL}/products?page=${page}&limit=${limit}`, {
-        headers: {
-          'X-Admin-ID': getCurrentAdminId() // ✅ ADD ADMIN HEADER
-        }
-      });
+      const res = await fetch(`${BASE_URL}/products?page=${page}&limit=${limit}`);
       if (!res.ok) throw new Error("Failed to load products");
       const data = await res.json();
       setProducts(data.products || []);
@@ -51,15 +42,11 @@ export function useProduct() {
     }
   }, []);
 
-  // ✅ UPDATED: Fetch all archived products WITH ADMIN HEADER
+  // --- Fetch all archived products ---
   const archivedProducts = useCallback(async (page = 1, limit = 7) => {
     setLoading(true);
     try {
-      const res = await fetch(`${BASE_URL}/products/archived?page=${page}&limit=${limit}`, {
-        headers: {
-          'X-Admin-ID': getCurrentAdminId() // ✅ ADD ADMIN HEADER
-        }
-      });
+      const res = await fetch(`${BASE_URL}/products/archived?page=${page}&limit=${limit}`);
       if (!res.ok) throw new Error("Failed to load archived products");
       const data = await res.json();
       setArchived(data.products || []);
@@ -72,56 +59,37 @@ export function useProduct() {
     }
   }, []);
 
-  // ✅ UPDATED: Create product WITH ADMIN HEADER
   const createProduct = async (product) => {
     try {
-      const response = await axios.post(`${BASE_URL}/products/create`, product, {
-        headers: {
-          'X-Admin-ID': getCurrentAdminId() // ✅ ADD ADMIN HEADER
-        }
-      });
+      const response = await axios.post(`${BASE_URL}/products/create`, product);
       await getAllProducts();
     } catch (err) {
       handleError(err);
     }
   };
 
-  // ✅ UPDATED: Update product WITH ADMIN HEADER
   const updateProduct = async (product) => {
     try {
-      await axios.post(`${BASE_URL}/products/update`, product, {
-        headers: {
-          'X-Admin-ID': getCurrentAdminId() // ✅ ADD ADMIN HEADER
-        }
-      });
+    await axios.post(`${BASE_URL}/products/update`, product);
+  
       await getAllProducts();
     } catch (err) {
       handleError(err);
     }
   };
 
-  // ✅ UPDATED: Delete product WITH ADMIN HEADER
   const deleteProduct = async (product) => {
     try {
-      await axios.post(`${BASE_URL}/products/delete`, { id: product.id }, {
-        headers: {
-          'X-Admin-ID': getCurrentAdminId() // ✅ ADD ADMIN HEADER
-        }
-      });
+      await axios.post(`${BASE_URL}/products/delete`, { id: product.id });
       await getAllProducts();
     } catch (err) {
       handleError(err);
     }
   };
 
-  // ✅ UPDATED: Archive product WITH ADMIN HEADER
   const archiveProduct = async (product) => {
     try {
-      await axios.post(`${BASE_URL}/products/archive`, { id: product.id }, {
-        headers: {
-          'X-Admin-ID': getCurrentAdminId() // ✅ ADD ADMIN HEADER
-        }
-      });
+      await axios.post(`${BASE_URL}/products/archive`, { id: product.id });
       await getAllProducts();
       await archivedProducts();
     } catch (err) {
@@ -129,14 +97,9 @@ export function useProduct() {
     }
   };
 
-  // ✅ UPDATED: Unarchive product WITH ADMIN HEADER
   const archiveAddBack = async (product) => {
     try {
-      await axios.post(`${BASE_URL}/products/addBack`, { id: product.id }, {
-        headers: {
-          'X-Admin-ID': getCurrentAdminId() // ✅ ADD ADMIN HEADER
-        }
-      });
+      await axios.post(`${BASE_URL}/products/addBack`, { id: product.id });
       await getAllProducts();
       await archivedProducts();
     } catch (err) {
@@ -144,83 +107,56 @@ export function useProduct() {
     }
   };
 
-  // ✅ UPDATED: Search product WITH ADMIN HEADER
-  const searchProduct = useCallback(
-    debounce(async (query) => {
-      if (!query.trim()) {
-        setProducts([]);
-        return;
-      }
-      try {
-        const res = await axios.get(`${BASE_URL}/products/search`, { 
-          params: { query },
-          headers: {
-            'X-Admin-ID': getCurrentAdminId() // ✅ ADD ADMIN HEADER
-          }
-        });
-        setProducts(res.data || []);
-        setError("");
-      } catch (err) {
-        handleError(err);
-      }
-    }, 300),
-    []
-  );
+  // --- Debounced Search ---
+const searchProduct = useCallback(
+  debounce(async (search, category) => {
 
-  // ✅ UPDATED: Search archived product WITH ADMIN HEADER
+    const res = await axios.get(`${BASE_URL}/products/search`, {
+      params: {
+        search: search || "",
+        category: category || "",
+      },
+    });
+
+    setProducts(res.data || []);
+  }, 300),
+  []
+);
+
+
   const searchArchivedProduct = useCallback(
-    debounce(async (query) => {
-      if (!query.trim()) {
-        setArchived([]);
-        return;
-      }
-      try {
-        const res = await axios.get(`${BASE_URL}/products/searchArchive`, { 
-          params: { query },
-          headers: {
-            'X-Admin-ID': getCurrentAdminId() // ✅ ADD ADMIN HEADER
-          }
-        });
-        setArchived(res.data || []);
-        setError("");
-      } catch (err) {
-        handleError(err);
-      }
-    }, 300),
-    []
+    debounce(async (search, category) => {
+    const res = await axios.get(`${BASE_URL}/products/searchArchive`, {
+      params: {
+        search: search || "",
+        category: category || "",
+      },
+    });
+    setArchived(res.data || []);
+  }, 300),
+  []
   );
 
-  // ✅ UPDATED: Category sort WITH ADMIN HEADER
-  const categorySort = async (order) => {
-    try {
-      const res = await axios.get(`${BASE_URL}/products/category`, { 
-        params: { sort: order },
-        headers: {
-          'X-Admin-ID': getCurrentAdminId() // ✅ ADD ADMIN HEADER
-        }
-      });
-      setProducts(res.data?.length ? res.data : []);
-      setError(res.data?.length ? "" : `No products for: ${order}`);
-    } catch (err) {
-      handleError(err);
-    }
-  };
+  // // --- Category Sorting ---
+  // const categorySort = async (order) => {
+  //   try {
+  //     const res = await axios.get(`${BASE_URL}/products/category`, { params: { sort: order } });
+  //     setProducts(res.data?.length ? res.data : []);
+  //     setError(res.data?.length ? "" : `No products for: ${order}`);
+  //   } catch (err) {
+  //     handleError(err);
+  //   }
+  // };
 
-  // ✅ UPDATED: Category archive sort WITH ADMIN HEADER
-  const categoryArchiveSort = async (order) => {
-    try {
-      const res = await axios.get(`${BASE_URL}/products/categoryArchive`, { 
-        params: { sort: order },
-        headers: {
-          'X-Admin-ID': getCurrentAdminId() // ✅ ADD ADMIN HEADER
-        }
-      });
-      setArchived(res.data?.length ? res.data : []);
-      setError(res.data?.length ? "" : `No archived products for: ${order}`);
-    } catch (err) {
-      handleError(err);
-    }
-  };
+  // const categoryArchiveSort = async (order) => {
+  //   try {
+  //     const res = await axios.get(`${BASE_URL}/products/categoryArchive`, { params: { sort: order } });
+  //     setArchived(res.data?.length ? res.data : []);
+  //     setError(res.data?.length ? "" : `No archived products for: ${order}`);
+  //   } catch (err) {
+  //     handleError(err);
+  //   }
+  // };
 
   // --- Return everything ---
   return {
@@ -238,7 +174,7 @@ export function useProduct() {
     archiveAddBack,
     searchProduct,
     searchArchivedProduct,
-    categorySort,
-    categoryArchiveSort,
+    //categorySort,
+    //categoryArchiveSort,
   };
 }
