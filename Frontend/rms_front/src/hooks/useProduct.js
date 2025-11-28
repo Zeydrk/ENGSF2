@@ -114,12 +114,12 @@ export function useProduct() {
     }
   };
 
-  // UPDATED: Archive product WITH ADMIN HEADER
+  // ✅ UPDATED: Archive product WITH ADMIN HEADER
   const archiveProduct = async (product) => {
     try {
       await axios.post(`${BASE_URL}/products/archive`, { id: product.id }, {
         headers: {
-          'X-Admin-ID': getCurrentAdminId() // ADD ADMIN HEADER
+          'X-Admin-ID': getCurrentAdminId() // ✅ ADD ADMIN HEADER
         }
       });
       await getAllProducts();
@@ -129,12 +129,12 @@ export function useProduct() {
     }
   };
 
-  // UPDATED: Unarchive product WITH ADMIN HEADER
+  // ✅ UPDATED: Unarchive product WITH ADMIN HEADER
   const archiveAddBack = async (product) => {
     try {
       await axios.post(`${BASE_URL}/products/addBack`, { id: product.id }, {
         headers: {
-          'X-Admin-ID': getCurrentAdminId() 
+          'X-Admin-ID': getCurrentAdminId() // ✅ ADD ADMIN HEADER
         }
       });
       await getAllProducts();
@@ -144,28 +144,30 @@ export function useProduct() {
     }
   };
 
-  // UPDATED: Search product WITH ADMIN HEADER
-const searchProduct = useCallback(
-  debounce(async (search, category) => {
-
-    const res = await axios.get(`${BASE_URL}/products/search`, {
-      
-          params: {
-        search: search || "",
-        category: category || "",
-      },
+  // ✅ UPDATED: Search product WITH ADMIN HEADER
+  const searchProduct = useCallback(
+    debounce(async (query) => {
+      if (!query.trim()) {
+        setProducts([]);
+        return;
+      }
+      try {
+        const res = await axios.get(`${BASE_URL}/products/search`, { 
+          params: { query },
           headers: {
-            'X-Admin-ID': getCurrentAdminId() // ADD ADMIN HEADER
+            'X-Admin-ID': getCurrentAdminId() // ✅ ADD ADMIN HEADER
           }
         });
+        setProducts(res.data || []);
+        setError("");
+      } catch (err) {
+        handleError(err);
+      }
+    }, 300),
+    []
+  );
 
-    setProducts(res.data || []);
-  }, 300),
-  []
-);
-
-
-  // UPDATED: Search archived product WITH ADMIN HEADER
+  // ✅ UPDATED: Search archived product WITH ADMIN HEADER
   const searchArchivedProduct = useCallback(
     debounce(async (query) => {
       if (!query.trim()) {
@@ -173,7 +175,12 @@ const searchProduct = useCallback(
         return;
       }
       try {
-        const res = await axios.get(`${BASE_URL}/products/searchArchive`, { params: { query } });
+        const res = await axios.get(`${BASE_URL}/products/searchArchive`, { 
+          params: { query },
+          headers: {
+            'X-Admin-ID': getCurrentAdminId() // ✅ ADD ADMIN HEADER
+          }
+        });
         setArchived(res.data || []);
         setError("");
       } catch (err) {
@@ -183,13 +190,13 @@ const searchProduct = useCallback(
     []
   );
 
-  //UPDATED: Category sort WITH ADMIN HEADER
+  // ✅ UPDATED: Category sort WITH ADMIN HEADER
   const categorySort = async (order) => {
     try {
       const res = await axios.get(`${BASE_URL}/products/category`, { 
         params: { sort: order },
         headers: {
-          'X-Admin-ID': getCurrentAdminId() //ADD ADMIN HEADER
+          'X-Admin-ID': getCurrentAdminId() // ✅ ADD ADMIN HEADER
         }
       });
       setProducts(res.data?.length ? res.data : []);
@@ -199,13 +206,13 @@ const searchProduct = useCallback(
     }
   };
 
-  //UPDATED: Category archive sort WITH ADMIN HEADER
+  // ✅ UPDATED: Category archive sort WITH ADMIN HEADER
   const categoryArchiveSort = async (order) => {
     try {
       const res = await axios.get(`${BASE_URL}/products/categoryArchive`, { 
         params: { sort: order },
         headers: {
-          'X-Admin-ID': getCurrentAdminId() //ADD ADMIN HEADER
+          'X-Admin-ID': getCurrentAdminId() // ✅ ADD ADMIN HEADER
         }
       });
       setArchived(res.data?.length ? res.data : []);
@@ -215,6 +222,7 @@ const searchProduct = useCallback(
     }
   };
 
+  // --- Return everything ---
   return {
     products,
     archived,
@@ -230,7 +238,7 @@ const searchProduct = useCallback(
     archiveAddBack,
     searchProduct,
     searchArchivedProduct,
-    //categorySort,
-    //categoryArchiveSort,
+    categorySort,
+    categoryArchiveSort,
   };
 }
