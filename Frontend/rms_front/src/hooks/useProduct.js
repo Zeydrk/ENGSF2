@@ -132,7 +132,6 @@ const searchProduct = useCallback(
         category: category || "",
       },
     });
-    console.log("Archive",res.data)
     setArchived(res.data || []);
   }, 300),
   []

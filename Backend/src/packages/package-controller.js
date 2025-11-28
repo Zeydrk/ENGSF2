@@ -1,212 +1,174 @@
 const models = require("../../models");
-const { sequelize } = require("../../models"); 
-const QRCode = require('qrcode');
 const fs = require('fs');
 const path = require('path');
-const { Op } = require('sequelize');
-
-const UPLOAD_DIR = path.join(__dirname, '..', '..', 'public', 'uploads', 'qrcodes')
-
-
-function getSellerFullName(seller) {
-  if (!seller) return '';
-  
-  // Trim each name individually and filter out empty strings
-  const fName = (seller.seller_FName || '').trim();
-  const mName = (seller.seller_MName || '').trim();
-  const lName = (seller.seller_LName || '').trim();
-  
-  // Join with spaces and trim the final result
-  const fullName = [fName, mName, lName].filter(name => name.length > 0).join(' ');
-  
-  return fullName.trim();
-}
 
 async function getPackage(req, res) {
-  try {
-    const packages = await models["Package"].findAll({
-      include: [{
-        model: models.Seller,
-        attributes: ['seller_FName', 'seller_MName', 'seller_LName']
-      }]
-    });
+    try {
+        const packages = await models.Package.findAll({
+            include: [{ model: models.Seller, attributes: ['seller_Name'] }]
+        });
 
-   
-    const packagesWithSellerName = packages.map(pkg => ({
-      ...pkg.toJSON(),
-      seller_Name: getSellerFullName(pkg.Seller)
-    }));
+        const formatted = packages.map(pkg => ({
+            ...pkg.toJSON(),
+            seller_Name: pkg.Seller?.seller_Name || ""
+        }));
 
-    res.status(200).json(packagesWithSellerName);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+        res.status(200).json(formatted);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 }
 
 async function addPackage(req, res) {
-  try {
-    const { seller_Name, package_Name, recipient_Name, descrtion } = req.body;
+    try {
+        const {
+            seller_Name,
+            package_Name,
+            buyer_Name,
+            dropOff_Date,
+            package_Size,
+            price,
+            handling_Fee,
+            payment_Status,
+            payment_Method,
+            package_Status
+        } = req.body;
 
-   
-    const seller = await models["Seller"].findOne({
-      where: {
-        [Op.or]: [
-          { seller_FName: { [Op.like]: `%${seller_Name}%` } },
-          { seller_LName: { [Op.like]: `%${seller_Name}%` } },
-          { seller_MName: { [Op.like]: `%${seller_Name}%` } }
-        ]
-      }
-    });
+        const seller = await models.Seller.findOne({ where: { seller_Name } });
+        if (!seller) return res.status(404).json({ error: "Seller not found" });
 
-    if (!seller) {
-      return res.status(404).json({ error: "Seller not found" });
+        const newPackage = await models.Package.create({
+            seller_Id: seller.id,
+            package_Name,
+            buyer_Name,
+            dropOff_Date,
+            package_Size,
+            price,
+            handling_Fee,
+            payment_Status: "unpaid", // always start unpaid
+            payment_Method,
+            package_Status
+        });
+
+        const fullPackage = await models.Package.findByPk(newPackage.id, {
+            include: [{ model: models.Seller, attributes: ['seller_Name'] }]
+        });
+
+        res.status(201).json(fullPackage);
+
+    } catch (err) {
+        console.error("ADD PACKAGE ERROR:", err);
+        res.status(500).json({ error: err.message });
     }
-
-    const newPackage = await models["Package"].create({
-      seller_Id: seller.id, 
-      package_Name,
-      recipient_Name,
-      descrtion
-    });
-
-    const baseUrl = process.env.APP_URL || 'http://localhost:5173';
-    const qrValue = `${baseUrl}/packages/${newPackage.id}`;
-
-    const svgString = await QRCode.toString(qrValue, { type: 'svg', margin: 1 });
-
-    fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-
-    const fileName = `qr_package_${newPackage.id}_${Date.now()}.svg`;
-    const filePath = path.join(UPLOAD_DIR, fileName);
-
-    fs.writeFileSync(filePath, svgString, 'utf8');
-
-    const publicPath = `/uploads/qrcodes/${fileName}`;
-    await newPackage.update({
-      package_QrCodeValue: qrValue,
-      package_QrCodePath: publicPath
-    });
-
-    const createdPackage = await models["Package"].findByPk(newPackage.id, {
-      include: [{
-        model: models.Seller,
-        attributes: ['seller_FName', 'seller_MName', 'seller_LName']
-      }]
-    });
-
-    res.status(201).json({
-      ...createdPackage.toJSON(),
-      seller_Name: getSellerFullName(createdPackage.Seller)
-    });
-
-  } catch (err) {
-    console.error("Error creating package:", err);
-    res.status(500).json({ error: err.message });
-  }
 }
 
 async function deletePackage(req, res) {
-  try {
-    const { id } = req.body;
-    const deleted = await models["Package"].destroy({ where: { id } });
-    if (deleted) res.status(200).json({ message: "Package deleted successfully" });
-    else res.status(404).json({ message: "Package not found" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+    try {
+        const { id } = req.body;
+        const pkg = await models.Package.findByPk(id);
+        if (!pkg) return res.status(404).json({ message: "Package not found" });
+
+        // Deduct balance if package was paid
+        if (pkg.payment_Status.toLowerCase() === "paid") {
+            const seller = await models.Seller.findByPk(pkg.seller_Id);
+            seller.balance = parseFloat(seller.balance) - parseFloat(pkg.price);
+            await seller.save();
+        }
+
+        await pkg.destroy();
+        res.status(200).json({ message: "Package deleted successfully" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 }
 
 async function updatePackage(req, res) {
-  try {
-    const { id, seller_Name, package_Name, recipient_Name, descrtion } = req.body;
-    const package = await models["Package"].findByPk(id);
-    if (!package) return res.status(404).json({ message: "Package not found" });
+    try {
+        const {
+            id,
+            seller_Name,
+            package_Name,
+            buyer_Name,
+            dropOff_Date,
+            package_Size,
+            price,
+            handling_Fee,
+            payment_Status,
+            payment_Method,
+            package_Status
+        } = req.body;
 
+        const pkg = await models.Package.findByPk(id);
+        if (!pkg) return res.status(404).json({ message: "Package not found" });
 
-    if (seller_Name) {
-      const seller = await models["Seller"].findOne({
-        where: {
-          [Op.or]: [
-            { seller_FName: { [Op.like]: `%${seller_Name}%` } },
-            { seller_LName: { [Op.like]: `%${seller_Name}%` } },
-            { seller_MName: { [Op.like]: `%${seller_Name}%` } }
-          ]
+        const oldStatus = pkg.payment_Status.toLowerCase();
+        const oldPrice = parseFloat(pkg.price);
+
+        if (seller_Name) {
+            const seller = await models.Seller.findOne({ where: { seller_Name } });
+            if (!seller) return res.status(404).json({ message: "Seller not found" });
+            pkg.seller_Id = seller.id;
         }
-      });
 
-      if (!seller) {
-        return res.status(404).json({ error: "Seller not found" });
-      }
-      package.seller_Id = seller.id;
+        pkg.package_Name = package_Name ?? pkg.package_Name;
+        pkg.buyer_Name = buyer_Name ?? pkg.buyer_Name;
+        pkg.dropOff_Date = dropOff_Date ?? pkg.dropOff_Date;
+        pkg.package_Size = package_Size ?? pkg.package_Size;
+        pkg.price = price ?? pkg.price;
+        pkg.handling_Fee = handling_Fee ?? pkg.handling_Fee;
+        pkg.payment_Status = payment_Status ?? pkg.payment_Status;
+        pkg.payment_Method = payment_Method ?? pkg.payment_Method;
+        pkg.package_Status = package_Status ?? pkg.package_Status;
+
+        await pkg.save();
+
+        // Update seller balance if payment status changed
+        if (payment_Status && oldStatus !== pkg.payment_Status.toLowerCase()) {
+            const seller = await models.Seller.findByPk(pkg.seller_Id);
+            const newPrice = parseFloat(pkg.price);
+
+            if (oldStatus === "unpaid" && pkg.payment_Status.toLowerCase() === "paid") {
+                seller.balance = parseFloat(seller.balance) + newPrice;
+            } else if (oldStatus === "paid" && pkg.payment_Status.toLowerCase() === "unpaid") {
+                seller.balance = parseFloat(seller.balance) - newPrice;
+            }
+            await seller.save();
+        }
+
+        const updated = await models.Package.findByPk(id, {
+            include: [{ model: models.Seller, attributes: ['seller_Name'] }]
+        });
+
+        res.status(200).json({ message: "Package updated successfully", package: updated });
+
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
-
-    package.package_Name = package_Name;
-    package.recipient_Name = recipient_Name;
-    package.descrtion = descrtion;
-    await package.save();
-
- 
-    const updatedPackage = await models["Package"].findByPk(id, {
-      include: [{
-        model: models.Seller,
-        attributes: ['seller_FName', 'seller_MName', 'seller_LName']
-      }]
-    });
-
-    res.status(200).json({ 
-      message: "Package updated successfully", 
-      package: {
-        ...updatedPackage.toJSON(),
-        seller_Name: getSellerFullName(updatedPackage.Seller)
-      }
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
 }
 
 async function getPackageById(req, res) {
-  try {
-    const { id } = req.params;
-    const package = await models["Package"].findByPk(id, {
-      include: [{
-        model: models.Seller,
-        attributes: ['seller_FName', 'seller_MName', 'seller_LName']
-      }]
-    });
+    try {
+        const { id } = req.params;
+        const packageData = await models.Package.findByPk(id, {
+            include: [{ model: models.Seller, attributes: ['seller_Name'] }]
+        });
 
-    if (!package) {
-      return res.status(404).json({ error: "Package not found" });
+        if (!packageData) return res.status(404).json({ error: "Not found" });
+        res.status(200).json(packageData);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
-
-    const packageWithSellerName = {
-      ...package.toJSON(),
-      seller_Name: getSellerFullName(package.Seller)
-    };
-
-    res.status(200).json(packageWithSellerName);
-  } catch (err) {
-    console.error("Error fetching package:", err);
-    res.status(500).json({ error: err.message });
-  }
 }
 
-
 async function getSellers(req, res) {
-  try {
-    const sellers = await models["Seller"].findAll({
-      attributes: ['id', 'seller_FName', 'seller_MName', 'seller_LName']
-    });
-    
-    const sellersWithFullName = sellers.map(seller => ({
-      ...seller.toJSON(),
-      seller_Name: getSellerFullName(seller)
-    }));
-    
-    res.status(200).json(sellersWithFullName);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+    try {
+        const sellers = await models.Seller.findAll({
+            attributes: ['id', 'seller_Name']
+        });
+        res.status(200).json(sellers);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 }
 
 module.exports = {
@@ -215,5 +177,5 @@ module.exports = {
     deletePackage,
     updatePackage,
     getPackageById,
-    getSellers 
-}
+    getSellers
+};

@@ -22,16 +22,13 @@ export default function Login({ onLogin }) {
     setPassword(e.target.value);
   };
 
-  // Setting function for alert
-
   // Setting handler for input submission
   async function handleSubmit(e) {
     e.preventDefault();
     setIsLoading(true);
-    // console.log(`Username: ${username}, Password: ${password}`);
     const user = { email, password };
     loginService.fetchAdmins(user)
-    .then(res =>{
+    .then(res =>{ 
       toast.success("Login Successful", {
         className: "alert alert-success text-white",
       });

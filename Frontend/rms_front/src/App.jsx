@@ -68,7 +68,7 @@ function App() {
             </ProtectedRoute>
           }/>
          <Route path='/package' element={<Package/>}/>
-        <Route path='/package/:id' element={<PackagePage/>}/>
+        
         <Route
             path="/product"
             element={
