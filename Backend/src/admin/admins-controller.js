@@ -23,6 +23,7 @@ async function getAdmins(req, res) {
     if (req.isAuthenticated()){
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         req.session.visited = true  
         req.session.user = req.user.email
 =======
@@ -30,6 +31,8 @@ async function getAdmins(req, res) {
         console.log(req.session.id)
 >>>>>>> parent of 2ece87f (sync with main)
         console.log(req.session)
+=======
+>>>>>>> parent of 9f16310 (currently doing the session store)
 =======
 >>>>>>> parent of 9f16310 (currently doing the session store)
        res.send({

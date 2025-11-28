@@ -32,12 +32,15 @@ app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false, 
 <<<<<<< HEAD
+<<<<<<< HEAD
     saveUninitialized: false,
 <<<<<<< HEAD
     cookie:{
         maxAge: 24 * 60 * 60 * 1000  //supposed to be a day
     }
 =======
+=======
+>>>>>>> parent of 9f16310 (currently doing the session store)
     saveUninitialized: true,
     // cookie:{
     //     maxAge: 24 * 60 * 60 * 1000  //supposed to be a day
