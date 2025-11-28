@@ -8,16 +8,15 @@ import {BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 // Importing components
 import Login from './components/Login/Login'
 import Register from './components/Register/Register'
-import ProtectedRoute from './components/ProtectedRoute'
-import Home from './components/Home'
-import Navbar from './components/Navbar'  
-import Product from './components/Products'
-import Sellers from "./components/Sellers";
-import ProductPage from './components/ProductPage';
+import ProtectedRoute from './pages/ProtectedRoute'
+import Home from './pages/Home'
+import Navbar from './components/Navigation/navbar'  
+import Product from './components/Product/Products'
+import Sellers from "./pages/seller/Sellers";
+import ProductPage from './pages/ProductPage';
 import Forgot from './components/Login/Forgot'
-import Reset from './components/Reset'
-import Package from './components/Package'
-import PackagePage from './components/PackagePage'
+import Reset from './pages/Reset'
+import Package from './pages/package/Package'
 
 const ProtectedLayout = ({ children, onLogout }) => (
   <>

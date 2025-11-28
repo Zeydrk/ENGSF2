@@ -1,4 +1,4 @@
-import Navbar from "./components/navbar";
+
 import React, { useEffect, useState } from "react";
 import {
   Chart as ChartJS,
@@ -248,7 +248,7 @@ export default function Home() {
   if (loading && products.length === 0) {
     return (
       <div className="min-h-screen flex flex-col bg-base-200" data-theme="autumn">
-        <Navbar />
+
         <div className="flex items-center justify-center flex-grow">
           <p className="text-center text-gray-500 text-lg">Loading products...</p>
         </div>
@@ -260,7 +260,6 @@ export default function Home() {
   if (error) {
     return (
       <div className="min-h-screen flex flex-col bg-base-200" data-theme="autumn">
-        <Navbar />
         <div className="flex items-center justify-center flex-grow">
           <div className="text-center">
             <p className="text-red-500 text-lg mb-2">Error loading products</p>
@@ -273,7 +272,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col bg-base-200" data-theme="autumn">
-      <Navbar />
 
       {/* Welcome Section */}
       <div className="mt-6 mb-6 p-6 rounded-xl bg-white shadow-md max-w-4xl mx-auto w-full">
