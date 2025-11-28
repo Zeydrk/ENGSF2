@@ -14,7 +14,7 @@ import Navigation from './components/Navigation/navbar'
 import Product from './components/Product/Products'
 import Sellers from "./components/seller/Sellers";
 import ProductPage from './components/ProductPage';
-import Forgot from './components/Forgot'
+import Forgot from './components/Login/Forgot'
 import Reset from './components/Reset'
 import Package from './components/package/Package'
 
