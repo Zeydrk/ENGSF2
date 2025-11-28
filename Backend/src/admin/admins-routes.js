@@ -8,19 +8,7 @@ const registerMiddleware = require("./middleware/register-middleware.js")
 router.post('/', registerMiddleware ,controller.createAdmin);
 <<<<<<< HEAD
 
-// router.get('/test', (req,res) => {
-//     req.session.visited = true
-//     console.log(req.session.id)
-//     req.sessionStore.get(req.session.id, (err, sessionData)=>{
-//         if(err){
-//             console.log(err)
-//         }
-//         console.log(sessionData)
-//     })
-//     res.send("Hi")
-// })
-
-router.get('/test2', (req,res) => {
+router.get('/test', (req,res) => {
     console.log(req.session.id)
     req.sessionStore.get(req.session.id, (err, sessionData)=>{
         if(err){
@@ -29,13 +17,14 @@ router.get('/test2', (req,res) => {
         console.log(sessionData)
     })
 
-    console.log(req.session.id)
-    console.log(req.session)
-    console.log(req.user)
     res.send("Hi")
 })
+<<<<<<< HEAD
 =======
 >>>>>>> parent of 9f16310 (currently doing the session store)
+=======
+
+>>>>>>> parent of 2ece87f (sync with main)
 // Changed to post because we are sending username and password in the body
 router.post('/login',passport.authenticate('local'),controller.getAdmins);
 // forgot password emailers

@@ -33,6 +33,7 @@ app.use(session({
     resave: false, 
 <<<<<<< HEAD
     saveUninitialized: false,
+<<<<<<< HEAD
     cookie:{
         maxAge: 24 * 60 * 60 * 1000  //supposed to be a day
     }
@@ -42,6 +43,11 @@ app.use(session({
     //     maxAge: 24 * 60 * 60 * 1000  //supposed to be a day
     // }
 >>>>>>> parent of 9f16310 (currently doing the session store)
+=======
+    // cookie:{
+    //     maxAge: 24 * 60 * 60 * 1000  //supposed to be a day
+    // }
+>>>>>>> parent of 2ece87f (sync with main)
 }))
 app.use(passport.initialize());
 app.use(passport.session());
