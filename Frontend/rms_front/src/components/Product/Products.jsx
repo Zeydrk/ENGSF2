@@ -227,8 +227,7 @@ async function handleCreate(e) {
     // Show toast for immediate feedback
     if (validationErrors.product_Name) {
       toast.error(validationErrors.product_Name, {
-        duration: 4000,
-        position: "top-right",
+        className: "alert alert-error text-white",
       });
     }
     return;
@@ -240,14 +239,12 @@ async function handleCreate(e) {
     setShowProductForm(false);
     refresh();
     toast.success("Product created successfully!", {
-      duration: 4000,
-      position: "top-right",
+     className: "alert alert-success text-white",
     });
   } catch (err) {
     const msg = err?.response?.data?.message || "Create failed";
     toast.error(msg, {
-      duration: 4000,
-      position: "top-right",
+     className: "alert alert-error text-white",
     });
     setError(msg);
   }
@@ -256,111 +253,34 @@ async function handleCreate(e) {
   async function handleDelete(id, stock) {
   if (stock > 0) {
     toast.error("Cannot delete a product with stock", {
-      duration: 4000,
-      position: "top-right",
-      style: { background: "#cf2b2bff", color: "#fff" },
+       className: "alert alert-error text-white",
     });
     return;
   }
-
-  // Show toast confirmation
-  const confirmDelete = await new Promise((resolve) => {
-    const toastId = toast(
-      (t) => (
-        <div className="flex flex-col gap-2">
-          <span>Delete this product? This action cannot be undone.</span>
-          <div className="flex gap-2 justify-end mt-2">
-            <button
-              className="btn btn-sm btn-error"
-              onClick={() => {
-                resolve(false);
-                toast.dismiss(t.id);
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              className="btn btn-sm btn-success"
-              onClick={() => {
-                resolve(true);
-                toast.dismiss(t.id);
-              }}
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-      ),
-      { duration: Infinity, position: "top-right" }
-    );
-  });
-
-  if (!confirmDelete) return;
-
   try {
     await productApi.deleteProduct({ id });
     toast.success("Product deleted successfully", {
-      duration: 3000,
-      position: "top-right",
-      style: { background: "#34d399", color: "#fff" },
+   className: "alert alert-success text-white",
     });
     refresh();
   } catch (err) {
     toast.error(err.message || "Delete failed", {
-      duration: 4000,
-      position: "top-right",
-      style: { background: "#f87171", color: "#fff" },
+  className: "alert alert-error text-white",
     });
     setError(err.message || "Delete failed");
   }
 }
 
   async function handleArchive (id) {
-    const confirmArchive = await new Promise((resolve) => {
-    const toastId = toast(
-      (t) => (
-        <div className="flex flex-col gap-2">
-          <span>Archive this product?</span>
-          <div className="flex gap-2 justify-end mt-2">
-            <button
-              className="btn btn-sm btn-error"
-              onClick={() => {
-                resolve(false);
-                toast.dismiss(t.id);
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              className="btn btn-sm btn-success"
-              onClick={() => {
-                resolve(true);
-                toast.dismiss(t.id);
-              }}
-            >
-              Archive
-            </button>
-          </div>
-        </div>
-      ),
-      { duration: Infinity, position: "top-right" }
-    );
-  });
-    if(!confirmArchive) return;
-    
     try {
       await productApi.archiveProduct({ id });
       toast.success("Product archived successfully", {
-      duration: 3000,
-      position: "top-right",
-      style: { background: "#34d399", color: "#fff" },
+       className: "alert alert-success text-white",
     });
       refresh();
     } catch (err) {
       toast.error(err.message || "Archive failed", {
-      duration: 4000,
-      position: "top-right",
-      style: { background: "#f87171", color: "#fff" },
+      className: "alert alert-error text-white",
     });
     setError(err.message || "Archive failed");
     }
@@ -370,16 +290,12 @@ async function handleCreate(e) {
     try {
       await productApi.archiveAddBack({ id });
       toast.success("Product added back successfully", {
-      duration: 3000,
-      position: "top-right",
-      style: { background: "#34d399", color: "#fff" },
+      className: "alert alert-success text-white",
     });
       refresh();
     } catch (err) {
       toast.error(err.message || "Adding back failed", {
-      duration: 4000,
-      position: "top-right",
-      style: { background: "#f87171", color: "#fff" },
+       className: "alert alert-error text-white",
     });
     setError(err.message || "Adding back  failed");
     }
@@ -427,16 +343,12 @@ async function handleCreate(e) {
       setEditing(null);
       resetForm();
        toast.success("Product Updated successfully", {
-      duration: 3000,
-      position: "top-right",
-      style: { background: "#34d399", color: "#fff" },
+      className: "alert alert-success text-white",
     });
      refresh();
     } catch (err) {
       toast.error(err.message || "Update failed", {
-      duration: 4000,
-      position: "top-right",
-      style: { background: "#f87171", color: "#fff" },
+       className: "alert alert-error text-white",
     });
     setError(err.message || "Update failed");
     }
