@@ -1,46 +1,66 @@
-// src/middleware/productLogging.js - FINAL VERSION WITH ORIGINAL DATA SUPPORT
+// src/middleware/productLogging.js - COMPLETE DEBUG VERSION
 const models = require("../../models");
 
+console.log('🟢 [PRODUCT LOGGING] Middleware file loaded successfully');
+
 const productLoggingMiddleware = (req, res, next) => {
+  console.log('🚨 [MIDDLEWARE] EXECUTING - URL:', req.originalUrl, 'METHOD:', req.method);
+  console.log('🚨 [MIDDLEWARE] Headers - x-admin-id:', req.headers['x-admin-id'] || 'Not provided');
+  console.log('🚨 [MIDDLEWARE] Body:', JSON.stringify(req.body, null, 2));
+  
   const originalSend = res.send;
   
-  res.send = async function(data) {
-    try {
-      if (res.statusCode >= 200 && res.statusCode < 300) {
-        await logProductAction(req, data);
-      }
-    } catch (error) {
-      console.error('Logging middleware error:', error);
-    }
+  res.send = function(data) {
+    console.log('🚨 [RESPONSE] SENDING - Status:', res.statusCode);
+    console.log('🚨 [RESPONSE] Data type:', typeof data);
     
-    return originalSend.call(this, data);
+    // Call the original send function
+    const result = originalSend.call(this, data);
+    
+    // Async logging after response is sent
+    setTimeout(async () => {
+      try {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          console.log('🚨 [LOGGING] Attempting to log action...');
+          await logProductAction(req, data);
+        }
+      } catch (error) {
+        console.error('❌ [LOGGING] Error:', error.message);
+      }
+    }, 0);
+    
+    return result;
   };
   
   next();
 };
 
 async function logProductAction(req, responseData) {
+  console.log('🔍 [ACTION DETECTION] Starting detection for:', req.method, req.originalUrl);
+  
   let action = '';
-  let productId = null;
+  let productId = req.body?.id;
   let actionDetails = '';
   
-  if (req.body && req.body.id) {
-    productId = req.body.id;
-  }
-
   const adminId = req.headers['x-admin-id'] || req.headers['X-Admin-ID'] || '1';
-  const route = req.route?.path || req.originalUrl;
-  const method = req.method;
-  
+  const url = req.originalUrl.toLowerCase();
+
+  console.log('🔍 [ACTION DETECTION] Product ID:', productId);
+  console.log('🔍 [ACTION DETECTION] Full URL:', url);
+
   // CREATE ACTION
-  if (method === 'POST' && (route.includes('/create') || req.originalUrl.includes('/products/create'))) {
+  if (req.method === 'POST' && url.includes('create')) {
     action = 'CREATE';
+    console.log('✅ [ACTION] CREATE detected');
     
     let parsedResponse = responseData;
     if (typeof responseData === 'string') {
       try {
         parsedResponse = JSON.parse(responseData);
-      } catch (e) {}
+        console.log('🔍 [CREATE] Parsed response:', parsedResponse);
+      } catch (e) {
+        console.log('❌ [CREATE] Failed to parse response');
+      }
     }
     
     if (parsedResponse && parsedResponse.id) {
@@ -51,136 +71,109 @@ async function logProductAction(req, responseData) {
     } else {
       actionDetails = 'Created new product';
     }
-    
   } 
-  // ARCHIVE ACTION
-  else if (method === 'POST' && (route.includes('/archive') || req.originalUrl.includes('/archive'))) {
-    action = 'ARCHIVE';
-    const product = await models.Products.findByPk(productId);
-    actionDetails = `Archived: ${product?.product_Name || productId}`;
-  } 
-  // UNARCHIVE ACTION  
-  else if (method === 'POST' && (route.includes('/addBack') || req.originalUrl.includes('/addBack'))) {
-    action = 'UNARCHIVE';
-    const product = await models.Products.findByPk(productId);
-    actionDetails = `Unarchived: ${product?.product_Name || productId}`;
-  } 
-  // UPDATE ACTION - USING ORIGINAL DATA FROM CONTROLLER
-  else if (method === 'POST' && (route.includes('/update') || req.originalUrl.includes('/update'))) {
+  // UPDATE ACTION
+  else if (req.method === 'POST' && url.includes('update')) {
     action = 'UPDATE';
+    console.log('✅ [ACTION] UPDATE detected');
     
-    const originalProduct = await models.Products.findByPk(productId);
-    if (originalProduct) {
-      const changes = [];
-      
-      // USE THE ORIGINAL DATA FROM THE CONTROLLER IF AVAILABLE
-      const originalData = req.originalProductData || originalProduct;
-      
-      console.log('UPDATE DEBUG - Original Data:', {
-        retail: originalData.product_RetailPrice,
-        buying: originalData.product_BuyingPrice,
-        stock: originalData.product_Stock
-      });
-      console.log('UPDATE DEBUG - Request Data:', {
-        retail: req.body.product_RetailPrice,
-        buying: req.body.product_BuyingPrice,
-        stock: req.body.product_Stock
-      });
-      
-      // Check each field for changes
-      if (req.body.product_Name && req.body.product_Name !== originalData.product_Name) {
-        changes.push(`name: ${originalData.product_Name} → ${req.body.product_Name}`);
-      }
-      
-      if (req.body.product_Description && req.body.product_Description !== originalData.product_Description) {
-        changes.push(`description: ${originalData.product_Description} → ${req.body.product_Description}`);
-      }
-      
-      if (req.body.product_RetailPrice !== undefined) {
-        const originalRetail = parseFloat(originalData.product_RetailPrice);
-        const newRetail = parseFloat(req.body.product_RetailPrice);
-        if (originalRetail !== newRetail) {
-          changes.push(`retail price: ₱${originalRetail} → ₱${newRetail}`);
-        }
-      }
-      
-      if (req.body.product_BuyingPrice !== undefined) {
-        const originalBuying = parseFloat(originalData.product_BuyingPrice);
-        const newBuying = parseFloat(req.body.product_BuyingPrice);
-        if (originalBuying !== newBuying) {
-          changes.push(`buying price: ₱${originalBuying} → ₱${newBuying}`);
-        }
-      }
-      
-      if (req.body.product_Stock !== undefined) {
-        const originalStock = parseInt(originalData.product_Stock);
-        const newStock = parseInt(req.body.product_Stock);
-        if (originalStock !== newStock) {
-          changes.push(`stock: ${originalStock} → ${newStock}`);
-        }
-      }
-      
-      if (req.body.product_Category && req.body.product_Category !== originalData.product_Category) {
-        changes.push(`category: ${originalData.product_Category} → ${req.body.product_Category}`);
-      }
-      
-      if (req.body.product_Expiry) {
-        const originalExpiry = new Date(originalData.product_Expiry).toISOString().split('T')[0];
-        const newExpiry = new Date(req.body.product_Expiry).toISOString().split('T')[0];
-        if (originalExpiry !== newExpiry) {
-          changes.push(`expiry: ${originalExpiry} → ${newExpiry}`);
-        }
-      }
-      
-      console.log('UPDATE DEBUG - Detected Changes:', changes);
-      
-      if (changes.length > 0) {
-        actionDetails = `Updated ${originalProduct.product_Name}: ${changes.join(', ')}`;
-      } else {
-        actionDetails = `Updated ${originalProduct.product_Name} (no changes)`;
+    if (productId) {
+      try {
+        const product = await models.Products.findByPk(productId);
+        actionDetails = `Updated: ${product?.product_Name || productId}`;
+        console.log('🔍 [UPDATE] Found product:', product?.product_Name);
+      } catch (error) {
+        console.error('❌ [UPDATE] Error finding product:', error.message);
+        actionDetails = `Updated product ${productId}`;
       }
     } else {
-      actionDetails = `Updated product ${productId}`;
+      actionDetails = 'Updated product';
     }
-  } 
+  }
+  // ARCHIVE ACTION
+  else if (req.method === 'POST' && url.includes('archive') && !url.includes('addback')) {
+    action = 'ARCHIVE';
+    console.log('✅ [ACTION] ARCHIVE detected');
+    
+    if (productId) {
+      try {
+        const product = await models.Products.findByPk(productId);
+        actionDetails = `Archived: ${product?.product_Name || productId}`;
+        console.log('🔍 [ARCHIVE] Found product:', product?.product_Name);
+      } catch (error) {
+        console.error('❌ [ARCHIVE] Error finding product:', error.message);
+        actionDetails = `Archived product ${productId}`;
+      }
+    } else {
+      actionDetails = 'Archived product';
+    }
+  }
+  // UNARCHIVE ACTION
+  else if (req.method === 'POST' && url.includes('addback')) {
+    action = 'UNARCHIVE';
+    console.log('✅ [ACTION] UNARCHIVE detected');
+    
+    if (productId) {
+      try {
+        const product = await models.Products.findByPk(productId);
+        actionDetails = `Unarchived: ${product?.product_Name || productId}`;
+        console.log('🔍 [UNARCHIVE] Found product:', product?.product_Name);
+      } catch (error) {
+        console.error('❌ [UNARCHIVE] Error finding product:', error.message);
+        actionDetails = `Unarchived product ${productId}`;
+      }
+    } else {
+      actionDetails = 'Unarchived product';
+    }
+  }
   // DELETE ACTION
-  else if (method === 'POST' && (route.includes('/delete') || req.originalUrl.includes('/delete'))) {
+  else if (req.method === 'POST' && url.includes('delete')) {
     action = 'DELETE';
-    const product = await models.Products.findByPk(productId);
-    actionDetails = `Deleted: ${product?.product_Name || productId}`;
+    console.log('✅ [ACTION] DELETE detected');
+    
+    if (productId) {
+      try {
+        const product = await models.Products.findByPk(productId);
+        actionDetails = `Deleted: ${product?.product_Name || productId}`;
+        console.log('🔍 [DELETE] Found product:', product?.product_Name);
+      } catch (error) {
+        console.error('❌ [DELETE] Error finding product:', error.message);
+        actionDetails = `Deleted product ${productId}`;
+      }
+    } else {
+      actionDetails = 'Deleted product';
+    }
+  } else {
+    console.log('❌ [ACTION] No action detected for this route');
   }
 
-  // Log the action
+  console.log('🔍 [ACTION DETECTION] Final action:', action);
+  console.log('🔍 [ACTION DETECTION] Action details:', actionDetails);
+
   if (action) {
+    console.log('📝 [LOGGING] Attempting to save log:', { action, productId, actionDetails });
     await logAdminActivity(adminId, action, productId, actionDetails);
   }
 }
 
-async function logAdminActivity(adminId, action, productId, actionDetails = null) {
+async function logAdminActivity(adminId, action, productId, actionDetails) {
   try {
-    let adminEmail = 'unknown@rms.com';
-    const admin = await models.Admin.findByPk(adminId, {
-      attributes: ['id', 'email']
-    });
+    console.log('💾 [DATABASE] Creating log entry...');
     
-    if (admin) {
-      adminEmail = admin.email;
-    }
-
-    const enhancedDetails = actionDetails || `${action} action performed`;
-
-    await models.AdminLogActivity.create({
-      adminId,
-      action,
-      productId,
-      actionDetails: enhancedDetails,
+    const logEntry = await models.AdminLogActivity.create({
+      adminId: adminId,
+      action: action,
+      productId: productId,
+      actionDetails: actionDetails,
       timestamp: new Date()
     });
 
-    console.log('Product action logged:', { action, product: actionDetails, by: adminEmail });
+    console.log('✅ [SUCCESS] Log saved to database with ID:', logEntry.id);
+    console.log('✅ [SUCCESS] Details:', { action, productId, actionDetails });
     
   } catch (error) {
-    console.error('Product logging failed:', error.message);
+    console.error('❌ [DATABASE] Error saving log:', error.message);
+    console.error('❌ [DATABASE] Full error:', error);
   }
 }
 
