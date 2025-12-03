@@ -66,6 +66,13 @@ async function claimSeller(req, res) {
         const seller = await models['Seller'].findByPk(id);
         if (!seller) return res.status(404).json({ message: "Seller not found" });
 
+        // Delete claimed packages for this seller
+        const deletedPackages = await models['Package'].destroy({
+            where: {
+                seller_Id: id,
+                package_Status: 'claimed'
+            }
+        });
 
         // RESET BALANCE
         seller.balance = 0;
@@ -85,4 +92,4 @@ async function claimSeller(req, res) {
     }
 }
 
-module.exports = { getSeller, addSeller, deleteSeller, updateSeller, claimSeller};
+module.exports = { getSeller, addSeller, deleteSeller, updateSeller, claimSeller };

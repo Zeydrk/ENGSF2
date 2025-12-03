@@ -19,8 +19,8 @@ const Packages = () => {
   const packgApi = usePackage();
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('all');
-  const [selectedSize, setSelectedSize] = useState('all');
+  const [selectedStatus, setSelectedStatus] = useState('All'); // Changed from 'all' to 'All'
+  const [selectedSize, setSelectedSize] = useState('All'); // Changed from 'all' to 'All'
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [viewingPackage, setViewingPackage] = useState(null);
   const [editingPackage, setEditingPackage] = useState(null);
@@ -276,33 +276,9 @@ const Packages = () => {
               placeholder="Search packages by seller, package name, or buyer..."
               value={searchTerm}
               onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-              className="block w-full pl-10 sm:pl-12 pr-3 py-2 sm:py-3 border border-amber-200 rounded-xl bg-amber-50 placeholder-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base"
+              className="block text-black w-full pl-10 sm:pl-12 pr-3 py-2 sm:py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base"
             />
-          </div>
-          <div className="flex space-x-2 sm:space-x-3 w-full sm:w-auto">
-            <select
-              value={selectedStatus}
-              onChange={(e) => { setSelectedStatus(e.target.value); setCurrentPage(1); }}
-              className="px-3 sm:px-4 py-2 sm:py-3 border border-amber-200 rounded-xl bg-white text-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base w-full sm:w-auto"
-            >
-              {statusOptions.map(status => (
-                <option key={status} value={status}>
-                  {status === 'All' ? 'All Status' : status.charAt(0).toUpperCase() + status.slice(1)}
-                </option>
-              ))}
-            </select>
-            <select
-              value={selectedSize}
-              onChange={(e) => { setSelectedSize(e.target.value); setCurrentPage(1); }}
-              className="px-3 sm:px-4 py-2 sm:py-3 border border-amber-200 rounded-xl bg-white text-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base w-full sm:w-auto"
-            >
-              {sizeOptions.map(size => (
-                <option key={size} value={size}>
-                  {size === 'All' ? 'All Sizes' : size}
-                </option>
-              ))}
-            </select>
-          </div>
+          </div>  
         </div>
       </div>
 
@@ -485,15 +461,15 @@ const Packages = () => {
               <div className="grid grid-cols-2 gap-3 text-sm mb-3">
                 <div>
                   <p className="text-gray-500 text-xs">Seller</p>
-                  <p className="font-medium">{pkg.seller_Name}</p>
+                  <p className="font-medium text-black">{pkg.seller_Name}</p>
                 </div>
                 <div>
                   <p className="text-gray-500 text-xs">Buyer</p>
-                  <p className="font-medium">{pkg.buyer_Name}</p>
+                  <p className="font-medium text-black">{pkg.buyer_Name}</p>
                 </div>
                 <div>
                   <p className="text-gray-500 text-xs">Drop-off Date</p>
-                  <p className="font-medium">{formatDate(pkg.dropOff_Date)}</p>
+                  <p className="font-medium text-black">{formatDate(pkg.dropOff_Date)}</p>
                 </div>
                 <div>
                   <p className="text-gray-500 text-xs">Price</p>
@@ -519,7 +495,7 @@ const Packages = () => {
                 </div>
                 <div>
                   <p className="text-gray-500 text-xs">Payment Method</p>
-                  <p className="font-medium text-xs">{pkg.payment_Method}</p>
+                  <p className="font-medium text-xs text-black">{pkg.payment_Method}</p>
                 </div>
               </div>
 
@@ -645,7 +621,7 @@ const Packages = () => {
                     value={formData.seller_Name}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border text-black border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base"
                   >
                     <option value="">Select a seller</option>
                     {packgApi.sellers.map(seller => (
@@ -666,7 +642,7 @@ const Packages = () => {
                     value={formData.package_Name}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border  text-black border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base"
                     placeholder="Enter package name"
                   />
                 </div>
@@ -681,7 +657,7 @@ const Packages = () => {
                     value={formData.buyer_Name}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border  text-black border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base"
                     placeholder="Enter buyer name"
                   />
                 </div>
@@ -696,7 +672,7 @@ const Packages = () => {
                     value={formData.dropOff_Date}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 borderv text-black border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base"
                   />
                 </div>
 
@@ -712,7 +688,7 @@ const Packages = () => {
                       value={formData.price}
                       onChange={handleInputChange}
                       required
-                      className="w-full pl-8 pr-3 sm:px-4 py-2 sm:py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base"
+                      className="w-full pl-8 pr-3 sm:px-4 py-2 sm:py-3 border text-black border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base"
                       placeholder="0.00"
                       step="0.01"
                     />
@@ -730,7 +706,7 @@ const Packages = () => {
                       name="handling_Fee"
                       value={formData.handling_Fee}
                       onChange={handleInputChange}
-                      className="w-full pl-8 pr-3 sm:px-4 py-2 sm:py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base"
+                      className="w-full pl-8 pr-3 sm:px-4 py-2 sm:py-3 border  text-black border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base"
                       placeholder="0.00"
                       step="0.01"
                     />
@@ -746,7 +722,7 @@ const Packages = () => {
                     value={formData.package_Size}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border  text-black border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base"
                   >
                     <option value="S">Small</option>
                     <option value="M">Medium</option>
@@ -762,7 +738,7 @@ const Packages = () => {
                     name="payment_Method"
                     value={formData.payment_Method}
                     onChange={handleInputChange}
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border  text-black border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base"
                   >
                     <option value="cash">Cash</option>
                     <option value="gcash">GCash</option>
@@ -778,7 +754,7 @@ const Packages = () => {
                       name="payment_Status"
                       value={formData.payment_Status}
                       onChange={handleInputChange}
-                      className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 border text-black border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base"
                     >
                       <option value="unpaid">Unpaid</option>
                       <option value="paid">Paid</option>
@@ -795,7 +771,7 @@ const Packages = () => {
                       name="package_Status"
                       value={formData.package_Status}
                       onChange={handleInputChange}
-                      className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 border  text-black border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base"
                     >
                       <option value="unclaimed">Unclaimed</option>
                       <option value="claimed">Claimed</option>
@@ -808,7 +784,7 @@ const Packages = () => {
                 <button
                   type="button"
                   onClick={handleCancel}
-                  className="flex-1 px-3 sm:px-4 py-2 sm:py-3 border border-amber-300 text-amber-700 rounded-xl font-semibold hover:bg-amber-50 transition-colors duration-200 text-sm sm:text-base"
+                  className="flex-1 px-3 sm:px-4 py-2 sm:py-3 border text-black border-amber-300 text-amber-700 rounded-xl font-semibold hover:bg-amber-50 transition-colors duration-200 text-sm sm:text-base"
                 >
                   Cancel
                 </button>
@@ -843,7 +819,7 @@ const Packages = () => {
 
             <div className="p-4 sm:p-6 space-y-4">
               <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-linear-to-r from-amber-400 to-orange-500 rounded-full flex items-center justify-center text-white font-semibold">
+                <div className="w-12 h-12 bg-linear-to-r from-amber-400 to-orange-500 rounded-full flex items-center justify-center text-black font-semibold">
                   <FiTruck className="w-6 h-6" />
                 </div>
                 <div>
