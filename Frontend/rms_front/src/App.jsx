@@ -6,15 +6,15 @@ import {BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 
 
 // Importing components
-import Login from './components/Login'
-import Register from './components/Register'
+import Login from './components/Login/Login'
+import Register from './components/Register/Register'
 import ProtectedRoute from './components/ProtectedRoute'
 import Home from './components/Home'
 import Navigation from './components/Navigation/navbar'
 import Product from './components/Product/Products'
 import Sellers from "./components/seller/Sellers";
 import ProductPage from './components/ProductPage';
-import Forgot from './components/Forgot'
+import Forgot from './components/Login/Forgot'
 import Reset from './components/Reset'
 import Package from './components/package/Package'
 
@@ -100,6 +100,7 @@ function App() {
             </ProtectedRoute>
             }
           />
+        
         <Route path="/forgot-password/" element={<Forgot />} />
         <Route path="/reset-password/" element={<Reset />} />
       </Routes>

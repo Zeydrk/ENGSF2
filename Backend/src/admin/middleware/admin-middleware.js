@@ -5,7 +5,7 @@
   const LocalStrategy = require('passport-local')
 
   // all midlleware functions 
-  // test if it will word
+ 
 
   // Serializing za user
   passport.serializeUser((user, done) =>{

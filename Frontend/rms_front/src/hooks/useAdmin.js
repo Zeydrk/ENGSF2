@@ -10,6 +10,8 @@ export function useAdmin() {
         setAdmins(prev => [...prev, response.data])
         return response
     }
+
+
     async function createAdmin(user) {
         const response = await axios.post(`${BASE_URL}/admins/`, user)
         setAdmins(prev => [...prev, response.data])
@@ -35,7 +37,7 @@ export function useAdmin() {
         fetchAdmins,
         createAdmin,
         forgotPassword,
-        resetPassword
+        resetPassword,
     }
 }
 

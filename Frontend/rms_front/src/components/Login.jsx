@@ -70,8 +70,8 @@ export default function Login({ onLogin }) {
               </label>
               <input
                 type="text"
-                id="Email"
-                name="Email"
+                id="email"
+                name="email"
                 placeholder="Enter your Email"
                 className="input input-bordered w-full"
                 onChange={handleEmailChange}
