@@ -25,7 +25,12 @@ const accountsRoutes = require('./src/accounts/accounts-routes')
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:5173', // Your exact frontend URL
+    credentials: true, // ← This allows cookies
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
 app.use(express.text());
 app.use(session({
@@ -33,7 +38,9 @@ app.use(session({
     resave: false, 
     saveUninitialized: false,
     cookie:{
-        maxAge: 24 * 60 * 60 * 1000  //supposed to be a day
+        maxAge: 24 * 60 * 60 * 1000, //supposed to be a day
+        secure: false, // ← Set to false for localhost
+        sameSite: 'lax' // ← Important for credentials
     },
 
     saveUninitialized: true,

@@ -67,7 +67,9 @@ function validateProduct(payload) {
 
 
 async function getProducts(req, res) {
+ 
   try {
+    console.log("message:" + req.session.user +" "+ req.session.userID);
     let {page,limit} = req.query;
 
     page = parseInt(page) || 1;
@@ -118,7 +120,8 @@ async function archivedProducts(req,res){
 async function archiveAddBack(req,res){
   try{
     const {id} = req.body;
-
+    const adminEmail = req.session.user;
+    const adminId = req.session.userID;
     if(!id){
       return res.status(400).json({message:"Product ID is required."})
     }
@@ -126,6 +129,16 @@ async function archiveAddBack(req,res){
 
     if(!product){
       return res.status(404).json({message:"Product not found"})
+    }
+    if (adminId) {
+        await models.AdminLogActivity.create({
+            adminId: adminId,
+            action: 'UNARCHIVED',
+            actionDetails: `Restored product from archive: ${product.product_Name}`,
+            productId: id,
+            timestamp: new Date()
+        });
+        console.log(`✅ Admin ${adminEmail} restored product: ${product.product_Name}`);
     }
     product.isArchived = false;
     await product.save();
@@ -139,7 +152,8 @@ async function archiveAddBack(req,res){
 async function archiveProduct(req, res) {
   try {
     const { id } = req.body;
-
+    const adminEmail = req.session.user;
+    const adminId = req.session.userID;
     if (!id) {
       return res.status(400).json({ message: "Product ID is required." });
     }
@@ -151,6 +165,17 @@ async function archiveProduct(req, res) {
 
     if (product.product_Stock > 0){
       return res.status(400).json({message: "Cannot Archive Product with Stock"});
+    }
+
+    if (adminId) {
+        await models.AdminLogActivity.create({
+            adminId: adminId,
+            action: 'ARCHIVE',
+            actionDetails: `Archived product: ${product.product_Name}`,
+            productId: id,
+            timestamp: new Date()
+        });
+        console.log(`✅ Admin ${adminEmail} archived product: ${product.product_Name}`);
     }
     product.isArchived = true;
     await product.save();
@@ -166,6 +191,8 @@ async function archiveProduct(req, res) {
 async function addProduct(req, res) {
   try {
     const { product_Name,product_Description, product_RetailPrice, product_BuyingPrice,product_Category, product_Stock, product_Expiry } = req.body;
+    const adminEmail = req.session.user;
+    const adminId = req.session.userID;
 
     const existing = await models["Products"].findOne({
       where: { product_Name: product_Name.trim() },
@@ -211,7 +238,16 @@ async function addProduct(req, res) {
       product_QrCodeValue: qrValue,
       product_QrCodePath: publicPath
     });
-
+    if (adminId) {
+        await models.AdminLogActivity.create({
+            adminId: adminId,
+            action: 'CREATE',
+            actionDetails: `Created product: ${product_Name}`,
+            productId: newProduct.id,
+            timestamp: new Date()
+        });
+        console.log(`✅ Admin activity logged for product creation`);
+    }
     res.status(201).json(newProduct);
 
   } catch (err) {
@@ -223,6 +259,8 @@ async function addProduct(req, res) {
 async function deleteProduct(req, res) {
   try {
     const { id } = req.body;
+    const adminEmail = req.session.user;
+    const adminId = req.session.userID;
     const product = await models["Products"].findByPk(id);
 
     if (!product) {
@@ -232,7 +270,16 @@ async function deleteProduct(req, res) {
     if (product.product_Stock > 0) {
       return res.status(400).json({ message: "Product still has stock." });
     }
-
+    if (adminId) {
+        await models.AdminLogActivity.create({
+            adminId: adminId,
+            action: 'DELETE',
+            actionDetails: `Permanently deleted product: ${product.product_Name}`,
+            productId: id,
+            timestamp: new Date()
+        });
+        console.log(`⚠️ Admin ${adminEmail} deleted product: ${product.product_Name}`);
+    }
     if (product.product_QrCodePath) {
       const qrFilePath = path.join(__dirname, "..", "..", "public", product.product_QrCodePath);
       if (fs.existsSync(qrFilePath)) {
@@ -258,9 +305,44 @@ async function deleteProduct(req, res) {
 async function updateProduct(req, res) {
   try {
     const { id, product_Name, product_RetailPrice, product_BuyingPrice,product_Description,product_Category, product_Stock, product_Expiry } = req.body;
+    const adminEmail = req.session.user;
+    const adminId = req.session.userID;
     const product = await models["Products"].findByPk(id);
     if (!product) return res.status(404).json({ message: "Product not found" });
+    if(adminId){
+      let changes = [];
 
+        if (product.product_Name !== product_Name) {
+              changes.push(`Name: "${product.product_Name}" → "${product_Name}"`);
+        }
+        if (parseFloat(product.product_RetailPrice) !== parseFloat(product_RetailPrice)) {
+              changes.push(`Retail: ${product.product_RetailPrice} → ${product_RetailPrice}`);
+        }
+        if (parseFloat(product.product_BuyingPrice) !== parseFloat(product_BuyingPrice)) {
+            changes.push(`Cost: ${product.product_BuyingPrice} → ${product_BuyingPrice}`);
+        }
+        if (product.product_Category !== product_Category) {
+            changes.push(`Category: ${product.product_Category} → ${product_Category}`);
+        }
+        if (parseInt(product.product_Stock) !== parseInt(product_Stock)) {
+            changes.push(`Stock: ${product.product_Stock} → ${product_Stock}`);
+        }
+        if (product.product_Expiry?.toISOString() !== new Date(product_Expiry).toISOString()) {
+            changes.push(`Expiry: ${product.product_Expiry} → ${product_Expiry}`);
+        }
+        const actionDetails = changes.length > 0 
+            ? `Updated: ${changes.join(' | ')}`
+            : 'No changes made';
+        
+        await models.AdminLogActivity.create({
+            adminId: adminId,
+            action: 'UPDATE',
+            actionDetails: actionDetails,
+            productId: id,
+            timestamp: new Date()
+        });
+        console.log(`✅ Admin ${adminEmail} updated product ID ${id}: ${changes.length} changes`);
+    }
     product.product_Name = product_Name;
     product.product_RetailPrice = product_RetailPrice;
     product.product_BuyingPrice = product_BuyingPrice;

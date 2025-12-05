@@ -7,6 +7,6 @@ const controller = require('./adminlogs-controller');
 router.get('/', controller.getAdminLogs);
 
 // Get admins for filter dropdown
-router.get('/admins', controller.getAdminsForFilter);
+router.get('/loggedadmin', controller.getAdminsForFilter);
 
 module.exports = router;

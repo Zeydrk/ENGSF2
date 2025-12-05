@@ -33,6 +33,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'AdminLogActivity',
+    timestamps: false
   });
   return AdminLogActivity;
 };

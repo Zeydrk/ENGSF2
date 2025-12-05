@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import {
   Chart as ChartJS,
@@ -13,6 +12,26 @@ import {
 import { Doughnut, Bar } from "react-chartjs-2";
 import { useProduct } from "../hooks/useProduct";
 import AdminLogReport from "./Adminlogreport";
+import { 
+  FiPackage, 
+  FiAlertTriangle, 
+  FiTruck, 
+  FiDollarSign,
+  FiFilter,
+  FiPlus,
+  FiUsers,
+  FiBarChart2,
+  FiEye,
+  FiCalendar,
+  FiTrendingUp,
+  FiBell,
+  FiShoppingBag
+} from 'react-icons/fi';
+import { 
+  HiOutlineExclamationCircle,
+  HiOutlineShoppingBag,
+  HiOutlineCube
+} from 'react-icons/hi';
 
 ChartJS.register(ArcElement, Tooltip, Legend, Title, CategoryScale, LinearScale, BarElement);
 
@@ -25,7 +44,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [products, setProducts] = useState([]);
-  const [activeFilter, setActiveFilter] = useState("all"); // 'all', 'lowStock', 'expiring'
+  const [activeFilter, setActiveFilter] = useState("all");
 
   // Statistics states
   const [stats, setStats] = useState({
@@ -38,7 +57,7 @@ export default function Home() {
     highValueProducts: 0,
   });
 
-  // Filtered products based on active filter
+  // Filtered products
   const filteredProducts = products.filter(product => {
     if (activeFilter === "lowStock") {
       return product.product_Stock < 10;
@@ -48,7 +67,7 @@ export default function Home() {
       const daysRemaining = Math.ceil((expiryDate - new Date()) / (1000 * 60 * 60 * 24));
       return daysRemaining <= 3 && daysRemaining >= 0;
     }
-    return true; // 'all' filter
+    return true;
   });
 
   // Initial data load
@@ -73,7 +92,6 @@ export default function Home() {
   useEffect(() => {
     const updateDashboard = () => {
       const now = new Date();
-      
       const safeProducts = Array.isArray(products) ? products : [];
       
       // Calculate statistics
@@ -111,7 +129,7 @@ export default function Home() {
         highValueProducts,
       });
 
-      // Charts data (same as before)
+      // Charts data
       if (safeProducts.length > 0) {
         let expired = 0, soon = 0, good = 0;
 
@@ -221,36 +239,71 @@ export default function Home() {
     },
   };
 
-  // Fixed Quick Actions
-  const quickActions = [
-    { 
-      label: "Add New Product",  
-      action: () => window.location.href = "/product" 
-    },
-    { 
-      label: "View Low Stock", 
-      action: () => setActiveFilter("lowStock"),
-      active: activeFilter === "lowStock"
-    },
-    { 
-      label: "Check Expiry",  
-      action: () => setActiveFilter("expiring"),
-      active: activeFilter === "expiring"
-    },
-    { 
-      label: "Show All", 
-      action: () => setActiveFilter("all"),
-      active: activeFilter === "all"
-    },
-  ];
+  // Stat Card Component (from ideal design)
+  const StatCard = ({ title, value, icon, trend, color, alert = false }) => {
+    const colorClasses = {
+      blue: 'from-blue-500 to-cyan-500',
+      red: 'from-red-500 to-pink-500',
+      amber: 'from-amber-500 to-orange-500',
+      green: 'from-green-500 to-emerald-500'
+    };
+
+    const trendColors = {
+      blue: 'text-blue-500',
+      red: 'text-red-500',
+      amber: 'text-amber-500',
+      green: 'text-green-500'
+    };
+
+    return (
+      <div className={`bg-white rounded-2xl shadow-lg border border-amber-100 p-6 transform hover:scale-105 transition-all duration-200 ${
+        alert ? 'ring-2 ring-red-200' : ''
+      }`}>
+        <div className="flex justify-between items-start">
+          <div>
+            <p className="text-gray-600 text-sm font-medium">{title}</p>
+            <p className="text-3xl font-bold text-gray-800 mt-2">{value}</p>
+            <p className={`text-sm mt-2 font-medium ${trendColors[color]}`}>
+              {trend}
+            </p>
+          </div>
+          <div className={`p-3 rounded-xl bg-gradient-to-br ${colorClasses[color]} text-white shadow-md`}>
+            {icon}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Quick Action Button Component
+  const QuickActionButton = ({ icon, label, color, onClick }) => {
+    const colorClasses = {
+      amber: 'bg-amber-500 hover:bg-amber-600 border-amber-400',
+      orange: 'bg-orange-500 hover:bg-orange-600 border-orange-400',
+      red: 'bg-red-500 hover:bg-red-600 border-red-400',
+      green: 'bg-green-500 hover:bg-green-600 border-green-400'
+    };
+
+    return (
+      <button
+        onClick={onClick}
+        className={`${colorClasses[color]} text-white rounded-xl p-4 flex flex-col items-center justify-center space-y-2 transform hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg border`}
+      >
+        <div className="p-2 bg-white/20 rounded-lg">
+          {icon}
+        </div>
+        <span className="text-sm font-medium text-center">{label}</span>
+      </button>
+    );
+  };
 
   // Show loading state
   if (loading && products.length === 0) {
     return (
-      <div className="min-h-screen flex flex-col bg-base-200" data-theme="autumn">
-       
-        <div className="flex items-center justify-center flex-grow">
-          <p className="text-center text-gray-500 text-lg">Loading products...</p>
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 p-6 flex items-center justify-center">
+        <div className="text-center">
+          <div className="loading loading-spinner loading-lg text-amber-500"></div>
+          <p className="mt-4 text-amber-700 text-lg">Loading inventory dashboard...</p>
         </div>
       </div>
     );
@@ -259,173 +312,208 @@ export default function Home() {
   // Show error state
   if (error) {
     return (
-      <div className="min-h-screen flex flex-col bg-base-200" data-theme="autumn">
-       
-        <div className="flex items-center justify-center flex-grow">
-          <div className="text-center">
-            <p className="text-red-500 text-lg mb-2">Error loading products</p>
-            <p className="text-gray-600 text-sm">{error}</p>
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 p-6 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-500 text-3xl mb-4">⚠️</div>
+          <p className="text-red-700 text-xl font-bold mb-2">Error loading dashboard</p>
+          <p className="text-amber-700">{error}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-base-200" data-theme="autumn">
- 
-
-      {/* Welcome Section */}
-      <div className="mt-6 mb-6 p-6 rounded-xl bg-white shadow-md max-w-4xl mx-auto w-full">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome to Your Dashboard
-          </h1>
-          <div className="w-24 h-1 bg-orange-400 rounded-full mx-auto mb-3"></div>
-          <p className="text-gray-700 text-lg mb-6">
-            Monitor your products, track stock levels, and keep tabs on expirations at a glance.
-          </p>
-          
-          {/* Active Filter Display */}
-          {activeFilter !== "all" && (
-            <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
-              <p className="text-orange-800 font-medium">
-                {activeFilter === "lowStock" 
-                  ? `Showing ${filteredProducts.length} low stock products (less than 10 units)` 
-                  : `Showing ${filteredProducts.length} products expiring within 3 days`}
-              </p>
-            </div>
-          )}
-          
-          {/* Quick Actions */}
-          <div className="flex flex-wrap justify-center gap-4 mb-4">
-            {quickActions.map((action, index) => (
-              <button
-                key={index}
-                onClick={action.action}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                  action.active 
-                    ? "bg-orange-500 text-white" 
-                    : "bg-orange-100 text-orange-800 hover:bg-orange-200"
-                }`}
-              >
-                <span className="text-lg">{action.icon}</span>
-                <span>{action.label}</span>
-              </button>
-            ))}
-          </div>
-
-          {lastUpdated && (
-            <p className="text-sm text-gray-500">
-              Last Updated: {lastUpdated}
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 p-6">
+      {/* Header Section */}
+      <header className="mb-8">
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-700 to-orange-800 pb-5">
+              Inventory Management System
+            </h1>
+            <p className="text-amber-700 mt-2 text-lg">
+              Welcome back! Here's what's happening with your inventory today.
             </p>
+          </div>
+          <div className="text-right">
+            <p className="text-amber-600 font-semibold">{new Date().toLocaleDateString('en-US', { 
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            })}</p>
+            {lastUpdated && (
+              <p className="text-amber-500 text-sm mt-1">Last updated: {lastUpdated}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Quick Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
+          <StatCard 
+            title="Total Products" 
+            value={stats.totalProducts} 
+            icon={<FiPackage className="w-6 h-6" />}
+            trend="In inventory"
+            color="blue"
+          />
+          <StatCard 
+            title="Stock Alerts" 
+            value={stats.lowStock + stats.outOfStock} 
+            icon={<FiAlertTriangle className="w-6 h-6" />}
+            trend={`${stats.outOfStock} out, ${stats.lowStock} low`}
+            color="red"
+            alert={stats.lowStock + stats.outOfStock > 0}
+          />
+          <StatCard 
+            title="Expiring Soon" 
+            value={stats.expiringSoon} 
+            icon={<FiCalendar className="w-6 h-6" />}
+            trend="Within 3 days"
+            color="amber"
+          />
+          <StatCard 
+            title="Inventory Value" 
+            value={`₱${stats.totalInventoryValue.toLocaleString()}`} 
+            icon={<FiDollarSign className="w-6 h-6" />}
+            trend={`Avg: ₱${stats.averagePrice.toFixed(2)}`}
+            color="green"
+          />
+        </div>
+      </header>
+
+      {/* Main Dashboard Grid */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        {/* Left Column - Charts */}
+        <div className="xl:col-span-2 space-y-8">
+          {/* Expiry Chart - SMALLER */}
+          <div className="bg-white rounded-2xl shadow-xl border border-amber-100 p-6">
+            <div className="flex items-center space-x-3 mb-6">
+              <HiOutlineCube className="w-6 h-6 text-amber-600" />
+              <h2 className="text-2xl font-bold text-gray-800">Product Expiry Overview</h2>
+            </div>
+            <div className="flex items-center justify-center">
+              <div className="w-64 h-64"> {/* Smaller size */}
+                <Doughnut data={expiryData} options={chartOptions} />
+              </div>
+            </div>
+          </div>
+
+          {/* Stock & Price Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="bg-white rounded-2xl shadow-xl border border-amber-100 p-6">
+              <div className="flex items-center space-x-3 mb-6">
+                <FiTrendingUp className="w-6 h-6 text-blue-600" />
+                <h2 className="text-2xl font-bold text-gray-800">Stock Levels</h2>
+              </div>
+              <div className="h-48">
+                <Bar data={stockData} options={barChartOptions} />
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-xl border border-amber-100 p-6">
+              <div className="flex items-center space-x-3 mb-6">
+                <FiDollarSign className="w-6 h-6 text-green-600" />
+                <h2 className="text-2xl font-bold text-gray-800">Price Distribution</h2>
+              </div>
+              <div className="h-48">
+                <Bar data={priceDistributionData} options={barChartOptions} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column - Quick Actions & Filters */}
+        <div className="space-y-8">
+          {/* Quick Actions - REMOVED "Add Product" and "View All Products" */}
+          <div className="bg-white rounded-2xl shadow-xl border border-amber-100 p-6">
+            <div className="flex items-center space-x-3 mb-6">
+              <HiOutlineShoppingBag className="w-6 h-6 text-amber-600" />
+              <h2 className="text-2xl font-bold text-gray-800">Quick Actions</h2>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {/* Only 2 buttons now: Low Stock and Expiring Soon */}
+              <QuickActionButton 
+                icon={<FiAlertTriangle className="w-5 h-5" />}
+                label="Low Stock" 
+                color="red" 
+                onClick={() => setActiveFilter("lowStock")}
+              />
+              <QuickActionButton 
+                icon={<FiCalendar className="w-5 h-5" />}
+                label="Expiring Soon" 
+                color="green" 
+                onClick={() => setActiveFilter("expiring")}
+              />
+            </div>
+          </div>
+
+          {/* Active Filter Display */}
+          {activeFilter !== "all" && filteredProducts.length > 0 && (
+            <div className="bg-white rounded-2xl shadow-xl border border-amber-100 p-6">
+              <div className="flex items-center space-x-3 mb-6">
+                <FiBell className="w-6 h-6 text-red-600" />
+                <h2 className="text-2xl font-bold text-gray-800">
+                  {activeFilter === "lowStock" ? "Low Stock Alerts" : "Expiring Soon"}
+                </h2>
+              </div>
+              <div className="space-y-3 max-h-80 overflow-y-auto">
+                {filteredProducts.slice(0, 8).map((product) => (
+                  <div key={product.id} className="flex items-center justify-between p-3 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors">
+                    <div className="flex items-center space-x-3">
+                      <HiOutlineCube className="w-4 h-4 text-amber-600" />
+                      <div>
+                        <p className="font-medium text-gray-800">{product.product_Name}</p>
+                        <p className="text-sm text-gray-600">
+                          {activeFilter === "lowStock" 
+                            ? `Stock: ${product.product_Stock}` 
+                            : `Expires: ${new Date(product.product_Expiry).toLocaleDateString()}`}
+                        </p>
+                      </div>
+                    </div>
+                    <FiEye className="w-4 h-4 text-amber-600" />
+                  </div>
+                ))}
+                {filteredProducts.length > 8 && (
+                  <p className="text-sm text-amber-600 text-center">
+                    ... and {filteredProducts.length - 8} more
+                  </p>
+                )}
+              </div>
+            </div>
           )}
-        </div>
-      </div>
 
-      {/* Statistics Cards */}
-      <div className="px-6 mb-6">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Total Products */}
-          <div className="stat bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
-            <div className="stat-title text-gray-600">Total Products</div>
-            <div className="stat-value text-blue-600 text-2xl">
-              {activeFilter === "all" ? stats.totalProducts : filteredProducts.length}
+          {/* System Info */}
+          <div className="bg-white rounded-2xl shadow-xl border border-amber-100 p-6">
+            <div className="flex items-center space-x-3 mb-6">
+              <HiOutlineExclamationCircle className="w-6 h-6 text-amber-600" />
+              <h2 className="text-2xl font-bold text-gray-800">System Information</h2>
             </div>
-            <div className="stat-desc text-gray-500">
-              {activeFilter === "all" ? "In inventory" : "Filtered view"}
-            </div>
-          </div>
-
-          {/* Stock Alerts */}
-          <div className="stat bg-white rounded-lg shadow p-4 border-l-4 border-red-500">
-            <div className="stat-title text-gray-600">Stock Alerts</div>
-            <div className="stat-value text-red-600 text-2xl">
-              {stats.lowStock + stats.outOfStock}
-            </div>
-            <div className="stat-desc text-gray-500">
-              {stats.outOfStock} out of stock, {stats.lowStock} low
-            </div>
-          </div>
-
-          {/* Expiry Alerts */}
-          <div className="stat bg-white rounded-lg shadow p-4 border-l-4 border-yellow-500">
-            <div className="stat-title text-gray-600">Expiring Soon</div>
-            <div className="stat-value text-yellow-600 text-2xl">{stats.expiringSoon}</div>
-            <div className="stat-desc text-gray-500">Within 3 days</div>
-          </div>
-
-          {/* Inventory Value */}
-          <div className="stat bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
-            <div className="stat-title text-gray-600">Inventory Value</div>
-            <div className="stat-value text-green-600 text-2xl">
-              ₱{stats.totalInventoryValue.toLocaleString()}
-            </div>
-            <div className="stat-desc text-gray-500">
-              ₱{stats.averagePrice.toFixed(2)} avg/product
+            <div className="space-y-4">
+              <div className="flex justify-between items-center p-3 bg-amber-50 rounded-lg">
+                <span className="font-medium text-gray-800">High Value Products</span>
+                <span className="font-bold text-green-600">{stats.highValueProducts}</span>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-amber-50 rounded-lg">
+                <span className="font-medium text-gray-800">Average Product Value</span>
+                <span className="font-bold text-blue-600">₱{stats.averagePrice.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between items-center p-3 bg-amber-50 rounded-lg">
+                <span className="font-medium text-gray-800">Data Last Updated</span>
+                <span className="font-bold text-amber-600">{lastUpdated || "N/A"}</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Product List Preview */}
-      {activeFilter !== "all" && filteredProducts.length > 0 && (
-        <div className="px-6 mb-6">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold mb-4">
-              {activeFilter === "lowStock" ? "Low Stock Products" : "Products Expiring Soon"}
-            </h3>
-            <div className="grid gap-2">
-              {filteredProducts.slice(0, 5).map((product, index) => (
-                <div key={product.id} className="flex justify-between items-center p-3 bg-gray-50 rounded">
-                  <span className="font-medium">{product.product_Name}</span>
-                  <span className="text-sm text-gray-600">
-                    {activeFilter === "lowStock" 
-                      ? `Stock: ${product.product_Stock}` 
-                      : `Expires: ${new Date(product.product_Expiry).toLocaleDateString()}`}
-                  </span>
-                </div>
-              ))}
-              {filteredProducts.length > 5 && (
-                <p className="text-sm text-gray-500 text-center mt-2">
-                  ... and {filteredProducts.length - 5} more
-                </p>
-              )}
-            </div>
+      {/* Admin Log Report Section */}
+      <div className="mt-8">
+        <div className="bg-white rounded-2xl shadow-xl border border-amber-100 p-6">
+          <div className="flex items-center space-x-3 mb-6">
+            <FiBarChart2 className="w-6 h-6 text-amber-600" />
+            <h2 className="text-2xl font-bold text-gray-800">Admin Activity Logs</h2>
           </div>
-        </div>
-      )}
-
-      {/* Charts and Logs Section */}
-      <div className="p-6 grid lg:grid-cols-2 xl:grid-cols-3 gap-6 mt-4">
-        {/* Doughnut Chart */}
-        <div className="bg-white rounded-2xl p-6 shadow flex flex-col items-center">
-          <h2 className="text-lg font-semibold mb-4">
-            {products.length > 0 ? "Expiry Overview" : "No Products"}
-          </h2>
-          <div className="w-full max-w-[300px] h-[300px]">
-            <Doughnut data={expiryData} options={chartOptions} />
-          </div>
-        </div>
-
-        {/* Stock Levels Chart */}
-        <div className="bg-white rounded-2xl p-6 shadow flex flex-col items-center">
-          <h2 className="text-lg font-semibold mb-4">Stock Levels</h2>
-          <div className="w-full h-[300px]">
-            <Bar data={stockData} options={barChartOptions} />
-          </div>
-        </div>
-
-        {/* Price Distribution Chart */}
-        <div className="bg-white rounded-2xl p-6 shadow flex flex-col items-center">
-          <h2 className="text-lg font-semibold mb-4">Price Distribution</h2>
-          <div className="w-full h-[300px]">
-            <Bar data={priceDistributionData} options={barChartOptions} />
-          </div>
-        </div>
-
-        {/* Admin Log Report */}
-        <div className="bg-white rounded-2xl p-6 shadow lg:col-span-2 xl:col-span-3">
           <AdminLogReport />
         </div>
       </div>

@@ -23,6 +23,7 @@ async function getAdmins(req, res) {
     if (req.isAuthenticated()){
         req.session.visited = true  
         req.session.user = req.user.email
+        req.session.userID = req.user.id
 
        res.send({
             status: 200,

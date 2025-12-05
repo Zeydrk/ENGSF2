@@ -1,8 +1,7 @@
 const express = require('express');
 const router  = express.Router();
 const controller = require("./product-controller");
-const productLogging = require('../middleware/productlogging');
-router.use(productLogging);
+
 
 router.get('/', controller.getProducts);
 router.post('/create', controller.addProduct);

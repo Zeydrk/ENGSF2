@@ -16,6 +16,7 @@
     "chart.js": "^4.5.0",
     "chartjs-plugin-zoom": "^2.2.0",
     "daisyui": "^5.1.27",
+    "jspdf": "^3.0.4",
     "qrcode.react": "^4.2.0",
     "react": "^19.1.1",
     "react-chartjs-2": "^5.3.0",
