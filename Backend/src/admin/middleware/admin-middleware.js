@@ -9,12 +9,12 @@
 
   // Serializing za user
   passport.serializeUser((user, done) =>{
-    done(null,user.email)
+    done(null,user.email, user.id)
   })
 
   // deserializing za user
-  passport.deserializeUser(async (email, done) =>{
-    const result =  await model['Admin'].findOne({ where: { email: email} })
+  passport.deserializeUser(async (email, id, done) =>{
+    const result =  await model['Admin'].findOne({ where: { email: email, id: id} })
     if (result) {
       done(null, result)
     }
