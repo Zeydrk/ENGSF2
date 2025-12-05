@@ -11,6 +11,60 @@ function generateProductId() {
   const id = Math.floor(Math.random() * (max - min + 1)) + min;
   return id.toString();
 }
+//implement thhis
+function validateProduct(payload) {
+  const newErrors = {};
+
+  // Expiry
+  const today = new Date();
+  const expiry = new Date(payload.product_Expiry);
+  const diff = (expiry - today) / (1000 * 60 * 60 * 24);
+
+  if (expiry < today) {
+    newErrors.product_Expiry = "Product is Expired.";
+  } else if (diff <= 5) {
+    newErrors.product_Expiry = "Expiry must be more than 5 days from today.";
+  }
+
+  // Retail price
+  if (!payload.product_RetailPrice || payload.product_RetailPrice <= 0) {
+    newErrors.product_RetailPrice = "Retail price must be greater than 0.";
+  }
+
+  // Buying price
+  if (!payload.product_BuyingPrice || payload.product_BuyingPrice <= 0) {
+    newErrors.product_BuyingPrice = "Buying price must be greater than 0.";
+  }
+
+  // Retail price must be higher than buying price
+  if (payload.product_RetailPrice <= payload.product_BuyingPrice) {
+    newErrors.product_RetailPrice = "Retail price must be higher than buying price.";
+    newErrors.product_BuyingPrice = "Buying price must be lower than retail price.";
+  }
+
+  // Stock
+  if (!payload.product_Stock || payload.product_Stock <= 0) {
+    newErrors.product_Stock = "Stock must be greater than 0.";
+  }
+
+  // Name
+  if (!payload.product_Name.trim()) {
+    newErrors.product_Name = "Product name is required.";
+  }
+
+  // Description
+  if (!payload.product_Description.trim()) {
+    newErrors.product_Description = "Description is required.";
+  }
+
+  // Category
+  if (!payload.product_Category.trim()) {
+    newErrors.product_Category = "Category is required.";
+  }
+
+  return newErrors;
+}
+
 
 async function getProducts(req, res) {
   try {
@@ -94,6 +148,10 @@ async function archiveProduct(req, res) {
     if (!product) {
       return res.status(404).json({ message: "Product not found!" });
     }
+
+    if (product.product_Stock > 0){
+      return res.status(400).json({message: "Cannot Archive Product with Stock"});
+    }
     product.isArchived = true;
     await product.save();
 
@@ -108,7 +166,7 @@ async function archiveProduct(req, res) {
 async function addProduct(req, res) {
   try {
     const { product_Name,product_Description, product_RetailPrice, product_BuyingPrice,product_Category, product_Stock, product_Expiry } = req.body;
-    
+
     const existing = await models["Products"].findOne({
       where: { product_Name: product_Name.trim() },
     });
@@ -116,6 +174,7 @@ async function addProduct(req, res) {
     if (existing) {
       return res.status(400).json({ message: "Product name already exists" });
     }
+
         const id = generateProductId();
     const newProduct = await models["Products"].create({
       id,
