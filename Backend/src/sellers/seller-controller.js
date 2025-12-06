@@ -61,33 +61,41 @@ async function updateSeller(req, res) {
 async function claimSeller(req, res) {
     try {
         const { id } = req.body;
+        const seller = await models.Seller.findByPk(id);
+        if (!seller) return res.status(404).json({ error: "Seller not found" });
 
-        // Find seller
-        const seller = await models['Seller'].findByPk(id);
-        if (!seller) return res.status(404).json({ message: "Seller not found" });
-
-        // Delete claimed packages for this seller
-        const deletedPackages = await models['Package'].destroy({
+        // Find all claimed and paid packages for this seller
+        const claimedPackages = await models.Package.findAll({
             where: {
                 seller_Id: id,
-                package_Status: 'claimed'
+                package_Status: "claimed",
+                payment_Status: "paid",
+                isArchived: false
             }
         });
 
-        // RESET BALANCE
+        // Archive the claimed packages
+        for (const pkg of claimedPackages) {
+            pkg.isArchived = true;
+            pkg.archivedAt = new Date();
+            pkg.archiveReason = "cashout";
+            await pkg.save();
+        }
+
+        // Reset seller balance
+        const oldBalance = seller.balance;
         seller.balance = 0;
         await seller.save();
 
-        // Return updated sellers
-        const sellers = await models['Seller'].findAll();
-
         res.status(200).json({
-            message: "Claim processed successfully",
-            deletedPackages: deletedPackages,
-            sellers
+            message: "Cashout completed successfully",
+            archivedPackages: claimedPackages.length,
+            oldBalance: oldBalance,
+            newBalance: seller.balance
         });
 
     } catch (err) {
+        console.error("CLAIM SELLER ERROR:", err);
         res.status(500).json({ error: err.message });
     }
 }

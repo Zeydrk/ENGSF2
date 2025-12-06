@@ -9,9 +9,12 @@ import {
   FiSave,
   FiTrash2,
   FiUser,
-  FiBox,
   FiChevronLeft,
-  FiChevronRight
+  FiChevronRight,
+  FiAlertCircle,
+  FiCheckCircle,
+  FiXCircle,
+  FiPackage
 } from 'react-icons/fi';
 import { usePackage } from '../../hooks/usePackage';
 
@@ -19,12 +22,13 @@ const Packages = () => {
   const packgApi = usePackage();
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('All'); // Changed from 'all' to 'All'
-  const [selectedSize, setSelectedSize] = useState('All'); // Changed from 'all' to 'All'
+  const [selectedStatus, setSelectedStatus] = useState('All');
+  const [selectedSize, setSelectedSize] = useState('All');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [viewingPackage, setViewingPackage] = useState(null);
   const [editingPackage, setEditingPackage] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -39,8 +43,7 @@ const Packages = () => {
     price: "",
     handling_Fee: "",
     payment_Method: "cash",
-    payment_Status: "unpaid",
-    package_Status: "unclaimed",
+    // Removed payment_Status and package_Status from form
   });
 
   const statusOptions = ['All', 'claimed', 'unclaimed'];
@@ -52,12 +55,18 @@ const Packages = () => {
     loadData();
   }, []);
 
-  async function loadData() {
-    setLoading(true);
+async function loadData() {
+  setLoading(true);
+  console.log('Loading packages and sellers...'); // Debug log
+  try {
     await packgApi.getAllPackage();
     await packgApi.getAllSellers();
-    setLoading(false);
+    console.log('Packages loaded:', packgApi.packages.length); // Debug log
+  } catch (error) {
+    console.error('Error loading data:', error);
   }
+  setLoading(false);
+}
 
   function resetForm() {
     setFormData({
@@ -69,9 +78,8 @@ const Packages = () => {
       price: "",
       handling_Fee: "",
       payment_Method: "cash",
-      payment_Status: "unpaid",
-      package_Status: "unclaimed",
     });
+    setErrorMessage('');
   }
 
   // Filter packages based on search term, status, and size
@@ -123,6 +131,77 @@ const Packages = () => {
       ...prev,
       [name]: value
     }));
+    
+    // Clear error message when user changes input
+    if (errorMessage) {
+      setErrorMessage('');
+    }
+  };
+
+  // Toggle payment status
+  const handleTogglePaymentStatus = async (pkg) => {
+    try {
+      const newPaymentStatus = pkg.payment_Status === 'paid' ? 'unpaid' : 'paid';
+      
+      // If trying to mark as unpaid and package is claimed, show error
+      if (newPaymentStatus === 'unpaid' && pkg.package_Status === 'claimed') {
+        setErrorMessage("Cannot mark as unpaid because package is already claimed. Please unclaim it first.");
+        return;
+      }
+      
+      await packgApi.updatePackage({ 
+        id: pkg.id, 
+        seller_Name: pkg.seller_Name,
+        package_Name: pkg.package_Name,
+        buyer_Name: pkg.buyer_Name,
+        dropOff_Date: pkg.dropOff_Date,
+        package_Size: pkg.package_Size,
+        price: pkg.price,
+        handling_Fee: pkg.handling_Fee,
+        payment_Method: pkg.payment_Method,
+        payment_Status: newPaymentStatus,
+        package_Status: pkg.package_Status
+      });
+      
+      await loadData();
+      setErrorMessage('');
+    } catch (error) {
+      console.error('Error updating payment status:', error);
+      setErrorMessage(error.message || 'Error updating payment status');
+    }
+  };
+
+  // Toggle package status
+  const handleTogglePackageStatus = async (pkg) => {
+    try {
+      const newPackageStatus = pkg.package_Status === 'claimed' ? 'unclaimed' : 'claimed';
+      
+      // Validation: Cannot claim if unpaid
+      if (newPackageStatus === 'claimed' && pkg.payment_Status !== 'paid') {
+        setErrorMessage("Package cannot be claimed because payment is not completed.");
+        return;
+      }
+      
+      await packgApi.updatePackage({ 
+        id: pkg.id, 
+        seller_Name: pkg.seller_Name,
+        package_Name: pkg.package_Name,
+        buyer_Name: pkg.buyer_Name,
+        dropOff_Date: pkg.dropOff_Date,
+        package_Size: pkg.package_Size,
+        price: pkg.price,
+        handling_Fee: pkg.handling_Fee,
+        payment_Method: pkg.payment_Method,
+        payment_Status: pkg.payment_Status,
+        package_Status: newPackageStatus
+      });
+      
+      await loadData();
+      setErrorMessage('');
+    } catch (error) {
+      console.error('Error updating package status:', error);
+      setErrorMessage(error.message || 'Error updating package status');
+    }
   };
 
   // Open form for adding new package
@@ -144,34 +223,38 @@ const Packages = () => {
       price: pkg.price || "",
       handling_Fee: pkg.handling_Fee || "",
       payment_Method: pkg.payment_Method || "cash",
-      payment_Status: pkg.payment_Status || "unpaid",
-      package_Status: pkg.package_Status || "unclaimed",
     });
     setIsFormOpen(true);
+    setErrorMessage('');
   };
 
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage('');
     
     try {
       const priceNumber = parseFloat(formData.price) || 0;
       const handlingFeeNumber = parseFloat(formData.handling_Fee) || 0;
 
       if (editingPackage) {
-        // Update existing package
+        // Update existing package - keep existing statuses
         await packgApi.updatePackage({ 
           id: editingPackage.id, 
           ...formData, 
           price: priceNumber,
-          handling_Fee: handlingFeeNumber
+          handling_Fee: handlingFeeNumber,
+          payment_Status: editingPackage.payment_Status, // Keep existing status
+          package_Status: editingPackage.package_Status  // Keep existing status
         });
       } else {
-        // Add new package
+        // Add new package - default to unpaid and unclaimed
         await packgApi.createPackage({ 
           ...formData, 
           price: priceNumber,
-          handling_Fee: handlingFeeNumber
+          handling_Fee: handlingFeeNumber,
+          payment_Status: "unpaid", // Default for new packages
+          package_Status: "unclaimed" // Default for new packages
         });
       }
       
@@ -180,28 +263,38 @@ const Packages = () => {
       
       // Reload data to get updates
       await loadData();
-      setCurrentPage(1); // Reset to first page after adding/editing
+      setCurrentPage(1);
     } catch (error) {
       console.error('Error saving package:', error);
-      alert('Error saving package. Please try again.');
+      setErrorMessage('Error saving package. Please try again.');
     }
   };
 
   // Handle delete package
-  const handleDeletePackage = async (packageId) => {
-    try {
-      await packgApi.deletePackage({ id: packageId });
-      setShowDeleteConfirm(null);
-      await loadData(); // Reload data after deletion
-      // Adjust current page if needed after deletion
-      if (currentPackages.length === 1 && currentPage > 1) {
-        setCurrentPage(currentPage - 1);
-      }
-    } catch (error) {
-      console.error('Error deleting package:', error);
-      alert('Error deleting package. Please try again.');
-    }
-  };
+const handleDeletePackage = async (packageId) => {
+  try {
+    console.log('Deleting/Archiving package ID:', packageId); // Debug log
+    
+    // Call the API to delete/archive the package
+    const response = await packgApi.deletePackage({ id: packageId });
+    console.log('Delete response:', response); // Debug log
+    
+    setShowDeleteConfirm(null);
+    
+    // Show success message
+    alert('Package archived successfully');
+    
+    // IMPORTANT: Wait a bit before reloading to ensure DB is updated
+    setTimeout(async () => {
+      await loadData();
+      console.log('Data reloaded after archiving'); // Debug log
+    }, 500);
+    
+  } catch (error) {
+    console.error('Error archiving package:', error);
+    alert('Error archiving package. Please try again.');
+  }
+};
 
   // Reset form
   const handleCancel = () => {
@@ -263,6 +356,28 @@ const Packages = () => {
           </button>
         </div>
       </div>
+
+      {/* Error Message Display */}
+      {errorMessage && (
+        <div className="mb-4">
+          <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-r">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <FiAlertCircle className="h-5 w-5 text-red-400" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-red-700">{errorMessage}</p>
+                <button
+                  onClick={() => setErrorMessage('')}
+                  className="mt-1 text-xs text-red-500 hover:text-red-700"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Search and Filter Bar */}
       <div className="bg-white rounded-2xl shadow-lg border border-amber-100 p-4 sm:p-6 mb-4 sm:mb-6">
@@ -377,14 +492,62 @@ const Packages = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`text-xs font-semibold px-2 py-1 rounded-full border ${getStatusColor(pkg.payment_Status)}`}>
-                        {pkg.payment_Status}
-                      </span>
+                      <button
+                        onClick={() => handleTogglePaymentStatus(pkg)}
+                        className={`text-xs font-semibold px-3 py-2 rounded-lg border transition-all duration-200 flex items-center space-x-1 ${
+                          pkg.payment_Status === 'paid' 
+                            ? 'bg-green-100 text-green-700 border-green-300 hover:bg-green-200' 
+                            : 'bg-red-100 text-red-700 border-red-300 hover:bg-red-200'
+                        }`}
+                        title={`Click to mark as ${pkg.payment_Status === 'paid' ? 'unpaid' : 'paid'}`}
+                      >
+                        {pkg.payment_Status === 'paid' ? (
+                          <>
+                            <FiCheckCircle className="w-3 h-3" />
+                            <span>Paid</span>
+                          </>
+                        ) : (
+                          <>
+                            <FiXCircle className="w-3 h-3" />
+                            <span>Unpaid</span>
+                          </>
+                        )}
+                      </button>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`text-xs font-semibold px-2 py-1 rounded-full border ${getStatusColor(pkg.package_Status)}`}>
-                        {pkg.package_Status}
-                      </span>
+                      <button
+                        onClick={() => handleTogglePackageStatus(pkg)}
+                        disabled={pkg.payment_Status !== 'paid' && pkg.package_Status === 'unclaimed'}
+                        className={`text-xs font-semibold px-3 py-2 rounded-lg border transition-all duration-200 flex items-center space-x-1 ${
+                          pkg.package_Status === 'claimed' 
+                            ? 'bg-green-100 text-green-700 border-green-300 hover:bg-green-200' 
+                            : 'bg-amber-100 text-amber-700 border-amber-300 hover:bg-amber-200'
+                        } ${
+                          pkg.payment_Status !== 'paid' && pkg.package_Status === 'unclaimed'
+                            ? 'opacity-50 cursor-not-allowed'
+                            : ''
+                        }`}
+                        title={
+                          pkg.payment_Status !== 'paid' && pkg.package_Status === 'unclaimed'
+                            ? "Cannot claim unpaid package"
+                            : `Click to mark as ${pkg.package_Status === 'claimed' ? 'unclaimed' : 'claimed'}`
+                        }
+                      >
+                        {pkg.package_Status === 'claimed' ? (
+                          <>
+                            <FiPackage className="w-3 h-3" />
+                            <span>Claimed</span>
+                          </>
+                        ) : (
+                          <>
+                            <FiPackage className="w-3 h-3" />
+                            <span>Unclaimed</span>
+                          </>
+                        )}
+                        {pkg.payment_Status !== 'paid' && pkg.package_Status === 'unclaimed' && (
+                          <FiAlertCircle className="w-3 h-3 text-red-500 ml-1" />
+                        )}
+                      </button>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center space-x-2">
@@ -482,20 +645,72 @@ const Packages = () => {
                   </span>
                 </div>
                 <div>
-                  <p className="text-gray-500 text-xs">Package Status</p>
-                  <span className={`text-xs font-semibold px-2 py-1 rounded-full border ${getStatusColor(pkg.package_Status)}`}>
-                    {pkg.package_Status}
-                  </span>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-xs">Payment Status</p>
-                  <span className={`text-xs font-semibold px-2 py-1 rounded-full border ${getStatusColor(pkg.payment_Status)}`}>
-                    {pkg.payment_Status}
-                  </span>
-                </div>
-                <div>
                   <p className="text-gray-500 text-xs">Payment Method</p>
                   <p className="font-medium text-xs text-black">{pkg.payment_Method}</p>
+                </div>
+              </div>
+
+              {/* Status buttons for mobile */}
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                <div>
+                  <p className="text-gray-500 text-xs mb-1">Payment Status</p>
+                  <button
+                    onClick={() => handleTogglePaymentStatus(pkg)}
+                    className={`w-full text-xs font-semibold px-3 py-2 rounded-lg border transition-all duration-200 flex items-center justify-center space-x-1 ${
+                      pkg.payment_Status === 'paid' 
+                        ? 'bg-green-100 text-green-700 border-green-300 hover:bg-green-200' 
+                        : 'bg-red-100 text-red-700 border-red-300 hover:bg-red-200'
+                    }`}
+                    title={`Click to mark as ${pkg.payment_Status === 'paid' ? 'unpaid' : 'paid'}`}
+                  >
+                    {pkg.payment_Status === 'paid' ? (
+                      <>
+                        <FiCheckCircle className="w-3 h-3" />
+                        <span>Paid</span>
+                      </>
+                    ) : (
+                      <>
+                        <FiXCircle className="w-3 h-3" />
+                        <span>Unpaid</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs mb-1">Package Status</p>
+                  <button
+                    onClick={() => handleTogglePackageStatus(pkg)}
+                    disabled={pkg.payment_Status !== 'paid' && pkg.package_Status === 'unclaimed'}
+                    className={`w-full text-xs font-semibold px-3 py-2 rounded-lg border transition-all duration-200 flex items-center justify-center space-x-1 ${
+                      pkg.package_Status === 'claimed' 
+                        ? 'bg-green-100 text-green-700 border-green-300 hover:bg-green-200' 
+                        : 'bg-amber-100 text-amber-700 border-amber-300 hover:bg-amber-200'
+                    } ${
+                      pkg.payment_Status !== 'paid' && pkg.package_Status === 'unclaimed'
+                        ? 'opacity-50 cursor-not-allowed'
+                        : ''
+                    }`}
+                    title={
+                      pkg.payment_Status !== 'paid' && pkg.package_Status === 'unclaimed'
+                        ? "Cannot claim unpaid package"
+                        : `Click to mark as ${pkg.package_Status === 'claimed' ? 'unclaimed' : 'claimed'}`
+                    }
+                  >
+                    {pkg.package_Status === 'claimed' ? (
+                      <>
+                        <FiPackage className="w-3 h-3" />
+                        <span>Claimed</span>
+                      </>
+                    ) : (
+                      <>
+                        <FiPackage className="w-3 h-3" />
+                        <span>Unclaimed</span>
+                      </>
+                    )}
+                    {pkg.payment_Status !== 'paid' && pkg.package_Status === 'unclaimed' && (
+                      <FiAlertCircle className="w-3 h-3 text-red-500 ml-1" />
+                    )}
+                  </button>
                 </div>
               </div>
 
@@ -610,6 +825,22 @@ const Packages = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4">
+              {/* Error Message Display */}
+              {errorMessage && (
+                <div className="col-span-full">
+                  <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-r">
+                    <div className="flex">
+                      <div className="flex-shrink-0">
+                        <FiAlertCircle className="h-5 w-5 text-red-400" />
+                      </div>
+                      <div className="ml-3">
+                        <p className="text-sm text-red-700">{errorMessage}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Seller Name Dropdown */}
                 <div>
@@ -744,40 +975,6 @@ const Packages = () => {
                     <option value="gcash">GCash</option>
                   </select>
                 </div>
-
-                {editingPackage && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Payment Status
-                    </label>
-                    <select
-                      name="payment_Status"
-                      value={formData.payment_Status}
-                      onChange={handleInputChange}
-                      className="w-full px-3 sm:px-4 py-2 sm:py-3 border text-black border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base"
-                    >
-                      <option value="unpaid">Unpaid</option>
-                      <option value="paid">Paid</option>
-                    </select>
-                  </div>
-                )}
-
-                {editingPackage && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Package Status
-                    </label>
-                    <select
-                      name="package_Status"
-                      value={formData.package_Status}
-                      onChange={handleInputChange}
-                      className="w-full px-3 sm:px-4 py-2 sm:py-3 border  text-black border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 text-sm sm:text-base"
-                    >
-                      <option value="unclaimed">Unclaimed</option>
-                      <option value="claimed">Claimed</option>
-                    </select>
-                  </div>
-                )}
               </div>
 
               <div className="flex space-x-2 sm:space-x-3 pt-4">
@@ -801,7 +998,7 @@ const Packages = () => {
         </div>
       )}
 
-      {/* View Package Details Modal */}
+      {/* View Package Details Modal (without QR code) */}
       {viewingPackage && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all">
@@ -867,17 +1064,17 @@ const Packages = () => {
                 </div>
                 <div>
                   <p className="text-gray-500">Package Status</p>
-                  <span className={`text-xs font-semibold px-2 py-1 rounded-full border ${getStatusColor(viewingPackage.package_Status)}`}>
-                    {viewingPackage.package_Status}
-                  </span>
+                  <div className="flex items-center">
+                    <span className={`text-xs font-semibold px-2 py-1 rounded-full border ${getStatusColor(viewingPackage.package_Status)}`}>
+                      {viewingPackage.package_Status}
+                    </span>
+                    {viewingPackage.package_Status === "claimed" && viewingPackage.payment_Status !== "paid" && (
+                      <span className="ml-1" title="Package claimed but not paid">
+                        <FiAlertCircle className="w-3 h-3 text-red-500" />
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
-
-              {/* QR Code Placeholder */}
-              <div className="border-2 border-dashed border-amber-200 rounded-xl p-4 text-center">
-                <FiBox className="w-8 h-8 text-amber-400 mx-auto mb-2" />
-                <p className="text-sm text-amber-600">QR Code Display Area</p>
-                <p className="text-xs text-amber-500 mt-1">Package ID: {viewingPackage.id}</p>
               </div>
             </div>
           </div>

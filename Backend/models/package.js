@@ -43,18 +43,31 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     payment_Status: {
-      type: DataTypes.STRING,       // paid / unpaid
+      type: DataTypes.STRING,
       allowNull: false
     },
-
     payment_Method: {
-      type: DataTypes.STRING,       // cash / gcash
+      type: DataTypes.STRING,
       allowNull: false
     },
     package_Status: {
-      type: DataTypes.STRING,       // claimed / unclaimed
+      type: DataTypes.STRING,
       allowNull: false
     },
+    // ADD THESE ARCHIVE FIELDS:
+    isArchived: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: false
+    },
+    archivedAt: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    archiveReason: {
+      type: DataTypes.STRING,
+      allowNull: true
+    }
   }, {
     sequelize,
     modelName: 'Package',

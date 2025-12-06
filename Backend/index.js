@@ -9,7 +9,8 @@ const session = require('express-session');
 require('dotenv').config();
 require('./src/accounts/middleware/accounts-middleware')
 
-
+// Import cron jobs
+const { setupArchiveCleanup } = require('./src/cronJobs'); // Add this line
 
 // importing routes here
 const adminsRoutes = require('./src/admin/admins-routes')
@@ -65,9 +66,12 @@ app.use('/sellers', sellerRoutes);
 app.use('/logs', logRoutes);
 app.use('/email/notifications', notificationRoutes);
 
-
+// Start cron jobs and notification scheduler
+setupArchiveCleanup(); // Add this line
 startAutoNotifications();
+
 // Server feedback
 app.listen(3000, () => {
     console.log(`Server has started at http://localhost:3000`)
+    console.log('Cron jobs initialized');
 })

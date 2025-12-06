@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useSeller } from '../../hooks/useSeller';
 import { 
   FiSearch, 
   FiEdit2, 
@@ -11,9 +12,10 @@ import {
   FiUsers,
   FiChevronLeft,
   FiChevronRight,
-  FiDollarSign
+  FiCheckCircle,
+  FiXCircle,
+  FiRefreshCw
 } from 'react-icons/fi';
-import { useSeller } from '../../hooks/useSeller';
 
 const Sellers = () => {
   const { 
@@ -22,7 +24,7 @@ const Sellers = () => {
     createSeller, 
     updateSeller, 
     deleteSeller, 
-    claimSeller 
+    claimSeller,
   } = useSeller();
   
   const [loading, setLoading] = useState(false);
@@ -117,9 +119,11 @@ const Sellers = () => {
           id: editingSeller.id, 
           ...formData 
         });
+        alert('Seller updated successfully!');
       } else {
         // Add new seller
         await createSeller(formData);
+        alert(`Seller added successfully!`);
       }
       
       setIsFormOpen(false);
@@ -127,7 +131,7 @@ const Sellers = () => {
       setCurrentPage(1); // Reset to first page after adding/editing
     } catch (error) {
       console.error('Error saving seller:', error);
-      alert('Error saving seller. Please try again.');
+      alert(error.response?.data?.error || 'Error saving seller. Please try again.');
     }
   };
 
@@ -153,7 +157,7 @@ const Sellers = () => {
       setShowClaimConfirm(null);
     } catch (error) {
       console.error('Error processing claim:', error);
-      alert('Error processing claim. Please try again.');
+      alert(error.response?.data?.error || 'Error processing claim. Please try again.');
     }
   };
 
@@ -310,7 +314,6 @@ const Sellers = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <FiDollarSign className="w-4 h-4 text-green-500 mr-2" />
                         <span className="text-sm font-semibold text-green-600">
                           {formatBalance(seller.balance)}
                         </span>
@@ -337,7 +340,7 @@ const Sellers = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <button
                         onClick={() => setShowClaimConfirm(seller.id)}
-                        className="px-3 py-1 bg-amber-500 text-white text-xs font-semibold rounded-lg hover:bg-amber-600 transition-colors duration-200"
+                        className="px-3 py-1 text-xs font-semibold bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors duration-200"
                         title="Cashout - Reset balance and delete claimed packages"
                       >
                         Cashout
@@ -416,16 +419,16 @@ const Sellers = () => {
                   <span>{seller.seller_Phone || 'N/A'}</span>
                 </div>
                 <div className="flex items-center text-sm text-green-600 font-semibold">
-                  <FiDollarSign className="w-4 h-4 mr-2 flex-shrink-0" />
                   <span>{formatBalance(seller.balance)}</span>
                 </div>
               </div>
 
               <div className="flex items-center justify-between pt-3 border-t border-amber-100">
+                <div></div>
                 <button
                   onClick={() => setShowClaimConfirm(seller.id)}
-                  className="px-3 py-1 bg-amber-500 text-white text-xs font-semibold rounded-lg hover:bg-amber-600 transition-colors duration-200"
-                  title="Cashout - Reset balance and delete claimed packages"
+                  className="px-3 py-1 text-xs font-semibold bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors duration-200"
+                  title="Cashout"
                 >
                   Cashout
                 </button>
@@ -538,7 +541,7 @@ const Sellers = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email Address
+                  Email Address *
                 </label>
                 <div className="relative">
                   <input
@@ -546,6 +549,7 @@ const Sellers = () => {
                     name="seller_Email"
                     value={formData.seller_Email}
                     onChange={handleInputChange}
+                    required
                     className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 text-black transition-all duration-200 text-sm sm:text-base"
                     placeholder="Enter email address"
                   />
@@ -634,8 +638,7 @@ const Sellers = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all">
             <div className="p-4 sm:p-6 border-b border-amber-100">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 flex items-center space-x-2">
-                <FiDollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500" />
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
                 <span>Cashout Seller</span>
               </h2>
             </div>
