@@ -8,7 +8,8 @@ import {
   FiLogOut,
   FiMenu,
   FiX,
-  FiChevronDown
+  FiChevronDown,
+  FiArchive 
 } from 'react-icons/fi';
 
 const Navigation = ({ user }) => {
@@ -22,6 +23,7 @@ const Navigation = ({ user }) => {
     { path: '/product', label: 'Products', icon: FiPackage },
     { path: '/seller', label: 'Sellers', icon: FiUsers },
     { path: '/package', label: 'Packages', icon: FiTruck },
+    { path: '/archived-packages', label: 'Archived Packages', icon: FiArchive },
   ];
 
     const handleLogin = () => {
