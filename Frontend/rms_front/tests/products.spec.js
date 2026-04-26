@@ -67,20 +67,30 @@ test.describe('Products Page', () => {
       .locator('input[type="date"]')
       .fill(d.expiry);
 
-    // Click "Create Product"
-    await page.getByRole('button', { name: /create product/i }).click();
+   await page.getByRole('button', { name: /create product/i }).click();
 
-    // 1. Verify the modal closes (proves validation passed)
+    // 1. Verify the modal closes
     await expect(page.getByRole('heading', { name: /add new product/i })).not.toBeVisible({ timeout: 5000 });
 
-    // 2. Look specifically for the green success toast class
+    // 2. Look specifically for the green success toast
     const successToast = page.locator('.alert-success').first();
     await expect(successToast).toBeVisible({ timeout: 5000 });
 
-    // 3. Wait for the table refresh to finish
+    // 3. Wait for the initial table refresh to finish
     await expect(page.getByText(/loading products/i)).not.toBeVisible({ timeout: 8000 });
 
-    // 4. Verify the new product name actually appears in the table
+    // ── THE FIX ────────────────────────────────────────────────────────
+    // 4. Search for the specific product to bypass pagination
+    const searchBox = page.getByPlaceholder(/search products by name/i).or(page.getByRole('textbox'));
+    await searchBox.fill(uniqueProductName);
+
+    // Wait for your 300ms debounce (debounceRef.current) to trigger the search API
+    await page.waitForTimeout(500); 
+
+    // Wait for the search's loading state to finish
+    await expect(page.getByText(/loading products/i)).not.toBeVisible({ timeout: 8000 });
+
+    // 5. Verify the new product name actually appears in the filtered table
     await expect(page.getByText(uniqueProductName).first()).toBeVisible({ timeout: 5000 });
   });
 
@@ -89,7 +99,7 @@ test.describe('Products Page', () => {
     const editBtn = page.getByTitle(/edit product/i).first();
 
     try {
-      await editBtn.waitFor({ state: 'visible', timeout: 100 });
+      await editBtn.waitFor({ state: 'visible', timeout: 1000 });
     } catch (error) {
       // CATCH: If 8 seconds pass and no button appears, gracefully skip
       test.skip(true, 'No products to edit — API timeout or empty DB');
@@ -291,4 +301,35 @@ test.describe('Archived Products Tab', () => {
       page.getByText(/deleted successfully|success/i).or(page.locator('body'))
     ).toBeVisible();
   });
+
+  // test('should flawlessly render table and pagination for 1000 products', async ({ page }) => {
+  //   const massivePayload = Array.from({ length: 1000 }, (_, i) => ({
+  //     id: i + 1,
+  //     product_Name: `Load Test Item ${i + 1}`,
+  //     product_Description: 'Generated for scalability testing',
+  //     product_RetailPrice: 100.00,
+  //     product_BuyingPrice: 50.00,
+  //     product_Stock: 50,
+  //     product_Category: 'Others',
+  //     product_Expiry: '2030-12-31'
+  //   }));
+
+  //   await page.route('**/getAllProducts*', async (route) => { 
+  //     await route.fulfill({
+  //       status: 200,
+  //       contentType: 'application/json',
+  //       body: JSON.stringify({
+
+  //         data: massivePayload, 
+  //         totalPages: 100, 
+  //         currentPage: 1
+  //       }) 
+  //     });
+  //   });
+
+  //   await page.goto(ROUTES.products);
+
+  //   const activeTab = page.getByRole('button', { name: /Active Products/i });
+  //   await expect(page.getByText(/Showing 1 to 10 of 1010 products/i)).toBeVisible();
+  // });
 });

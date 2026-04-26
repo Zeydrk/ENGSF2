@@ -988,7 +988,7 @@ const handleBulkUnarchive = async () => {
         <div className="bg-white rounded-2xl shadow-lg border border-amber-100 p-4 sm:p-6 mt-4 sm:mt-6">
           <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
             <div className="text-sm text-gray-600">
-              Showing {((page - 1) * limit) + 1} to {Math.min(page * limit, tableData.length)} of {tableData.length} products
+              Showing {((page - 1) * limit) + 1} to {((page - 1) * limit) + tableData.length} of {page === totalPages ? ((page - 1) * limit) + tableData.length : totalPages * limit} products
             </div>
             
             <div className="flex items-center space-x-1">
