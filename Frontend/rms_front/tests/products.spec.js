@@ -42,12 +42,14 @@ test.describe('Products Page', () => {
   });
 
   test('should successfully add a new product', async ({ page }) => {
+    // Generate a truly unique name dynamically inside the test
+    const uniqueProductName = `Test Product ${Date.now()}-${Math.floor(Math.random() * 1000)}`;
     const d = PRODUCT_DATA.valid;
 
     await page.getByRole('button', { name: /add new product/i }).click();
 
-    // Using placeholders since IDs are missing on the Add Form in the component
-    await page.getByPlaceholder('Enter product name').fill(d.name);
+    // Use the dynamically generated unique name!
+    await page.getByPlaceholder('Enter product name').fill(uniqueProductName);
     await page.getByPlaceholder('Enter product description').fill(d.description);
     
     // Locating price inputs relative to their labels
@@ -59,15 +61,27 @@ test.describe('Products Page', () => {
     const categoryField = page.locator('#category').or(page.locator('select').nth(1));
     await categoryField.selectOption({ label: d.category }).catch(() => {});
 
-    // Date inputs
-    await page.locator('input[type="date"]').fill(d.expiry);
+    // Using the highly-specific expiry locator we discussed earlier
+    await page.locator('div')
+      .filter({ hasText: /^Expiry Date \*/ })
+      .locator('input[type="date"]')
+      .fill(d.expiry);
 
     // Click "Create Product"
     await page.getByRole('button', { name: /create product/i }).click();
 
-    await expect(
-      page.getByText(d.name).or(page.getByText(/created successfully|success/i))
-    ).toBeVisible({ timeout: 8000 });
+    // 1. Verify the modal closes (proves validation passed)
+    await expect(page.getByRole('heading', { name: /add new product/i })).not.toBeVisible({ timeout: 5000 });
+
+    // 2. Look specifically for the green success toast class
+    const successToast = page.locator('.alert-success').first();
+    await expect(successToast).toBeVisible({ timeout: 5000 });
+
+    // 3. Wait for the table refresh to finish
+    await expect(page.getByText(/loading products/i)).not.toBeVisible({ timeout: 8000 });
+
+    // 4. Verify the new product name actually appears in the table
+    await expect(page.getByText(uniqueProductName).first()).toBeVisible({ timeout: 5000 });
   });
 
   // ── CRUD: Edit Product ─────────────────────────────────────────
