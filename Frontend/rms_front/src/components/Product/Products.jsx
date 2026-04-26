@@ -1151,6 +1151,7 @@ const handleBulkUnarchive = async () => {
                     Stock Quantity *
                   </label>
                   <input
+                    id="stock"
                     type="number"
                     placeholder="Enter stock quantity"
                     value={form.p_Stock}
@@ -1169,6 +1170,7 @@ const handleBulkUnarchive = async () => {
                     Category *
                   </label>
                   <select
+                    id="category"
                     value={form.p_Cat}
                     onChange={(e) => setForm((f) => ({ ...f, p_Cat: e.target.value }))}
                     className="w-full px-4 py-3 border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white text-black"
@@ -1267,6 +1269,7 @@ const handleBulkUnarchive = async () => {
                     Product Name *
                   </label>
                   <input
+                    id="productName"
                     type="text"
                     placeholder="Enter product name"
                     value={form.p_Name}
@@ -1285,6 +1288,7 @@ const handleBulkUnarchive = async () => {
                     Description *
                   </label>
                   <input
+                    id="description"
                     type="text"
                     placeholder="Enter product description"
                     value={form.p_Desc}
@@ -1305,6 +1309,7 @@ const handleBulkUnarchive = async () => {
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₱</span>
                     <input
+                      id="buyingPrice"
                       type="number"
                       placeholder="0.00"
                       value={form.p_Buying}
@@ -1326,6 +1331,7 @@ const handleBulkUnarchive = async () => {
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₱</span>
                     <input
+                      id="retailPrice"
                       type="number"
                       placeholder="0.00"
                       value={form.p_Retail}
@@ -1399,6 +1405,7 @@ const handleBulkUnarchive = async () => {
                     Expiry Date *
                   </label>
                   <input
+                    id="expiry"
                     type="date"
                     value={form.p_Expiry}
                     onChange={(e) => setForm((f) => ({ ...f, p_Expiry: e.target.value }))}

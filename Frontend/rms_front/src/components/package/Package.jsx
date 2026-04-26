@@ -679,6 +679,7 @@ const handleDeletePackage = async (packageId) => {
                 <div>
                   <p className="text-gray-500 text-xs mb-1">Package Status</p>
                   <button
+                    id='status'
                     onClick={() => handleTogglePackageStatus(pkg)}
                     disabled={pkg.payment_Status !== 'paid' && pkg.package_Status === 'unclaimed'}
                     className={`w-full text-xs font-semibold px-3 py-2 rounded-lg border transition-all duration-200 flex items-center justify-center space-x-1 ${
@@ -848,6 +849,7 @@ const handleDeletePackage = async (packageId) => {
                     Seller Name *
                   </label>
                   <select
+                    id='sellerName'
                     name="seller_Name"
                     value={formData.seller_Name}
                     onChange={handleInputChange}
@@ -868,6 +870,7 @@ const handleDeletePackage = async (packageId) => {
                     Package Name *
                   </label>
                   <input
+                    id='packageName'
                     type="text"
                     name="package_Name"
                     value={formData.package_Name}
@@ -883,6 +886,7 @@ const handleDeletePackage = async (packageId) => {
                     Buyer Name *
                   </label>
                   <input
+                    id='buyerName'
                     type="text"
                     name="buyer_Name"
                     value={formData.buyer_Name}
@@ -898,6 +902,7 @@ const handleDeletePackage = async (packageId) => {
                     Drop-off Date *
                   </label>
                   <input
+                    id='droppOffDate'
                     type="date"
                     name="dropOff_Date"
                     value={formData.dropOff_Date}
@@ -914,6 +919,7 @@ const handleDeletePackage = async (packageId) => {
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₱</span>
                     <input
+                      id='price'
                       type="number"
                       name="price"
                       value={formData.price}
@@ -933,6 +939,7 @@ const handleDeletePackage = async (packageId) => {
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₱</span>
                     <input
+                      id='handlingFee'
                       type="number"
                       name="handling_Fee"
                       value={formData.handling_Fee}
@@ -949,6 +956,7 @@ const handleDeletePackage = async (packageId) => {
                     Package Size *
                   </label>
                   <select
+                    id='packageSize'
                     name="package_Size"
                     value={formData.package_Size}
                     onChange={handleInputChange}
@@ -966,6 +974,7 @@ const handleDeletePackage = async (packageId) => {
                     Payment Method
                   </label>
                   <select
+                    id='paymentMethod'
                     name="payment_Method"
                     value={formData.payment_Method}
                     onChange={handleInputChange}

@@ -525,6 +525,7 @@ const Sellers = () => {
                 </label>
                 <div className="relative">
                   <input
+                    id='sellerName'
                     type="text"
                     name="seller_Name"
                     value={formData.seller_Name}
@@ -545,6 +546,7 @@ const Sellers = () => {
                 </label>
                 <div className="relative">
                   <input
+                    id='sellerEmail'
                     type="email"
                     name="seller_Email"
                     value={formData.seller_Email}
@@ -565,6 +567,7 @@ const Sellers = () => {
                 </label>
                 <div className="relative">
                   <input
+                    id='phoneNumber'
                     type="tel"
                     name="seller_Phone"
                     value={formData.seller_Phone}
